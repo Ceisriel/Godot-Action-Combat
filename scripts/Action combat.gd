@@ -17,7 +17,7 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 # Gamplay mechanics and Inspector tweakables
 export var gravity = 9.8
 export var jump_force = 9
-export var walk_speed = 2
+export var walk_speed = 3.33
 export var run_speed = 10
 export var teleport_distance = 15
 export var dash_power = 12
@@ -26,7 +26,7 @@ export (float) var mouse_sense = 0.1
 #dodge
 export var speed: float = 10.0
 export var dash_distance: float = 4.0
-export var double_press_time: float = 0.5
+export var double_press_time: float = 0.25
 var dash_count: int = 0
 var dash_timer: float = 0.0
 
@@ -84,7 +84,7 @@ func _physics_process(delta):
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
 	var ray_start = translation + Vector3(0,0.15, 0)  # Adjust the starting position of the ray based on your character's position
 	var ray_end = ray_start + ray_direction * ray_length
-	var climb_speed = 30
+	var climb_speed = 2
 	var is_climbing = false
 	var enabled_climbing = true 
 	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
@@ -168,10 +168,22 @@ func _physics_process(delta):
 		dash_count = 0
 		dash_timer = 0.0
 
-	if Input.is_action_just_pressed("forward") or Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("left") or Input.is_action_just_pressed("right"):
+	if Input.is_action_just_pressed("forward"):
 		dash_count += 1
 	if dash_count == 2 and dash_timer < double_press_time:
 		horizontal_velocity = direction * dash_power
+	if Input.is_action_just_pressed("backward"):
+		dash_count += 1
+	if dash_count == 2 and dash_timer < double_press_time:
+		horizontal_velocity = direction * dash_power	
+	if Input.is_action_just_pressed("left"):
+		dash_count += 1
+	if dash_count == 2 and dash_timer < double_press_time:
+		horizontal_velocity = direction * dash_power
+	if Input.is_action_just_pressed("right"):
+		dash_count += 1
+	if dash_count == 2 and dash_timer < double_press_time:
+		horizontal_velocity = direction * dash_power			
 #movement
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	movement.z = horizontal_velocity.z + vertical_velocity.z

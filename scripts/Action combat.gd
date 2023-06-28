@@ -5,9 +5,10 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
+onready var hitbox =$Graphics/Knight/Armature/Skeleton/SwordAttachment/Hitbox
 
 # Animation
-onready var animation = $Knight/AnimationPlayer
+onready var animation = $Graphics/Knight/AnimationPlayer
 
 # Collision for crouching
 onready var player_collision = $CollisionShape
@@ -18,7 +19,7 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 
 # Gamplay mechanics and Inspector tweakables
 export var gravity = 9.8
-export var jump_force = 9
+export var jump_force = 5
 export var walk_speed = 3.33
 export var run_speed = 10
 export var teleport_distance = 30
@@ -26,7 +27,7 @@ export var dash_power = 12
 export (float) var mouse_sense = 0.1
 
 # Dodge
-export var double_press_time: float = 0.3
+export var double_press_time: float = 0.1
 var dash_count: int = 0
 var dash_timer: float = 0.0
 
@@ -72,6 +73,13 @@ func setStateSlide():
 
 func setStateJump():
 	animation.play("jump")
+	
+#Damage 
+func _on_Hitbox_body_entered(body):
+	if body.is_in_group("Enemy"):
+		if body.has_method("hurt") and Input.is_action_pressed("attack") and is_on_floor() :
+			body.hurt()
+			body.health -= 3
 
 
 func _ready():  # Camera-based Rotation
@@ -85,6 +93,7 @@ func _input(event):  # All major mouse and button input events
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
 	
 	# Toggle mouse mode
+
 	if Input.is_action_just_pressed("ESC"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
 			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
@@ -105,7 +114,7 @@ func _physics_process(delta):
 	var enabled_climbing = true
 	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
 
-	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run"):
+	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") :
 		enabled_climbing = false
 		if Input.is_action_pressed("forward") and enabled_climbing and not is_on_floor():
 			vertical_velocity = Vector3.UP * climb_speed
@@ -137,7 +146,7 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		vertical_velocity = Vector3.UP * jump_force
 
-	if Input.is_action_pressed("slide") && (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")) and is_on_floor():
+	if Input.is_action_just_pressed("slide") && (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")) and is_on_floor():
 		horizontal_velocity = direction * 12
 
 	# Teleportation
@@ -188,24 +197,10 @@ func _physics_process(delta):
 	if dash_timer >= double_press_time:
 		dash_count = 0
 		dash_timer = 0.0
-
-	if Input.is_action_just_pressed("forward"):
+	if Input.is_action_just_pressed("forward") or Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("left") or Input.is_action_just_pressed("right"):
 		dash_count += 1
 	if dash_count == 2 and dash_timer < double_press_time:
 		horizontal_velocity = direction * dash_power * 2.5
-	if Input.is_action_just_pressed("backward"):
-		dash_count += 1
-	if dash_count == 2 and dash_timer < double_press_time:
-		horizontal_velocity = direction * dash_power * 2.5
-	if Input.is_action_just_pressed("left"):
-		dash_count += 1
-	if dash_count == 2 and dash_timer < double_press_time:
-		horizontal_velocity = direction * dash_power * 2.5
-	if Input.is_action_just_pressed("right"):
-		dash_count += 1
-	if dash_count == 2 and dash_timer < double_press_time:
-		horizontal_velocity = direction * dash_power * 2.5
-
 	# Attacking while moving
 	if Input.is_action_pressed("attack") and is_on_floor() and not mousemode:
 		horizontal_velocity = direction * 1.25
@@ -218,7 +213,7 @@ func _physics_process(delta):
 	move_and_slide(movement, Vector3.UP)
 
 	# Animation order
-	if Input.is_action_pressed("attack") and not mousemode:
+	if Input.is_action_pressed("attack") and not mousemode and not is_climbing:
 		setStateAttack()
 	elif Input.is_action_pressed("sprint") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")):
 		setStateSprint()

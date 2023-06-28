@@ -1,7 +1,7 @@
 extends Spatial
 
 # Camera variables
-var move_speed = 1
+var move_speed = 2.5
 
 onready var cameraHolder = $Camera_holder/Camera
 

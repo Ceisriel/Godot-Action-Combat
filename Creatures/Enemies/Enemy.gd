@@ -50,7 +50,7 @@ func onhit(damage):
 	var text = floatingtext.instance()
 	text.amount = float(damage - defense)
 	add_child(text)
-# Delete the enemy if it has less than -200 health (after death enemies can still be attacked
+# Delete the enemy if it has less than -200 health (after death enemies can still be attacked, this is done on purpose for future functions)
 	if health <= -200:
 		self.queue_free()
 	else:

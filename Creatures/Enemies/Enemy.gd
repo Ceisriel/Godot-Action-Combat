@@ -75,7 +75,7 @@ func _physics_process(delta: float) -> void:
 
 # Apply gravity
 	velocity.y -= gravity * delta
-# If the enemy is alive, has more than 50% of it's health, it will not be scared
+# If the enemy is alive, and has more than 50% of it's health, it will not be scared
 	if alive:
 		if health >= maxhealth / 2:
 			scared = false
@@ -122,7 +122,9 @@ func _physics_process(delta: float) -> void:
 			running = false  
 			scared = false
 	velocity = move_and_slide(velocity, Vector3.UP)
-# Animation order and logic	
+
+# Animation order and logic, the enemy walks towards the player if in range, 
+# when it gets closer it starts attacking, if the enemy is scared it runs away to a safe distance and then it is idle 	
 	if not alive:
 		death()
 	elif distance <= 2 and not scared:

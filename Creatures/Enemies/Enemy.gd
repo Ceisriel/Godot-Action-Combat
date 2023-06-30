@@ -60,7 +60,7 @@ func onhit(damage):
 func attack() -> void:
 # Creates a varaible called "players" for anything that is inside the hurtbox	
 	var players = hitbox.get_overlapping_bodies()
-# Checks if there are is anything in the group Player in the hurtbox
+# Checks if there is anything in the group Player in the hurtbox
 	for Player in players:
 # If there is, and the Player has the ability to be hurt, then call that ability		
 		if Player.has_method("hurt"):

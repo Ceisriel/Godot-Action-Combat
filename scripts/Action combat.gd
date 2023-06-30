@@ -40,6 +40,7 @@ var is_sprinting = bool()
 var is_aiming = bool()
 var mousemode = bool()
 var staggered = false
+var blocking = false
 
 # Physics values
 var direction = Vector3()
@@ -55,6 +56,8 @@ var wall_normal
 #player stats 
 var maxhealth = 50.0
 var health = 50.0
+var maxenergy = 50.0
+var energy = 50.0
 var defense = 2.25
 var damage = 35
 
@@ -68,6 +71,8 @@ func setStateWalkBack():
 	animation.play_backwards("walk")
 func setStateAttack():
 	animation.play("base attack", 0.1)
+func setStateGuard():
+	animation.play("t pose", 0.1)	
 func setStateRun():
 	animation.play("run", 0.1)
 func setStateSprint():
@@ -89,12 +94,14 @@ func attack():
 
 func _ready(): 
 	health = maxhealth
+	energy = maxenergy
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 #getting damaged
 func onhit(damage):
-	$GUI/HealthBar.value = int((health / maxhealth) * 100)
-	health -= (damage - defense)
-	staggered = true
+	if not blocking: 
+		health -= (damage - defense)
+		staggered = true
+		
 
 	
 	
@@ -114,11 +121,18 @@ func _input(event):  # All major mouse and button input events
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			mousemode = false
+func _process(delta):
+	# Update energy bar
+	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
+	$GUI/EnergyBar/Label.text = "Energy: " + str(energy) + "/" +str(maxenergy)
+	# Update health bar
+	$GUI/HealthBar.value = int((health / maxhealth) * 100)
+	$GUI/HealthBar/Label.text = "Health: " + str(health) + "/" +str(maxhealth)
+
 
 
 func _physics_process(delta: float):
-#healthbar text
-	$GUI/HealthBar/Label.text = "Health: " + str(health) + "/" +str(maxhealth)
+#healthbar and energy text
 	if health <= 0:
 		close_game()
 # Raycast to detect obstacles in front of the character
@@ -167,13 +181,16 @@ func _physics_process(delta: float):
 		horizontal_velocity = direction * 12
 
 	# Teleportation
-	if Input.is_action_just_pressed("blink"):
+	# Teleportation
+	if Input.is_action_just_pressed("blink") and energy >= 5:
+		energy -= 5
 		var teleport_vector = direction.normalized() * teleport_distance
 		var teleport_position = translation + teleport_vector
 		var collision = move_and_collide(teleport_vector)
 		if collision:
 			teleport_position = collision.position
-		translation = teleport_position
+			translation = teleport_position
+
 
 	# Movement and strafe
 	if Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
@@ -254,14 +271,20 @@ func _physics_process(delta: float):
 		horizontal_velocity = direction * 1.25
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode :
+		blocking = true
 
+	else: 
+		blocking = false	
 	movement.z = horizontal_velocity.z + vertical_velocity.z
 	movement.x = horizontal_velocity.x + vertical_velocity.x
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
 
 	# Animation order
-	if Input.is_action_pressed("attack") and not mousemode and not is_climbing:
+	if Input.is_action_pressed("guard") and not mousemode and not is_climbing:
+		setStateGuard()
+	elif Input.is_action_pressed("attack") and not mousemode and not is_climbing:
 		setStateAttack()
 	elif Input.is_action_pressed("sprint") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")):
 		setStateSprint()
@@ -275,7 +298,6 @@ func _physics_process(delta: float):
 		setStateWalk()
 	else:
 		setStateIdle()
-
 func close_game():
 	get_tree().quit()
 	print("game over")

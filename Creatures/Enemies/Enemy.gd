@@ -23,7 +23,7 @@ var maxhealth = 40.0
 var health = 40.0
 var damage = 5.5
 var defense = 0.5
-# Makes floating text appear when hit
+# loads the floating text from another scene
 var floatingtext = preload("res://UI/floatingtext.tscn")
 # Animationplayer
 onready var animation = $AnimationPlayer

@@ -41,6 +41,7 @@ var is_aiming = bool()
 var mousemode = bool()
 var staggered = false
 var blocking = false
+var dodge = bool()
 
 # Physics values
 var direction = Vector3()
@@ -54,12 +55,12 @@ var acceleration = int()
 var wall_normal
 
 #player stats 
-var maxhealth = 50.0
-var health = 50.0
+var maxhealth = 500.0
+var health = 500.0
 var maxenergy = 50.0
 var energy = 50.0
-var defense = 2.25
-var damage = 35
+var defense = 4.25
+var damage = 60
 
 func setStateIdle():
 	animation.play("idle", 0.2, 0.3)
@@ -88,7 +89,6 @@ func attack():
 	var enemies = hitbox.get_overlapping_bodies()
 	for enemy in enemies:
 		if enemy.has_method("onhit"):
-			#enemy.hurt()
 			enemy.onhit(damage)
 
 
@@ -97,10 +97,12 @@ func _ready():
 	energy = maxenergy
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 #getting damaged
-func onhit(damage):
+func onhitP(damage):
 	if not blocking: 
 		health -= (damage - defense)
 		staggered = true
+	else:
+		staggered = false	
 		
 
 	
@@ -177,7 +179,8 @@ func _physics_process(delta: float):
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		vertical_velocity = Vector3.UP * jump_force
 
-	if Input.is_action_pressed("slide") && (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")) and is_on_floor():
+	if Input.is_action_just_pressed("slide") and is_on_floor() and energy >= 2.5 and is_walking:  # Check if energy is above or equal to 2.5
+		energy -= 2.5
 		horizontal_velocity = direction * 12
 
 	# Teleportation
@@ -235,6 +238,10 @@ func _physics_process(delta: float):
 		dash_count += 1
 	if dash_count == 2 and dash_timer < double_press_time:
 		horizontal_velocity = direction * dash_power * 3
+		setStateSlide()
+		dodge = true 
+	else:
+		dodge = false	
 #Dodge back
 	if dash_count2 > 0:
 		dash_timer2 += delta
@@ -245,6 +252,10 @@ func _physics_process(delta: float):
 		dash_count2 += 1
 	if dash_count2 == 2 and dash_timer2 < double_press_time:
 		horizontal_velocity = direction * dash_power * 3
+		setStateSlide()
+		dodge = true 
+	else:
+		dodge = false		
 #Dodge left		
 	if dash_count3 > 0:
 		dash_timer3 += delta
@@ -255,6 +266,10 @@ func _physics_process(delta: float):
 		dash_count3 += 1
 	if dash_count3 == 2 and dash_timer3 < double_press_time:
 		horizontal_velocity = direction * dash_power * 3
+		setStateSlide()
+		dodge = true 
+	else:
+		dodge = false			
 #Dodge right	
 	if dash_count4 > 0:
 		dash_timer4 += delta
@@ -265,10 +280,12 @@ func _physics_process(delta: float):
 		dash_count4 += 1
 	if dash_count4 == 2 and dash_timer4 < double_press_time:
 		horizontal_velocity = direction * dash_power * 3
-
+		setStateSlide()
 	# Attacking while moving
-	if Input.is_action_pressed("attack") and is_on_floor() and not mousemode:
-		horizontal_velocity = direction * 1.25
+	elif Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")):
+		horizontal_velocity = direction * 12
+	elif Input.is_action_pressed("attack") and is_on_floor() and not mousemode and not dodge:
+		horizontal_velocity = direction * 1.25	
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode :
@@ -282,7 +299,10 @@ func _physics_process(delta: float):
 	move_and_slide(movement, Vector3.UP)
 
 	# Animation order
-	if Input.is_action_pressed("guard") and not mousemode and not is_climbing:
+
+	if Input.is_action_pressed("slide") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right") or Input.is_action_pressed("attack")) and is_on_floor():
+		setStateSlide()
+	elif Input.is_action_pressed("guard") and not mousemode and not is_climbing:
 		setStateGuard()
 	elif Input.is_action_pressed("attack") and not mousemode and not is_climbing:
 		setStateAttack()
@@ -290,8 +310,6 @@ func _physics_process(delta: float):
 		setStateSprint()
 	elif is_running:
 		setStateRun()
-	elif Input.is_action_pressed("slide") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right") or Input.is_action_pressed("attack")) and is_on_floor():
-		setStateSlide()
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim"):
 		setStateWalkBack()
 	elif is_walking and is_on_floor():

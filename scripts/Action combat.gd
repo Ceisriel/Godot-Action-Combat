@@ -5,13 +5,8 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-onready var hitbox =$Graphics/Knight/Armature/Skeleton/SwordAttachment/Hitbox
-
 # Animation
-onready var animation = $Graphics/Knight/AnimationPlayer
-
-# Collision for crouching
-onready var player_collision = $CollisionShape
+onready var animation = $Knight/AnimationPlayer
 
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -20,16 +15,22 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 # Gamplay mechanics and Inspector tweakables
 export var gravity = 9.8
 export var jump_force = 5
-export var walk_speed = 3.33
-export var run_speed = 10
-export var teleport_distance = 30
+export var walk_speed = 8
+export var run_speed = 16
+export var teleport_distance = 35
 export var dash_power = 12
 export (float) var mouse_sense = 0.1
 
 # Dodge
-export var double_press_time: float = 0.1
+export var double_press_time: float = 0.3
 var dash_count: int = 0
 var dash_timer: float = 0.0
+var dash_count2: int = 0
+var dash_timer2: float = 0.0
+var dash_count3: int = 0
+var dash_timer3: float = 0.0
+var dash_count4: int = 0
+var dash_timer4: float = 0.0
 
 # Condition States
 var is_rolling = bool()
@@ -38,6 +39,7 @@ var is_running = bool()
 var is_sprinting = bool()
 var is_aiming = bool()
 var mousemode = bool()
+var staggered = false
 
 # Physics values
 var direction = Vector3()
@@ -50,41 +52,52 @@ var angular_acceleration = int()
 var acceleration = int()
 var wall_normal
 
+#player stats 
+var maxhealth = 50.0
+var health = 50.0
+var defense = 2.25
+var damage = 35
+
 func setStateIdle():
 	animation.play("idle", 0.2, 0.3)
-
+func hurt():
+	animation.play("t pose")	
 func setStateWalk():
 	animation.play("walk", 0.25)
-
 func setStateWalkBack():
 	animation.play_backwards("walk")
-
 func setStateAttack():
 	animation.play("base attack", 0.1)
-
 func setStateRun():
 	animation.play("run", 0.1)
-
 func setStateSprint():
 	animation.play("run", 0, 0.95)
-
 func setStateSlide():
 	animation.play("slide")
-
 func setStateJump():
 	animation.play("jump")
 	
 #Damage 
-func _on_Hitbox_body_entered(body):
-	if body.is_in_group("Enemy"):
-		if body.has_method("hurt") and Input.is_action_pressed("attack") and is_on_floor() :
-			body.hurt()
-			body.health -= 3
+onready var hitbox = $Knight/Hitbox
+func attack():
+	var enemies = hitbox.get_overlapping_bodies()
+	for enemy in enemies:
+		if enemy.has_method("onhit"):
+			#enemy.hurt()
+			enemy.onhit(damage)
 
 
-func _ready():  # Camera-based Rotation
+func _ready(): 
+	health = maxhealth
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
+#getting damaged
+func onhit(damage):
+	$GUI/HealthBar.value = int((health / maxhealth) * 100)
+	health -= (damage - defense)
+	staggered = true
 
+	
+	
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
@@ -103,8 +116,12 @@ func _input(event):  # All major mouse and button input events
 			mousemode = false
 
 
-func _physics_process(delta):
-	# Raycast to detect obstacles in front of the character
+func _physics_process(delta: float):
+#healthbar text
+	$GUI/HealthBar/Label.text = "Health: " + str(health) + "/" +str(maxhealth)
+	if health <= 0:
+		close_game()
+# Raycast to detect obstacles in front of the character
 	var ray_length = 1  # Adjust this value based on the desired length of the ray
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
 	var ray_start = translation + Vector3(0, 0.15, 0)  # Adjust the starting position of the ray based on your character's position
@@ -146,7 +163,7 @@ func _physics_process(delta):
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		vertical_velocity = Vector3.UP * jump_force
 
-	if Input.is_action_just_pressed("slide") && (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")) and is_on_floor():
+	if Input.is_action_pressed("slide") && (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")) and is_on_floor():
 		horizontal_velocity = direction * 12
 
 	# Teleportation
@@ -191,16 +208,47 @@ func _physics_process(delta):
 	else:
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
 
-	# Dodging and dashing
+#Dodge forward
 	if dash_count > 0:
 		dash_timer += delta
 	if dash_timer >= double_press_time:
 		dash_count = 0
 		dash_timer = 0.0
-	if Input.is_action_just_pressed("forward") or Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("left") or Input.is_action_just_pressed("right"):
+	if Input.is_action_just_pressed("forward"):
 		dash_count += 1
 	if dash_count == 2 and dash_timer < double_press_time:
-		horizontal_velocity = direction * dash_power * 2.5
+		horizontal_velocity = direction * dash_power * 3
+#Dodge back
+	if dash_count2 > 0:
+		dash_timer2 += delta
+	if dash_timer2 >= double_press_time:
+		dash_count2 = 0
+		dash_timer2 = 0.0	
+	if Input.is_action_just_pressed("backward"):
+		dash_count2 += 1
+	if dash_count2 == 2 and dash_timer2 < double_press_time:
+		horizontal_velocity = direction * dash_power * 3
+#Dodge left		
+	if dash_count3 > 0:
+		dash_timer3 += delta
+	if dash_timer3 >= double_press_time:
+		dash_count3 = 0
+		dash_timer3 = 0.0	
+	if Input.is_action_just_pressed("left"):
+		dash_count3 += 1
+	if dash_count3 == 2 and dash_timer3 < double_press_time:
+		horizontal_velocity = direction * dash_power * 3
+#Dodge right	
+	if dash_count4 > 0:
+		dash_timer4 += delta
+	if dash_timer4 >= double_press_time:
+		dash_count4 = 0
+		dash_timer4 = 0.0	
+	if Input.is_action_just_pressed("right"):
+		dash_count4 += 1
+	if dash_count4 == 2 and dash_timer4 < double_press_time:
+		horizontal_velocity = direction * dash_power * 3
+
 	# Attacking while moving
 	if Input.is_action_pressed("attack") and is_on_floor() and not mousemode:
 		horizontal_velocity = direction * 1.25
@@ -228,3 +276,6 @@ func _physics_process(delta):
 	else:
 		setStateIdle()
 
+func close_game():
+	get_tree().quit()
+	print("game over")

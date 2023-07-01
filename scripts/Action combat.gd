@@ -7,11 +7,9 @@ onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
 # Animation
 onready var animation = $Knight/AnimationPlayer
-
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
 export onready var player_mesh = get_node(PlayerCharacterMesh)
-
 # Gamplay mechanics and Inspector tweakables
 export var gravity = 9.8
 export var jump_force = 5
@@ -20,7 +18,6 @@ export var run_speed = 7.7
 export var teleport_distance = 35
 export var dash_power = 12
 export (float) var mouse_sense = 0.1
-
 # Dodge
 export var double_press_time: float = 0.3
 var dash_count: int = 0
@@ -31,7 +28,6 @@ var dash_count3: int = 0
 var dash_timer3: float = 0.0
 var dash_count4: int = 0
 var dash_timer4: float = 0.0
-
 # Condition States
 var is_rolling = bool()
 var is_walking = bool()
@@ -56,7 +52,7 @@ var wall_normal
 
 #player stats 
 var maxhealth = 500.0
-var health = 10.0
+var health = 500.0
 var maxenergy = 150.0
 var energy = 150.0
 var defense = 0
@@ -98,11 +94,11 @@ func attack():
 	for enemy in enemies:
 		if enemy.has_method("onhit"):
 			enemy.onhit(damage)
+			if energy < maxenergy: 
+				energy += 0.5	
 
 
 func _ready(): 
-	health = maxhealth
-	energy = maxenergy
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 #getting damaged
 func onhitP(damage):
@@ -111,10 +107,7 @@ func onhitP(damage):
 		staggered = true
 	else:
 		staggered = false	
-		
 
-	
-	
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
@@ -315,7 +308,7 @@ func _physics_process(delta: float):
 	elif Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")):
 		horizontal_velocity = direction * 12
 	elif Input.is_action_pressed("attack") and dash_count == 0 and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge:
-		horizontal_velocity = direction * 1.25	
+		horizontal_velocity = direction * 1.25
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode and energy >= 0.125:
@@ -350,3 +343,25 @@ func _physics_process(delta: float):
 func close_game():
 	get_tree().quit()
 	print("game over")
+
+func get_save_stats():
+	return {
+		'filename': get_filename(),
+		'parent' : get_parent().get_path(),
+		'x_pos' : global_transform.origin.x,
+		'y_pos' : global_transform.origin.y,
+		'z_pos' : global_transform.origin.z,
+		'stats': {
+			'health' : health,
+			'energy' : energy,
+			'maxhealth' : maxhealth,
+			'maxenergy' : maxenergy
+		}
+	}
+
+func load_save_stats(stats): 
+	global_transform.origin = Vector3(stats.x_pos,stats.y_pos,stats.z_pos)
+	health = stats.stats.health
+	energy = stats.stats.energy
+	maxhealth = stats.stats.maxhealth
+	maxenergy = stats.stats.maxenergy

@@ -57,10 +57,10 @@ var wall_normal
 #player stats 
 var maxhealth = 500.0
 var health = 500.0
-var maxenergy = 50.0
-var energy = 50.0
+var maxenergy = 150.0
+var energy = 150.0
 var defense = 4.25
-var damage = 60
+var damage = 10
 
 func setStateIdle():
 	animation.play("idle", 0.2, 0.3)
@@ -79,7 +79,7 @@ func setStateRun():
 func setStateSprint():
 	animation.play("run", 0, 0.95)
 func setStateSlide():
-	animation.play("slide")
+	animation.play("slide",0.1)
 func setStateJump():
 	animation.play("jump")
 	
@@ -236,8 +236,9 @@ func _physics_process(delta: float):
 		dash_timer = 0.0
 	if Input.is_action_just_pressed("forward"):
 		dash_count += 1
-	if dash_count == 2 and dash_timer < double_press_time:
+	if dash_count == 2 and dash_timer < double_press_time and energy >= 1.25:
 		horizontal_velocity = direction * dash_power * 3
+		energy -= 0.125
 		setStateSlide()
 		dodge = true 
 	else:
@@ -250,8 +251,9 @@ func _physics_process(delta: float):
 		dash_timer2 = 0.0	
 	if Input.is_action_just_pressed("backward"):
 		dash_count2 += 1
-	if dash_count2 == 2 and dash_timer2 < double_press_time:
+	if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
 		horizontal_velocity = direction * dash_power * 3
+		energy -= 0.125
 		setStateSlide()
 		dodge = true 
 	else:
@@ -264,8 +266,9 @@ func _physics_process(delta: float):
 		dash_timer3 = 0.0	
 	if Input.is_action_just_pressed("left"):
 		dash_count3 += 1
-	if dash_count3 == 2 and dash_timer3 < double_press_time:
+	if dash_count3 == 2 and dash_timer3 < double_press_time  and energy >= 1.25:
 		horizontal_velocity = direction * dash_power * 3
+		energy -= 0.125
 		setStateSlide()
 		dodge = true 
 	else:
@@ -278,17 +281,19 @@ func _physics_process(delta: float):
 		dash_timer4 = 0.0	
 	if Input.is_action_just_pressed("right"):
 		dash_count4 += 1
-	if dash_count4 == 2 and dash_timer4 < double_press_time:
+	if dash_count4 == 2 and dash_timer4 < double_press_time and energy >= 1.25:
 		horizontal_velocity = direction * dash_power * 3
+		energy -= 0.125
 		setStateSlide()
 	# Attacking while moving
 	elif Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")):
 		horizontal_velocity = direction * 12
-	elif Input.is_action_pressed("attack") and is_on_floor() and not mousemode and not dodge:
+	elif Input.is_action_pressed("attack") and dash_count == 0 and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge:
 		horizontal_velocity = direction * 1.25	
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
-	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode :
+	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode and energy >= 0.125:
+		energy -= 0.125
 		blocking = true
 
 	else: 

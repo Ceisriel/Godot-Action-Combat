@@ -12,16 +12,23 @@ position = Vector2( 545, 316 )
 scale = Vector2( 1.66, 1.74 )
 script = ExtResource( 2 )
 
-[node name="Label" type="Label" parent="."]
+[node name="TextureRect" type="TextureRect" parent="."]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -50.0
-margin_top = -15.5
-margin_right = 50.0
-margin_bottom = 15.5
+margin_left = -20.0
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+stretch_mode = 4
+
+[node name="Label" type="Label" parent="TextureRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
 rect_min_size = Vector2( 100, 25 )
+size_flags_vertical = 1
+size_flags_stretch_ratio = 0.0
 custom_colors/font_color = Color( 0.784314, 0, 0, 1 )
 custom_colors/font_outline_modulate = Color( 1, 1, 1, 1 )
 custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
@@ -29,6 +36,6 @@ custom_fonts/font = SubResource( 1 )
 align = 1
 valign = 1
 
-[node name="Tween" type="Tween" parent="Label"]
+[node name="Tween" type="Tween" parent="TextureRect/Label"]
 
-[connection signal="tween_all_completed" from="Label/Tween" to="." method="_on_Tween_tween_all_completed"]
+[connection signal="tween_all_completed" from="TextureRect/Label/Tween" to="." method="_on_Tween_tween_all_completed"]

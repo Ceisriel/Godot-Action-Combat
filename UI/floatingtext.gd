@@ -1,6 +1,6 @@
 extends Position2D
-onready var label = $Label
-onready var tween = $Label/Tween
+onready var label = $TextureRect/Label
+onready var tween = $TextureRect/Label/Tween
 var amount = 0 
 func _ready():
 	label.set_text(str(amount))

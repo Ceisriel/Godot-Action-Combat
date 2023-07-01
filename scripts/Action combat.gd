@@ -15,8 +15,8 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 # Gamplay mechanics and Inspector tweakables
 export var gravity = 9.8
 export var jump_force = 5
-export var walk_speed = 8
-export var run_speed = 16
+export var walk_speed = 4
+export var run_speed = 7.7
 export var teleport_distance = 35
 export var dash_power = 12
 export (float) var mouse_sense = 0.1
@@ -56,11 +56,19 @@ var wall_normal
 
 #player stats 
 var maxhealth = 500.0
-var health = 500.0
+var health = 10.0
 var maxenergy = 150.0
 var energy = 150.0
-var defense = 4.25
+var defense = 0
 var damage = 10
+#Energy regeneration 
+var regenerationRate = 0.5  # 1 point every 2 seconds
+var regenerateEnergy = true
+var regenerationTimer = 0
+#Health regeneration 
+var regenerationRateH = 0.5  # 1 point every 2 seconds
+var regenerateHealth = true
+var regenerationTimerH = 0
 
 func setStateIdle():
 	animation.play("idle", 0.2, 0.3)
@@ -124,6 +132,24 @@ func _input(event):  # All major mouse and button input events
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			mousemode = false
 func _process(delta):
+# Energy rengeneration	
+	if regenerateEnergy and energy < maxenergy:
+		regenerationTimer += delta
+		if regenerationTimer >= 2.0:  # Regenerate every 2 seconds
+			regenerationTimer = 0
+			energy += 1
+			if energy >= maxenergy:
+				energy = maxenergy
+				regenerateEnergy = false
+# Health regeneration				
+	if regenerateHealth and health < maxhealth:
+		regenerationTimerH += delta
+		if regenerationTimerH >= 2.0:  # Regenerate every 2 seconds
+			regenerationTimerH = 0
+			health += 1
+			if health >= maxhealth:
+				health = maxhealth
+				regenerateHealth = false			
 	# Update energy bar
 	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
 	$GUI/EnergyBar/Label.text = "Energy: " + str(energy) + "/" +str(maxenergy)

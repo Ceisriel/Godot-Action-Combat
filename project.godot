@@ -13,24 +13,56 @@ _global_script_classes=[ {
 "class": "Global",
 "language": "GDScript",
 "path": "res://scripts/Global.gd"
+}, {
+"base": "Node",
+"class": "Thoth",
+"language": "GDScript",
+"path": "res://scripts/thoth.gd"
+}, {
+"base": "Node",
+"class": "ThothGameState",
+"language": "GDScript",
+"path": "res://addons/thoth/thoth_gamestate.gd"
+}, {
+"base": "Node",
+"class": "ThothSerializer",
+"language": "GDScript",
+"path": "res://addons/thoth/thoth_serializer.gd"
 } ]
 _global_script_class_icons={
-"Global": ""
+"Global": "",
+"Thoth": "",
+"ThothGameState": "",
+"ThothSerializer": ""
 }
 
 [application]
 
 config/name="Velsia"
-run/main_scene="res://env/World.tscn"
+run/main_scene="res://World.tscn"
+config/Version="Prototype 0.01"
+
+[autoload]
+
+SaveState="*res://scripts/SaveState.gd"
 
 [debug]
 
-settings/fps/force_fps=30
+settings/fps/force_fps=25
 settings/stdout/print_fps=true
+
+[display]
+
+window/energy_saving/keep_screen_on=false
+window/stretch/aspect="expand"
 
 [editor_plugins]
 
 enabled=PoolStringArray(  )
+
+[global]
+
+main=false
 
 [input]
 

@@ -24,7 +24,6 @@ enum {
 
 #as soon as the enemy spawns it will walk around randomly
 func _ready():
-	state = walk
 	directionChangeInterval = rand_range(minChangeInterval, maxChangeInterval)
 
 #if in range, the enemy will start attacking, 
@@ -32,7 +31,8 @@ func _ready():
 func _on_Sight_body_entered(body):
 	if body.is_in_group("Player"):
 		state = shoot
-		target = body
+	else:
+		state = idle	
 func _on_Sight_body_exited(body):
 	state = chase
 
@@ -52,7 +52,7 @@ func _process(delta):
 			animation.play("idle")
 		shoot:
 			animation.play("shoot")
-			if target != null:
+			if target:
 				eyes.look_at(target.global_transform.origin, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 		walk:
@@ -65,7 +65,7 @@ func _process(delta):
 			move_and_slide(getSlideVelocity())
 		chase:
 			animation.play("walk", 0, 1.5)
-			if target != null:
+			if target:
 				var targetDirection = (target.global_transform.origin - global_transform.origin).normalized()
 				eyes.look_at(global_transform.origin + targetDirection, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
@@ -84,5 +84,10 @@ func _physics_process(delta):
 #otherwise it will chase the player 
 func _on_ChaseRange_body_entered(body):
 	state = chase
+	target = body	
+
+
 func _on_ChaseRange_body_exited(body):
 	state = walk
+	
+	

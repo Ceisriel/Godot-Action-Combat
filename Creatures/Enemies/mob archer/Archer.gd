@@ -19,6 +19,7 @@ enum {
 	chase,
 	walk,
 	shoot,
+	flee,
 }
 
 
@@ -32,7 +33,9 @@ func _ready():
 func _on_Sight_body_entered(body):
 	if body.is_in_group("Player"):
 		state = shoot
-		target = body
+	else:
+		state = idle	
+		
 func _on_Sight_body_exited(body):
 	state = chase
 
@@ -49,14 +52,14 @@ func getSlideVelocity():
 func _process(delta):
 	match state:
 		idle: 
-			animation.play("idle")
+			animation.play("idle", 0.1)
 		shoot:
-			animation.play("shoot")
+			animation.play("shoot", 0.2)
 			if target != null:
 				eyes.look_at(target.global_transform.origin, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 		walk:
-			animation.play("walk")
+			animation.play("walk", 0.2)
 			directionChangeTimer += delta
 			if directionChangeTimer >= directionChangeInterval:
 				directionChangeTimer = 0.0
@@ -70,7 +73,10 @@ func _process(delta):
 				eyes.look_at(global_transform.origin + targetDirection, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 				move_and_slide(targetDirection * getSlideVelocity().length())
-
+		flee:
+			animation.play_backwards("walk")
+			var fleeDirection = -getSlideVelocity().normalized()
+			move_and_slide(fleeDirection * getSlideVelocity().length())
 #gravity without sliding on slopes
 func _physics_process(delta):
 	if not is_on_floor():
@@ -83,6 +89,25 @@ func _physics_process(delta):
 #if outside of chasing range the enemy will walk randomly,
 #otherwise it will chase the player 
 func _on_ChaseRange_body_entered(body):
-	state = chase
+	if body.is_in_group("Player"):
+		state = chase
+		target = body
+	else: 
+		state = walk
 func _on_ChaseRange_body_exited(body):
 	state = walk
+
+
+func _on_Flee_body_entered(body):
+	if body.is_in_group("Player"):	
+		state = flee
+	else:
+		state = shoot	
+	
+
+
+func _on_Flee_body_exited(body):
+	if body.is_in_group("Player"):
+		state = shoot
+	else: 
+		state = shoot	

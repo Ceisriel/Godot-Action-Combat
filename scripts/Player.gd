@@ -3,6 +3,7 @@ extends KinematicBody
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
 onready var intlabel = $GUI/Character/Attributes/INT/INT
 onready var strlabel = $GUI/Character/Attributes/STR/STR
+onready var acclabel = $GUI/Character/Attributes/Acc/Acc
 onready var attributelabel = $GUI/Character/Attributes/AttributePoints
 onready var head = $Camroot
 onready var head_pos = head.transform
@@ -58,20 +59,23 @@ export var initial_maxhealth = 10
 const basemaxhealth = 10
 export var maxhealth = 10.0
 export var health = 10.0
-export var maxenergy = 250.0
-export var energy = 250.0
+const basemaxenergy = 25
+export var maxenergy = 25
+export var energy = 25
 export var defense = 0
 const basedamage = 10
 export var damage = 10
-export var attribute_points = 100
 export var criticalDefenseChance = 0.60
 export var criticalDefenseMultiplier = 2
-export var criticalChance = 0.5
+export var criticalChance = 0.01
+const criticalChancebase = 0.01
 export var criticalMultiplier = 2
 #player attributes 
 var attribute = 10
 var vitality = 1.0
 var strength = 1.0
+var intelligence = 1.0
+var accuracy = 1.0
 #Energy regeneration 
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
@@ -122,9 +126,13 @@ func _input(event):  # All major mouse and button input events
 
 func _physics_process(delta: float):
 # Update attribute and stats 	
+	criticalChance = criticalChancebase * accuracy * 10
 	damage = basedamage * strength
 	maxhealth = basemaxhealth * vitality
+	maxenergy = basemaxenergy * intelligence
 	
+	acclabel.text = "%.3f" % accuracy
+	intlabel.text = "%.3f" % intelligence
 	strlabel.text = "%.3f" % strength
 	vitalitylabel.text = "%.3f" % vitality
 	attributelabel.text = "Attribute Points: " + str(attribute)
@@ -326,11 +334,13 @@ func get_save_stats():
 		'stats': {
 			'health': health,
 			'vitality': vitality,
+			'strength': strength,
+			'intelligence' : intelligence,
 			'basemaxhealth': basemaxhealth,
 			'energy': energy,
 			'maxhealth': maxhealth,
 			'maxenergy': maxenergy,
-			'attribute': attribute_points,
+			'attribute': attribute,
 		}
 	}
 
@@ -341,18 +351,15 @@ func load_save_stats(stats):
 	vitality = stats.stats.vitality
 	maxhealth = stats.stats.maxhealth
 	maxenergy = stats.stats.maxenergy
-	attribute_points = stats.stats.attribute
-
-
-
+	strength = stats.stats.strength
+	intelligence = stats.stats.intelligence
+	attribute = stats.stats.attribute
 
 
 func _on_PlusVIT_pressed():
 	if attribute > 0:
 		attribute -= 1
 		vitality += 0.025
-
-
 func _on_MinusVIT_pressed():
 	if vitality > 0.076:
 		attribute += 1
@@ -360,14 +367,38 @@ func _on_MinusVIT_pressed():
 		health = maxhealth
 
 
-
 func _on_PlusSTR_pressed():
 	if attribute > 0:
 		attribute -= 1
 		strength += 0.025
-
-
 func _on_MinusSTR_pressed():
 	if strength > 0.076:
 		attribute += 1
 		strength -= 0.025
+
+		
+func _on_PlusINT_pressed():
+	if attribute > 0:
+		attribute -= 1
+		intelligence += 0.025	
+func _on_MinusINT_pressed():
+	if intelligence > 0.076:
+		attribute += 1
+		intelligence -= 0.025
+		energy = maxenergy
+		
+		
+
+
+func _on_PlusACC_pressed():
+	if attribute > 0:
+		attribute -= 1
+		accuracy += 0.025
+
+
+func _on_MinusACC_pressed():
+	if accuracy > 0.01:
+		attribute += 1
+		accuracy -= 0.025
+
+

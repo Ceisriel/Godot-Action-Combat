@@ -1,13 +1,14 @@
 extends KinematicBody
-
-# Camera movement
+#imports
+onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
+onready var intlabel = $GUI/Character/Attributes/INT/INT
+onready var strlabel = $GUI/Character/Attributes/STR/STR
+onready var attributelabel = $GUI/Character/Attributes/AttributePoints
 onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-#hitbox for damage 
 onready var hitbox = $Knight/Hitbox
-# Animation
 onready var animation = $Knight/AnimationPlayer
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -53,16 +54,24 @@ var angular_acceleration = int()
 var acceleration = int()
 var wall_normal
 #player stats 
-var initial_maxhealth = 10
-var maxhealth = 1000.0
-var health = 1000.0
-var maxenergy = 250.0
-var energy = 250.0
-var defense = 0
-var damage = 10
-var attribute_points = 100
-var criticalDefenseChance = 0.60
-var criticalDefenseMultiplier = 2
+export var initial_maxhealth = 10
+const basemaxhealth = 10
+export var maxhealth = 10.0
+export var health = 10.0
+export var maxenergy = 250.0
+export var energy = 250.0
+export var defense = 0
+const basedamage = 10
+export var damage = 10
+export var attribute_points = 100
+export var criticalDefenseChance = 0.60
+export var criticalDefenseMultiplier = 2
+export var criticalChance = 0.5
+export var criticalMultiplier = 2
+#player attributes 
+var attribute = 10
+var vitality = 1.0
+var strength = 1.0
 #Energy regeneration 
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
@@ -70,40 +79,22 @@ var regenerationTimer = 0
 var floatingtext = preload("res://UI/floatingtext.tscn")
 
 
-func setStateIdle():
-	animation.play("idle", 0.2, 0.3)
-func hurt():
-	animation.play("t pose")	
-func setStateWalk():
-	animation.play("walk", 0.25)
-func setStateWalkBack():
-	animation.play_backwards("walk")
-func setStateAttack():
-	animation.play("base attack", 0.1)
-func setStateGuard():
-	animation.play("t pose", 0.1)	
-func setStateRun():
-	animation.play("run", 0.1)
-func setStateSprint():
-	animation.play("run", 0, 0.95)
-func setStateSlide():
-	animation.play("slide",0.1)
-func setStateJump():
-	animation.play("jump")
+func _ready(): 
+	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 
-
-	
 #Damage 
 func attack():
 	var enemies = hitbox.get_overlapping_bodies()
 	for enemy in enemies:
 		if enemy.has_method("onhit"):
-			enemy.onhit(damage)
-			if energy < maxenergy: 
-				energy += 0.5	
-
-func _ready(): 
-	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
+			if randf() <= criticalChance:
+				var criticalDamage = damage * criticalMultiplier
+				enemy.onhit(criticalDamage)
+			else: 	
+				enemy.onhit(damage)
+		if energy < maxenergy: 
+			energy += 0.5	
+			
 #getting damaged
 func onhitP(damage):
 	if not blocking: 
@@ -119,50 +110,26 @@ func onhitP(damage):
 		staggered = false	
 
 
-
-	
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
 		rotate_y(deg2rad(-event.relative.x * mouse_sense))
 		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
-	
-	# Toggle mouse mode
-	if Input.is_action_just_pressed("ESC"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-			mousemode = true
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			mousemode = false
-func _process(delta):	
-# Energy rengeneration	
-	if regenerateEnergy and energy < maxenergy:
-		regenerationTimer += delta
-		if regenerationTimer >= 2.0:  # Regenerate every 2 seconds
-			regenerationTimer = 0
-			energy += 1
-			if energy >= maxenergy:
-				energy = maxenergy
-				regenerateEnergy = false	
-	# Update energy bar
-	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
-	# Update health bar
-	$GUI/HealthBar.value = int((health / maxhealth) * 100)
-	# Update the UI or display a message to indicate the attribute increase
-	# Update the UI or display a message to indicate the attribute increase
-	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
-	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
 
-	$GUI/H.text = healthText
-	$GUI/E.text = energyText
+
 
 
 func _physics_process(delta: float):
-#healthbar and energy text
-	if health <= 0:
-		close_game()
+# Update attribute and stats 	
+	damage = basedamage * strength
+	maxhealth = basemaxhealth * vitality
+	
+	strlabel.text = "%.3f" % strength
+	vitalitylabel.text = "%.3f" % vitality
+	attributelabel.text = "Attribute Points: " + str(attribute)
+	
+	
 # Raycast to detect obstacles in front of the character
 	var ray_length = 1  # Adjust this value based on the desired length of the ray
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
@@ -188,28 +155,23 @@ func _physics_process(delta: float):
 		else:
 			is_climbing = false
 
-	# State control for jumping/falling/landing
+# State control for jumping/falling/landing
 	var on_floor = is_on_floor()
 	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
 	movement_speed = 0
 	angular_acceleration = 10
 	acceleration = 15
 
-	# Gravity and stop sliding on floors
+# Gravity and stop sliding on floors
 	if not is_on_floor():
 		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
 	else:
 		vertical_velocity = -get_floor_normal() * gravity / 2.5
 
-	# Jump and slide
+# Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		vertical_velocity = Vector3.UP * jump_force
-
-	if Input.is_action_just_pressed("slide") and is_on_floor() and energy >= 2.5 and is_walking:  # Check if energy is above or equal to 2.5
-		energy -= 2.5
-		horizontal_velocity = direction * 12
-
-	# Teleportation
+# Teleportation
 	if Input.is_action_just_pressed("blink") and energy >= 5:
 		energy -= 5
 		var teleport_vector = direction.normalized() * teleport_distance
@@ -219,8 +181,7 @@ func _physics_process(delta: float):
 			teleport_position = collision.position
 			translation = teleport_position
 
-
-	# Movement and strafe
+# Movement and strafe
 	if Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
 		direction = Vector3(Input.get_action_strength("left") - Input.get_action_strength("right"),
 					0,
@@ -266,7 +227,7 @@ func _physics_process(delta: float):
 	if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
 		horizontal_velocity = direction * dash_power 
 		energy -= 0.125
-		setStateSlide()
+		animation.play("slide",0.1)
 		dodge = true 
 	else:
 		dodge = false	
@@ -281,7 +242,7 @@ func _physics_process(delta: float):
 	if dash_count4 == 2 and dash_timer4 < double_press_time and energy >= 1.25:
 		horizontal_velocity = direction * dash_power 
 		energy -= 0.125
-		setStateSlide()
+		animation.play("slide",0.1)
 		dodge = true 
 	else:
 		dodge = false	
@@ -307,24 +268,53 @@ func _physics_process(delta: float):
 
 	# Animation order
 	if Input.is_action_pressed("slide") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right") or Input.is_action_pressed("attack")) and is_on_floor():
-		setStateSlide()
+		animation.play("slide",0.1)
 	elif Input.is_action_pressed("guard") and not mousemode and not is_climbing and energy >= 0.125:
-		setStateGuard()
+		animation.play("t pose", 0.1)	
 	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge:
-		setStateAttack()
+		animation.play("base attack", 0.1)
 	elif Input.is_action_pressed("sprint") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")):
-		setStateSprint()
+		animation.play("run", 0, 1.2)
 	elif is_running:
-		setStateRun()
+		animation.play("run", 0, 0.95)
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim"):
-		setStateWalkBack()
+		animation.play_backwards("walk")
 	elif is_walking and is_on_floor():
-		setStateWalk()
+		animation.play("walk", 0.25)
 	else:
-		setStateIdle()
-func close_game():
-	get_tree().quit()
-	print("game over")
+		animation.play("idle", 0.2)
+		
+		
+	# Energy rengeneration	
+	if regenerateEnergy and energy < maxenergy:
+		regenerationTimer += delta
+		if regenerationTimer >= 2.0:  # Regenerate every 2 seconds
+			regenerationTimer = 0
+			energy += 1
+			if energy >= maxenergy:
+				energy = maxenergy
+				regenerateEnergy = false	
+	# Update energy bar
+	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
+	# Update health bar
+	$GUI/HealthBar.value = int((health / maxhealth) * 100)
+	# Update the UI or display a message to indicate the attribute increase
+	# Update the UI or display a message to indicate the attribute increase
+	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
+	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
+
+	$GUI/H.text = healthText
+	$GUI/E.text = energyText	
+	
+		
+	# Toggle mouse mode
+	if Input.is_action_just_pressed("ESC"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			mousemode = true
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			mousemode = false
 
 func get_save_stats():
 	return {
@@ -335,6 +325,8 @@ func get_save_stats():
 		'z_pos': global_transform.origin.z,
 		'stats': {
 			'health': health,
+			'vitality': vitality,
+			'basemaxhealth': basemaxhealth,
 			'energy': energy,
 			'maxhealth': maxhealth,
 			'maxenergy': maxenergy,
@@ -346,7 +338,36 @@ func load_save_stats(stats):
 	global_transform.origin = Vector3(stats.x_pos, stats.y_pos, stats.z_pos)
 	health = stats.stats.health
 	energy = stats.stats.energy
+	vitality = stats.stats.vitality
 	maxhealth = stats.stats.maxhealth
 	maxenergy = stats.stats.maxenergy
 	attribute_points = stats.stats.attribute
 
+
+
+
+
+func _on_PlusVIT_pressed():
+	if attribute > 0:
+		attribute -= 1
+		vitality += 0.025
+
+
+func _on_MinusVIT_pressed():
+	if vitality > 0.076:
+		attribute += 1
+		vitality -= 0.025
+		health = maxhealth
+
+
+
+func _on_PlusSTR_pressed():
+	if attribute > 0:
+		attribute -= 1
+		strength += 0.025
+
+
+func _on_MinusSTR_pressed():
+	if strength > 0.076:
+		attribute += 1
+		strength -= 0.025

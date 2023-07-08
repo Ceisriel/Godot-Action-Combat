@@ -1,5 +1,6 @@
 extends KinematicBody
 #imports
+onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
 onready var intlabel = $GUI/Character/Attributes/INT/INT
 onready var strlabel = $GUI/Character/Attributes/STR/STR
@@ -14,12 +15,12 @@ onready var animation = $Knight/AnimationPlayer
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
 export onready var player_mesh = get_node(PlayerCharacterMesh)
-# Gamplay mechanics and Inspector tweakables
+# movement variables
 export var gravity = 9.8
 export var jump_force = 7
 export var walk_speed = 4
 export var run_speed = 7.7
-export var crouch_speed = 1 
+const basesprint = 15
 export var sprint_speed = 15
 export var teleport_distance = 35
 export var dash_power = 30
@@ -76,6 +77,7 @@ var vitality = 1.0
 var strength = 1.0
 var intelligence = 1.0
 var accuracy = 1.0
+var agility = 1.0
 #Energy regeneration 
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
@@ -125,12 +127,15 @@ func _input(event):  # All major mouse and button input events
 
 
 func _physics_process(delta: float):
-# Update attribute and stats 	
+# Update attribute and stats 
+	sprint_speed = basesprint * agility
 	criticalChance = criticalChancebase * accuracy * 10
 	damage = basedamage * strength
 	maxhealth = basemaxhealth * vitality
 	maxenergy = basemaxenergy * intelligence
 	
+	
+	agillabel.text = "%.3f" % agility
 	acclabel.text = "%.3f" % accuracy
 	intlabel.text = "%.3f" % intelligence
 	strlabel.text = "%.3f" % strength
@@ -203,7 +208,7 @@ func _physics_process(delta: float):
 			is_running = true
 			enabled_climbing = false
 		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking:
-			movement_speed = run_speed * 2
+			movement_speed = sprint_speed
 			is_sprinting = true
 			enabled_climbing = false	
 		else:  # Walk State and speed
@@ -280,11 +285,11 @@ func _physics_process(delta: float):
 	elif Input.is_action_pressed("guard") and not mousemode and not is_climbing and energy >= 0.125:
 		animation.play("t pose", 0.1)	
 	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge:
-		animation.play("base attack", 0.1)
+		animation.play("base attack", 0.1, agility)
 	elif Input.is_action_pressed("sprint") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")):
-		animation.play("run", 0, 1.2)
+		animation.play("run", 0, agility)
 	elif is_running:
-		animation.play("run", 0, 0.95)
+		animation.play("run", 0, agility - 0.25)
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim"):
 		animation.play_backwards("walk")
 	elif is_walking and is_on_floor():
@@ -337,6 +342,7 @@ func get_save_stats():
 			'strength': strength,
 			'intelligence' : intelligence,
 			'basemaxhealth': basemaxhealth,
+			'accuracy': accuracy,
 			'energy': energy,
 			'maxhealth': maxhealth,
 			'maxenergy': maxenergy,
@@ -354,7 +360,7 @@ func load_save_stats(stats):
 	strength = stats.stats.strength
 	intelligence = stats.stats.intelligence
 	attribute = stats.stats.attribute
-
+	accuracy = stats.stats.attribute
 
 func _on_PlusVIT_pressed():
 	if attribute > 0:
@@ -366,7 +372,6 @@ func _on_MinusVIT_pressed():
 		vitality -= 0.025
 		health = maxhealth
 
-
 func _on_PlusSTR_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -375,7 +380,6 @@ func _on_MinusSTR_pressed():
 	if strength > 0.076:
 		attribute += 1
 		strength -= 0.025
-
 		
 func _on_PlusINT_pressed():
 	if attribute > 0:
@@ -386,19 +390,21 @@ func _on_MinusINT_pressed():
 		attribute += 1
 		intelligence -= 0.025
 		energy = maxenergy
-		
-		
-
-
+	
 func _on_PlusACC_pressed():
 	if attribute > 0:
 		attribute -= 1
 		accuracy += 0.025
-
-
 func _on_MinusACC_pressed():
 	if accuracy > 0.01:
 		attribute += 1
 		accuracy -= 0.025
 
-
+func _on_PlusAGI_pressed():
+	if attribute > 0:
+		attribute -= 1
+		agility += 0.025
+func _on_MinusAGI_pressed():
+	if agility > 0.11:
+		attribute += 1
+		agility -= 0.025

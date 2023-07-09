@@ -22,10 +22,7 @@ var criticalMultiplier = 2.0
 var criticalDefenseChance = 0.60
 var criticalDefenseMultiplier = 2
 #artificial fps timer
-var FPSTimer: Timer
-
-
-
+onready var fps = $Timer
 
 # states list
 enum {
@@ -35,15 +32,19 @@ enum {
 	shoot,
 	flee,
 }
+
 func _ready():
-	chaseTimer = Timer.new()
-	add_child(chaseTimer)
-	chaseTimer.wait_time = 0.078
-	chaseTimer.connect("timeout", self, "_on_Timer_timeout")
-	chaseTimer.start()
+	state = "walk"
+	directionChangeInterval = rand_range(minChangeInterval, maxChangeInterval)
+	fps = Timer.new()
+	add_child(fps)
+	fps.wait_time = 0.078
+	fps.connect("timeout", self, "_on_Timer_timeout")
+	fps.start()
 
-
-
+func _on_Timer_timeout():
+	chase(get_process_delta_time())
+	pc(get_process_delta_time())
 
 func onhit(damage):
 	state = "shoot"
@@ -73,14 +74,7 @@ func attack():
 			if enemy.energy >= 0:
 				enemy.energy -= damage/10
 
-# as soon as the enemy spawns, it will walk around randomly
-func _ready():
-	state = "walk"
-	directionChangeInterval = rand_range(minChangeInterval, maxChangeInterval)
-
-# if the player is within range, the enemy will start attacking,
-# if outside of range, the enemy will start chasing the player 
-func _process(delta):
+func chase(delta):
 	var players = get_tree().get_nodes_in_group("Player")
 	var target = null
 
@@ -97,7 +91,7 @@ func _process(delta):
 	if target != null:
 		var distanceToPlayer = self.global_transform.origin.distance_to(target.global_transform.origin)
 
-		if distanceToPlayer > 13 and distanceToPlayer <= 65:
+		if distanceToPlayer > 13 and distanceToPlayer <= 29:
 			state = "chase"
 			target = target
 		elif distanceToPlayer > 6 and distanceToPlayer <= 13:
@@ -138,23 +132,21 @@ func _process(delta):
 			var fleeDirection = -getSlideVelocity().normalized()
 			move_and_slide(fleeDirection * getSlideVelocity().length())
 
-
 func changeRandomDirection():
-		var randomDirection = Vector3(rand_range(-1, 1), 0, rand_range(-1, 1)).normalized()
-		var lookRotation = randomDirection.angle_to(Vector3.FORWARD)
-		rotate_y(lookRotation)
+	var randomDirection = Vector3(rand_range(-1, 1), 0, rand_range(-1, 1)).normalized()
+	var lookRotation = randomDirection.angle_to(Vector3.FORWARD)
+	rotate_y(lookRotation)
 
 func getSlideVelocity():
-		var forwardVector = -transform.basis.z
-		return forwardVector * 4
+	var forwardVector = -transform.basis.z
+	return forwardVector * 4
 
-# gravity without sliding on slopes
-func _physics_process(delta):
+func pc(delta):
 	var players = get_tree().get_nodes_in_group("Player")
 	if players.size() > 0:
 		var player = players[0]
 		var distanceToPlayer = self.global_transform.origin.distance_to(player.global_transform.origin)
-		if distanceToPlayer > 65:
+		if distanceToPlayer > 30:
 			self.visible = false
 			directionChangeTimer = 0.0
 			directionChangeInterval = rand_range(minChangeInterval, maxChangeInterval)
@@ -169,4 +161,3 @@ func _physics_process(delta):
 		vertical_velocity = -get_floor_normal() * gravity / 2.5
 
 	move_and_slide(vertical_velocity, Vector3.UP)
-

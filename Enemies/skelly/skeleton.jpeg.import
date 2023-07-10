@@ -2,8 +2,8 @@
 
 importer="texture"
 type="StreamTexture"
-path.s3tc="res://.import/skeleton.png-dd0f6a768235a4d074bd1f40c6dcda49.s3tc.stex"
-path.etc2="res://.import/skeleton.png-dd0f6a768235a4d074bd1f40c6dcda49.etc2.stex"
+path.s3tc="res://.import/skeleton.jpeg-24b9ef3b01f198399e0b21d6a23237a5.s3tc.stex"
+path.etc2="res://.import/skeleton.jpeg-24b9ef3b01f198399e0b21d6a23237a5.etc2.stex"
 metadata={
 "imported_formats": [ "s3tc", "etc2" ],
 "vram_texture": true
@@ -11,8 +11,8 @@ metadata={
 
 [deps]
 
-source_file="res://Creatures/Enemies/skelly/skeleton.png"
-dest_files=[ "res://.import/skeleton.png-dd0f6a768235a4d074bd1f40c6dcda49.s3tc.stex", "res://.import/skeleton.png-dd0f6a768235a4d074bd1f40c6dcda49.etc2.stex" ]
+source_file="res://Creatures/Enemies/skelly/skeleton.jpeg"
+dest_files=[ "res://.import/skeleton.jpeg-24b9ef3b01f198399e0b21d6a23237a5.s3tc.stex", "res://.import/skeleton.jpeg-24b9ef3b01f198399e0b21d6a23237a5.etc2.stex" ]
 
 [params]
 

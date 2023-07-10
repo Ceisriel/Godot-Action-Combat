@@ -1,12 +1,16 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=15 format=2]
 
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=1]
-[ext_resource path="res://scripts/Action combat.gd" type="Script" id=2]
+[ext_resource path="res://scripts/Player.gd" type="Script" id=2]
 [ext_resource path="res://player/assets/player_assets/Knight.tscn" type="PackedScene" id=3]
-[ext_resource path="res://player/minimap.gd" type="Script" id=4]
-[ext_resource path="res://UI/Crossair.png" type="Texture" id=5]
+[ext_resource path="res://minimap.gd" type="Script" id=4]
+[ext_resource path="res://UI/UI assets/crossair2.png" type="Texture" id=5]
 [ext_resource path="res://scripts/Help menu.gd" type="Script" id=6]
-[ext_resource path="res://UI/progressbar.png" type="Texture" id=7]
+[ext_resource path="res://Pause.tscn" type="PackedScene" id=7]
+[ext_resource path="res://scripts/SaveButton.gd" type="Script" id=9]
+[ext_resource path="res://scripts/LoadButton.gd" type="Script" id=10]
+[ext_resource path="res://UI/UI assets/R.png" type="Texture" id=13]
+[ext_resource path="res://UI/UI assets/button-slot.png" type="Texture" id=14]
 
 [sub_resource type="CapsuleShape" id=48]
 radius = 0.170336
@@ -29,7 +33,7 @@ tracks/0/keys = {
 
 [sub_resource type="BoxShape" id=49]
 
-[node name="Player" type="KinematicBody" groups=["Player"]]
+[node name="Player" type="KinematicBody" groups=["Player", "Predator", "Save"]]
 collision_mask = 2
 script = ExtResource( 2 )
 PlayerCharacterMesh = NodePath("Knight")
@@ -45,7 +49,7 @@ script = ExtResource( 1 )
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.14596, -0.53851 )
 
 [node name="Camera" type="ClippedCamera" parent="Camroot/Camera_holder"]
-transform = Transform( -1, 6.21725e-14, -1.50996e-07, -2.71125e-08, 0.983747, 0.179558, 1.48542e-07, 0.179558, -0.983747, -4.03244e-07, 2.39356, -3.83743 )
+transform = Transform( -1, 6.21725e-14, -1.50996e-07, -2.71125e-08, 0.983747, 0.179558, 1.48542e-07, 0.179558, -0.983747, -4.03244e-07, 2.92945, -5.98446 )
 current = true
 far = 987.1
 process_mode = 1
@@ -53,35 +57,7 @@ process_mode = 1
 [node name="GUI" type="CanvasLayer" parent="."]
 follow_viewport_enable = true
 
-[node name="ColorRect" type="ColorRect" parent="GUI"]
-anchor_left = 1.0
-anchor_right = 1.0
-margin_left = -150.0
-margin_bottom = 150.0
-color = Color( 0.0627451, 0.207843, 0.105882, 1 )
-
-[node name="ViewportContainer" type="ViewportContainer" parent="GUI/ColorRect"]
-anchor_right = 1.0
-anchor_bottom = 1.0
-rect_min_size = Vector2( 150, 150 )
-
-[node name="Viewport" type="Viewport" parent="GUI/ColorRect/ViewportContainer"]
-size = Vector2( 150, 150 )
-transparent_bg = true
-handle_input_locally = false
-render_target_update_mode = 3
-
-[node name="Camera" type="Camera" parent="GUI/ColorRect/ViewportContainer/Viewport"]
-transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 57.4095, 0 )
-projection = 1
-fov = 83.6
-size = 200.0
-near = 0.25
-far = 1000.0
-script = ExtResource( 4 )
-target = NodePath("../../../../..")
-
-[node name="TextureRect" type="TextureRect" parent="GUI"]
+[node name="Crossair" type="TextureRect" parent="GUI"]
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -93,15 +69,40 @@ margin_bottom = 20.0
 texture = ExtResource( 5 )
 stretch_mode = 4
 
+[node name="ViewportContainer" type="ViewportContainer" parent="GUI/Crossair"]
+margin_left = -473.0
+margin_top = 234.0
+margin_right = -383.0
+margin_bottom = 324.0
+rect_scale = Vector2( 0.821609, 0.801529 )
+
+[node name="Viewport" type="Viewport" parent="GUI/Crossair/ViewportContainer"]
+size = Vector2( 90, 90 )
+size_override_stretch = true
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Camera" type="Camera" parent="GUI/Crossair/ViewportContainer/Viewport"]
+transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 57.4095, 0 )
+projection = 1
+fov = 83.6
+size = 200.0
+near = 0.25
+far = 1000.0
+script = ExtResource( 4 )
+target = NodePath("../../../../..")
+
 [node name="HealthBar" type="TextureProgress" parent="GUI"]
 anchor_top = 1.0
 anchor_bottom = 1.0
-margin_top = -80.0
-margin_right = 80.0
+margin_left = 3.0
+margin_top = -100.0
+margin_right = 83.0
+margin_bottom = -20.0
 rect_min_size = Vector2( 80, 80 )
-rect_scale = Vector2( 0.993361, 0.992035 )
+rect_scale = Vector2( 1.32876, 1.2464 )
 value = 100.0
-texture_progress = ExtResource( 7 )
+texture_progress = ExtResource( 13 )
 fill_mode = 4
 tint_progress = Color( 0.741176, 0, 0, 1 )
 nine_patch_stretch = true
@@ -110,43 +111,54 @@ __meta__ = {
 }
 
 [node name="Label" type="Label" parent="GUI/HealthBar"]
+modulate = Color( 0, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
 anchor_top = 1.0
 anchor_bottom = 1.0
-margin_left = 15.1003
-margin_top = -47.7431
-margin_right = 55.1003
-margin_bottom = -33.7431
+margin_left = 75.5388
+margin_top = -17.0581
+margin_right = 115.539
+margin_bottom = -3.05814
 rect_scale = Vector2( 1, 0.967319 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 
 [node name="EnergyBar" type="TextureProgress" parent="GUI"]
 anchor_left = 1.0
 anchor_top = 1.0
 anchor_right = 1.0
 anchor_bottom = 1.0
-margin_left = -87.0
-margin_top = -80.0
-margin_right = -7.0
+margin_left = -1013.0
+margin_top = -94.0
+margin_right = -933.0
+margin_bottom = -14.0
 rect_min_size = Vector2( 80, 80 )
-rect_scale = Vector2( 0.993361, 0.992035 )
+rect_scale = Vector2( 1.13986, 1.09147 )
 value = 100.0
-texture_progress = ExtResource( 7 )
+texture_progress = ExtResource( 13 )
 fill_mode = 5
-tint_progress = Color( 0.027451, 0.188235, 0.164706, 1 )
+tint_progress = Color( 0, 1, 0.854902, 1 )
 nine_patch_stretch = true
 
 [node name="Label" type="Label" parent="GUI/EnergyBar"]
 anchor_top = 1.0
 anchor_bottom = 1.0
-margin_left = -10.0668
-margin_top = -46.7351
-margin_right = 29.9332
-margin_bottom = -32.7351
+margin_left = 93.1141
+margin_top = -41.5091
+margin_right = 133.114
+margin_bottom = -27.5091
 rect_scale = Vector2( 1, 0.967319 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 
 [node name="RichTextLabel" type="RichTextLabel" parent="GUI"]
 modulate = Color( 0, 0, 0, 1 )
-margin_right = 422.0
-margin_bottom = 258.0
+margin_left = 2.00003
+margin_top = 4.0
+margin_right = 424.0
+margin_bottom = 262.0
 rect_scale = Vector2( 1.05871, 1.21964 )
 tab_size = 5
 text = "Movement:	WASD
@@ -169,6 +181,24 @@ Hide/Show:    Ctrl + H press to hide this message then again to bring it back
 "
 script = ExtResource( 6 )
 
+[node name="Pause" parent="GUI/RichTextLabel" instance=ExtResource( 7 )]
+
+[node name="Save" type="Button" parent="GUI"]
+margin_left = 723.0
+margin_top = 501.0
+margin_right = 771.0
+margin_bottom = 543.0
+icon = ExtResource( 14 )
+script = ExtResource( 9 )
+
+[node name="Load" type="Button" parent="GUI"]
+margin_left = 772.0
+margin_top = 501.0
+margin_right = 820.0
+margin_bottom = 543.0
+icon = ExtResource( 14 )
+script = ExtResource( 10 )
+
 [node name="Knight" parent="." instance=ExtResource( 3 )]
 
 [node name="AnimationPlayer" parent="Knight" index="1"]
@@ -178,7 +208,7 @@ anims/RESET = SubResource( 50 )
 transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
 
 [node name="CollisionShape" type="CollisionShape" parent="Knight/Hitbox"]
-transform = Transform( 110.467, 0, 0, 0, 122.604, 0, 0, 0, 91.2765, 64.3885, 137.271, 7.29677 )
+transform = Transform( 110.467, 0, 0, 0, 401.58, 0, 0, 0, 91.2764, 64.3885, 137.271, -81.4751 )
 shape = SubResource( 49 )
 
 [editable path="Knight"]

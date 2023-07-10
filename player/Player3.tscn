@@ -1,0 +1,197 @@
+[gd_scene load_steps=12 format=2]
+
+[ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=1]
+[ext_resource path="res://player/Player3.gd" type="Script" id=2]
+[ext_resource path="res://player/assets/player_assets/Knight.tscn" type="PackedScene" id=3]
+[ext_resource path="res://minimap.gd" type="Script" id=4]
+[ext_resource path="res://UI/UI assets/crossair2.png" type="Texture" id=5]
+[ext_resource path="res://UI/UI assets/c.png" type="Texture" id=7]
+[ext_resource path="res://UI/UI assets/skillbar.png" type="Texture" id=8]
+[ext_resource path="res://UI/UI assets/R.png" type="Texture" id=13]
+
+[sub_resource type="CapsuleShape" id=48]
+radius = 0.170336
+height = 1.48893
+
+[sub_resource type="Animation" id=50]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Hitbox/CollisionShape:disabled")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+
+[sub_resource type="BoxShape" id=49]
+
+[node name="Player" type="KinematicBody" groups=["Entity", "Player", "Predator", "Save", "prey"]]
+collision_mask = 2
+script = ExtResource( 2 )
+PlayerCharacterMesh = NodePath("Knight")
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0.918, 0 )
+shape = SubResource( 48 )
+
+[node name="Camroot" type="Spatial" parent="."]
+script = ExtResource( 1 )
+
+[node name="Camera_holder" type="Spatial" parent="Camroot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.14596, -0.53851 )
+
+[node name="Camera" type="ClippedCamera" parent="Camroot/Camera_holder"]
+transform = Transform( -1, 6.21725e-14, -1.50996e-07, -2.71125e-08, 0.983747, 0.179558, 1.48542e-07, 0.179558, -0.983747, -4.03244e-07, 2.39356, -3.83743 )
+current = true
+far = 987.1
+process_mode = 1
+
+[node name="GUI" type="CanvasLayer" parent="."]
+follow_viewport_enable = true
+
+[node name="H" type="Label" parent="GUI"]
+modulate = Color( 0, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 844.0
+margin_top = -437.0
+margin_right = 884.0
+margin_bottom = -423.0
+rect_scale = Vector2( 1.36026, 0.938606 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "test"
+
+[node name="E" type="Label" parent="GUI" groups=["Entity"]]
+modulate = Color( 0, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 844.0
+margin_top = -424.0
+margin_right = 884.0
+margin_bottom = -410.0
+rect_scale = Vector2( 1.36026, 0.938606 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "test"
+
+[node name="Crossair" type="TextureRect" parent="GUI"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -20.0
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+texture = ExtResource( 5 )
+stretch_mode = 4
+
+[node name="ViewportContainer" type="ViewportContainer" parent="GUI/Crossair"]
+margin_left = 385.0
+margin_top = -252.0
+margin_right = 475.0
+margin_bottom = -162.0
+rect_scale = Vector2( 1.3631, 1.22243 )
+
+[node name="Viewport" type="Viewport" parent="GUI/Crossair/ViewportContainer"]
+size = Vector2( 90, 90 )
+size_override_stretch = true
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Camera" type="Camera" parent="GUI/Crossair/ViewportContainer/Viewport"]
+transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 57.4095, 0 )
+projection = 1
+fov = 83.6
+size = 200.0
+near = 0.25
+far = 1000.0
+script = ExtResource( 4 )
+target = NodePath("../../../../..")
+
+[node name="HealthBarBackground" type="TextureProgress" parent="GUI"]
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -173.0
+margin_top = 2.0
+margin_right = -55.9999
+margin_bottom = 118.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.47181, 1.3879 )
+value = 100.0
+texture_progress = ExtResource( 13 )
+tint_progress = Color( 0.490196, 0, 0, 1 )
+nine_patch_stretch = true
+
+[node name="HealthBar" type="TextureProgress" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -173.0
+margin_top = 2.0
+margin_right = -55.9999
+margin_bottom = 118.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.47181, 1.3879 )
+value = 100.0
+texture_progress = ExtResource( 13 )
+tint_progress = Color( 0.490196, 0, 0, 1 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="EnergyBar" type="TextureProgress" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -159.0
+margin_top = 15.0
+margin_right = -78.9998
+margin_bottom = 95.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.80807, 1.67963 )
+value = 100.0
+texture_progress = ExtResource( 7 )
+fill_mode = 5
+tint_under = Color( 0, 0, 0, 1 )
+tint_progress = Color( 0.0431373, 0.25098, 0.219608, 1 )
+nine_patch_stretch = true
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="TextureRect" type="TextureRect" parent="GUI"]
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+margin_left = -429.0
+margin_top = -465.0
+margin_right = 937.0
+margin_bottom = 303.0
+rect_scale = Vector2( 0.634681, 0.605344 )
+texture = ExtResource( 8 )
+
+[node name="Knight" parent="." instance=ExtResource( 3 )]
+
+[node name="AnimationPlayer" parent="Knight" index="1"]
+anims/RESET = SubResource( 50 )
+
+[node name="Hitbox" type="Area" parent="Knight"]
+transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Knight/Hitbox"]
+transform = Transform( 110.467, 0, 0, 0, 401.58, 0, 0, 0, 91.2764, 64.3885, 137.271, -81.4751 )
+shape = SubResource( 49 )
+
+[editable path="Knight"]

@@ -6,10 +6,16 @@ onready var animation = $spearskeleton/AnimationPlayer
 onready var eyes = $Eyes
 onready var ray = $RayCast
 onready var hitbox = $Hitbox
+#timers for movement
 var directionChangeTimer = 0.0
 var directionChangeInterval = 0.0
 const minChangeInterval = 3.0
 const maxChangeInterval = 12.0
+#timers for combat 
+var switchTimer = Timer.new()
+var switchTimeMin = 1.0
+var switchTimeMax = 1.5
+#movement
 const turn = 32
 var vertical_velocity = Vector3()
 var gravity = 30
@@ -22,11 +28,13 @@ var criticalChance = 0.70
 var criticalMultiplier = 2.5
 var criticalDefenseChance = 0.60
 var criticalDefenseMultiplier = 2
+var impact = 80
 # artificial fps timer
 onready var fps = $Timer
 var FPS = 0.05
 var blocking : bool
-
+var kick : bool
+var stabbing : bool
 
 # movement speed variables
 var walkSpeed = 6.0
@@ -53,14 +61,34 @@ func _ready():
 	fps.wait_time = FPS
 	fps.connect("timeout", self, "_on_Timer_timeout")
 	fps.start()
-
+	
+	switchTimer.wait_time = rand_range(switchTimeMin, switchTimeMax)
+	add_child(switchTimer)
+	switchTimer.connect("timeout", self, "_on_SwitchTimer_timeout")
+	switchTimer.start()
+	
+	
 func _on_Timer_timeout():
+
 	chase(fps.wait_time)  # Pass the timer wait time instead of delta time
 	pc(fps.wait_time)  # Pass the timer wait time instead of delta time
+func _on_SwitchTimer_timeout():
+	var randomValue = randf()
 
+	if randomValue < 0.3:
+		kick = false
+		stabbing = true
+	else:
+		stabbing = false
+		kick = true
+
+	switchTimer.wait_time = rand_range(switchTimeMin, switchTimeMax)
+	switchTimer.start()
+	
+	
 func onhit(damage):
 	if not blocking: 
-		state = "shoot"
+
 		if damage <= 0:
 			return
 	# Apply critical defense chance
@@ -85,6 +113,12 @@ func attack():
 				enemy.onhitP(criticalDamage)
 			else:
 				enemy.onhitP(damage)
+				
+func knockback(): 
+	var enemies = hitbox.get_overlapping_bodies()
+	for enemy in enemies:
+		if enemy.is_in_group("Player"):
+			enemy.onhitKnockback(impact)
 
 
 func chase(delta):
@@ -124,10 +158,15 @@ func chase(delta):
 			animation.play("idle", 0.1)
 		"shoot":
 			blocking = false
-			animation.play("stab", 0.2)
 			if target != null:
 				eyes.look_at(target.global_transform.origin, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
+				if 	stabbing: 
+					animation.play("stab", 0.2)
+				elif kick:
+					animation.play("kick")	
+				else:
+					pass	
 		"walk":
 			blocking = false
 			animation.play("walk", 0.2)
@@ -146,12 +185,15 @@ func chase(delta):
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 				move_and_slide(targetDirection * getSlideVelocity(chaseSpeed).length())  # Pass the chase speed
 		"flee":
-			blocking = true
-			animation.play("block")
 			if target != null:
 				var fleeDirection = (global_transform.origin - target.global_transform.origin).normalized()
 				eyes.look_at(global_transform.origin - fleeDirection, Vector3.UP)
 				rotate_y(deg2rad(eyes.rotation.y * turn))
+			if kick: 
+				animation.play("kick")
+			else:
+				blocking = true
+			animation.play("block")	
 
 
 func changeRandomDirection():

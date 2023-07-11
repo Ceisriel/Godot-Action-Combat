@@ -1,5 +1,6 @@
 extends KinematicBody
 #imports
+onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
 onready var intlabel = $GUI/Character/Attributes/INT/INT
@@ -23,7 +24,8 @@ export var run_speed = 7.7
 const basesprint = 15
 export var sprint_speed = 15
 export var teleport_distance = 35
-export var dash_power = 30
+const basedash = 35
+export var dash_power = 35
 export var dodge_power = 12
 export (float) var mouse_sense = 0.1
 # Dodge
@@ -72,7 +74,7 @@ export var criticalChance = 0.01
 const criticalChancebase = 0.01
 export var criticalMultiplier = 2
 #player attributes 
-var attribute = 10
+var attribute = 100
 var vitality = 1.0
 var strength = 1.0
 var intelligence = 1.0
@@ -115,6 +117,22 @@ func onhitP(damage):
 	else:
 		staggered = false	
 
+func onhitKnockback(impact):
+	# Calculate the angle between the player's forward direction and the camera's forward direction
+	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
+	
+	# Check if the player is facing the camera
+	if angle_to_camera < 0.5:
+		horizontal_velocity = direction.normalized() * impact
+		animation.play("t pose")
+	# Check if the player is showing their back to the camera
+	elif angle_to_camera > 0.5:
+		horizontal_velocity = -direction.normalized() * impact
+		animation.play("t pose")
+	else:# future logic for getting knockedbacke correctly when facing sideways
+		pass
+
+
 
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
@@ -122,19 +140,50 @@ func _input(event):  # All major mouse and button input events
 		rotate_y(deg2rad(-event.relative.x * mouse_sense))
 		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
-
-
+func dodge(delta):		
+	#Dodge back and front
+	if dash_count2 > 0:
+		dash_timer2 += delta
+	if dash_timer2 >= double_press_time:
+		dash_count2 = 0
+		dash_timer2 = 0.0	
+	if Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("forward"):
+		dash_count2 += 1
+	if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
+		horizontal_velocity = direction * dash_power  
+		energy -= 0.125 * delta
+		animation.play("slide",0.1)
+		dodge = true 
+	else:
+		dodge = false	
+#Dodge right	
+	if dash_count4 > 0:
+		dash_timer4 += delta
+	if dash_timer4 >= double_press_time:
+		dash_count4 = 0
+		dash_timer4 = 0.0	
+	if Input.is_action_just_pressed("right") or Input.is_action_just_pressed("left") :
+		dash_count4 += 1
+	if dash_count4 == 2 and dash_timer4 < double_press_time and energy >= 1.25:
+		horizontal_velocity = direction * dash_power 
+		energy -= 0.125 * delta
+		animation.play("slide",0.1)
+		dodge = true 
+	else:
+		dodge = false		
 
 
 func _physics_process(delta: float):
+	dodge(delta / 2)
 # Update attribute and stats 
+	dash_power = basedash * agility 
 	sprint_speed = basesprint * agility
 	criticalChance = criticalChancebase * accuracy * 10
 	damage = basedamage * strength
 	maxhealth = basemaxhealth * vitality
 	maxenergy = basemaxenergy * intelligence
 	
-	
+	criticallabel.text =  "%.3f" % criticalChance
 	agillabel.text = "%.3f" % agility
 	acclabel.text = "%.3f" % accuracy
 	intlabel.text = "%.3f" % intelligence
@@ -229,36 +278,6 @@ func _physics_process(delta: float):
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
 
 
-#Dodge back and front
-	if dash_count2 > 0:
-		dash_timer2 += delta
-	if dash_timer2 >= double_press_time:
-		dash_count2 = 0
-		dash_timer2 = 0.0	
-	if Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("forward"):
-		dash_count2 += 1
-	if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
-		horizontal_velocity = direction * dash_power 
-		energy -= 0.125
-		animation.play("slide",0.1)
-		dodge = true 
-	else:
-		dodge = false	
-#Dodge right	
-	if dash_count4 > 0:
-		dash_timer4 += delta
-	if dash_timer4 >= double_press_time:
-		dash_count4 = 0
-		dash_timer4 = 0.0	
-	if Input.is_action_just_pressed("right") or Input.is_action_just_pressed("left") :
-		dash_count4 += 1
-	if dash_count4 == 2 and dash_timer4 < double_press_time and energy >= 1.25:
-		horizontal_velocity = direction * dash_power 
-		energy -= 0.125
-		animation.play("slide",0.1)
-		dodge = true 
-	else:
-		dodge = false	
 	# Attacking while moving
 	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")):
 		horizontal_velocity = direction * 12
@@ -280,16 +299,14 @@ func _physics_process(delta: float):
 	move_and_slide(movement, Vector3.UP)
 
 	# Animation order
-	if Input.is_action_pressed("slide") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right") or Input.is_action_pressed("attack")) and is_on_floor():
-		animation.play("slide",0.1)
-	elif Input.is_action_pressed("guard") and not mousemode and not is_climbing and energy >= 0.125:
+	if Input.is_action_pressed("guard") and not mousemode and not is_climbing and energy >= 0.125:
 		animation.play("t pose", 0.1)	
 	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge:
-		animation.play("base attack", 0.1, agility)
+		animation.play("base attack", 0.1, 0.5 + agility * 0.50)
 	elif Input.is_action_pressed("sprint") and (Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right")):
-		animation.play("run", 0, agility)
+		animation.play("run", 0, agility * 0.80)
 	elif is_running:
-		animation.play("run", 0, agility - 0.25)
+		animation.play("run", 0, agility * 0.89)
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim"):
 		animation.play_backwards("walk")
 	elif is_walking and is_on_floor():
@@ -347,6 +364,7 @@ func get_save_stats():
 			'maxhealth': maxhealth,
 			'maxenergy': maxenergy,
 			'attribute': attribute,
+			'agility': agility
 		}
 	}
 
@@ -360,7 +378,9 @@ func load_save_stats(stats):
 	strength = stats.stats.strength
 	intelligence = stats.stats.intelligence
 	attribute = stats.stats.attribute
-	accuracy = stats.stats.attribute
+	accuracy = stats.stats.accuracy
+	agility = stats.stats.agility
+
 
 func _on_PlusVIT_pressed():
 	if attribute > 0:
@@ -372,6 +392,7 @@ func _on_MinusVIT_pressed():
 		vitality -= 0.025
 		health = maxhealth
 
+
 func _on_PlusSTR_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -380,6 +401,7 @@ func _on_MinusSTR_pressed():
 	if strength > 0.076:
 		attribute += 1
 		strength -= 0.025
+
 		
 func _on_PlusINT_pressed():
 	if attribute > 0:
@@ -390,7 +412,7 @@ func _on_MinusINT_pressed():
 		attribute += 1
 		intelligence -= 0.025
 		energy = maxenergy
-	
+
 func _on_PlusACC_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -408,3 +430,4 @@ func _on_MinusAGI_pressed():
 	if agility > 0.11:
 		attribute += 1
 		agility -= 0.025
+

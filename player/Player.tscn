@@ -1,0 +1,772 @@
+[gd_scene load_steps=24 format=2]
+
+[ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=1]
+[ext_resource path="res://scripts/Player.gd" type="Script" id=2]
+[ext_resource path="res://player/assets/player_assets/Knight.tscn" type="PackedScene" id=3]
+[ext_resource path="res://player/minimap.gd" type="Script" id=4]
+[ext_resource path="res://UI/UI assets/crossair2.png" type="Texture" id=5]
+[ext_resource path="res://UI/UI assets/MobileControls/MobileControls.tscn" type="PackedScene" id=6]
+[ext_resource path="res://UI/UI assets/c.png" type="Texture" id=7]
+[ext_resource path="res://UI/UI assets/background.png" type="Texture" id=8]
+[ext_resource path="res://UI/UI assets/-.png" type="Texture" id=9]
+[ext_resource path="res://UI/UI assets/AttributeIcons/str.png" type="Texture" id=10]
+[ext_resource path="res://UI/UI assets/Minimapcontainer.png" type="Texture" id=11]
+[ext_resource path="res://UI/UI assets/button-slot.png" type="Texture" id=12]
+[ext_resource path="res://UI/UI assets/R.png" type="Texture" id=13]
+[ext_resource path="res://UI/UI assets/+.png" type="Texture" id=14]
+[ext_resource path="res://UI/UI assets/AttributeIcons/int.png" type="Texture" id=15]
+[ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=16]
+[ext_resource path="res://UI/UI assets/AttributeIcons/vit.png" type="Texture" id=17]
+[ext_resource path="res://scripts/LoadButton.gd" type="Script" id=18]
+[ext_resource path="res://scripts/SaveButton.gd" type="Script" id=19]
+[ext_resource path="res://player/Character.gd" type="Script" id=20]
+
+[sub_resource type="Animation" id=50]
+length = 0.001
+tracks/0/type = "value"
+tracks/0/path = NodePath("Hitbox/CollisionShape:disabled")
+tracks/0/interp = 1
+tracks/0/loop_wrap = true
+tracks/0/imported = false
+tracks/0/enabled = true
+tracks/0/keys = {
+"times": PoolRealArray( 0 ),
+"transitions": PoolRealArray( 1 ),
+"update": 0,
+"values": [ false ]
+}
+
+[sub_resource type="BoxShape" id=49]
+
+[sub_resource type="CapsuleShape" id=51]
+radius = 0.170336
+height = 1.48893
+
+[node name="Player" type="KinematicBody" groups=["Entity", "Player", "Predator", "Save", "prey"]]
+collision_mask = 2
+script = ExtResource( 2 )
+PlayerCharacterMesh = NodePath("Knight")
+
+[node name="Camroot" type="Spatial" parent="."]
+script = ExtResource( 1 )
+
+[node name="Camera_holder" type="Spatial" parent="Camroot"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.14596, -0.53851 )
+
+[node name="Camera" type="ClippedCamera" parent="Camroot/Camera_holder"]
+transform = Transform( -1, 9.05942e-14, -1.50996e-07, -4.07327e-08, 0.962927, 0.269761, 1.45398e-07, 0.269761, -0.962927, -4.03244e-07, 2.74813, -3.49268 )
+current = true
+far = 987.1
+process_mode = 1
+collision_mask = 2
+
+[node name="GUI" type="CanvasLayer" parent="."]
+follow_viewport_enable = true
+
+[node name="H" type="Label" parent="GUI"]
+modulate = Color( 0, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 1244.0
+margin_top = -154.0
+margin_right = 1284.0
+margin_bottom = -140.0
+rect_scale = Vector2( 1.36026, 0.938606 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "test"
+
+[node name="E" type="Label" parent="GUI" groups=["Entity"]]
+modulate = Color( 0, 0, 0, 1 )
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 1244.0
+margin_top = -141.0
+margin_right = 1284.0
+margin_bottom = -127.0
+rect_scale = Vector2( 1.36026, 0.938606 )
+custom_colors/font_color = Color( 0, 0, 0, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+text = "test"
+
+[node name="Crossair" type="TextureRect" parent="GUI"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -20.0
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+texture = ExtResource( 5 )
+stretch_mode = 4
+
+[node name="HealthBarBackground" type="TextureProgress" parent="GUI"]
+self_modulate = Color( 0, 0, 0, 1 )
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = 57.0001
+margin_top = 403.0
+margin_right = 174.0
+margin_bottom = 519.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.47181, 1.3879 )
+value = 100.0
+texture_progress = ExtResource( 13 )
+tint_progress = Color( 0.490196, 0, 0, 1 )
+nine_patch_stretch = true
+
+[node name="HealthBar" type="TextureProgress" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = 57.0001
+margin_top = 403.0
+margin_right = 174.0
+margin_bottom = 519.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.47181, 1.3879 )
+value = 100.0
+texture_progress = ExtResource( 13 )
+fill_mode = 4
+tint_progress = Color( 0.490196, 0, 0, 1 )
+nine_patch_stretch = true
+
+[node name="EnergyBar" type="TextureProgress" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = 71.0
+margin_top = 416.0
+margin_right = 151.0
+margin_bottom = 496.0
+rect_min_size = Vector2( 80, 80 )
+rect_scale = Vector2( 1.80807, 1.67963 )
+value = 100.0
+texture_progress = ExtResource( 7 )
+fill_mode = 5
+tint_under = Color( 0, 0, 0, 1 )
+tint_progress = Color( 0.0431373, 0.25098, 0.219608, 1 )
+nine_patch_stretch = true
+
+[node name="Minimap" type="Control" parent="GUI"]
+anchor_left = 1.0
+anchor_right = 1.0
+margin_left = -16.0001
+margin_top = -8.0
+margin_right = -16.0001
+margin_bottom = -8.0
+rect_scale = Vector2( 0.406377, 0.401776 )
+
+[node name="ViewportContainer" type="ViewportContainer" parent="GUI/Minimap"]
+margin_left = -287.0
+margin_top = 87.0
+margin_right = -197.0
+margin_bottom = 177.0
+rect_scale = Vector2( 3.45219, 2.84424 )
+
+[node name="Viewport" type="Viewport" parent="GUI/Minimap/ViewportContainer"]
+size = Vector2( 90, 90 )
+size_override_stretch = true
+handle_input_locally = false
+render_target_update_mode = 3
+
+[node name="Camera" type="Camera" parent="GUI/Minimap/ViewportContainer/Viewport"]
+transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 149.569, 0 )
+projection = 1
+fov = 83.6
+size = 200.0
+near = 0.25
+far = 1000.0
+script = ExtResource( 4 )
+target = NodePath("../../../../..")
+
+[node name="Minimap Container" type="TextureRect" parent="GUI/Minimap"]
+margin_left = -435.0
+margin_top = 6.0
+margin_right = -395.0
+margin_bottom = 46.0
+rect_scale = Vector2( 11.8514, 9.84932 )
+texture = ExtResource( 11 )
+expand = true
+
+[node name="Character" type="Control" parent="GUI"]
+visible = false
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -651.0
+margin_top = -185.0
+margin_right = -611.0
+margin_bottom = -145.0
+rect_scale = Vector2( 0.497832, 0.474599 )
+script = ExtResource( 20 )
+
+[node name="CharacterBackground" type="TextureRect" parent="GUI/Character"]
+margin_left = 423.0
+margin_top = 129.0
+margin_right = 1328.0
+margin_bottom = 750.0
+rect_scale = Vector2( 1.27265, 1.26651 )
+texture = ExtResource( 8 )
+expand = true
+
+[node name="Attributes" type="Control" parent="GUI/Character"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -68.0
+margin_top = -108.0
+margin_right = -28.0
+margin_bottom = -68.0
+rect_scale = Vector2( 0.93876, 0.868313 )
+
+[node name="STR" type="Control" parent="GUI/Character/Attributes"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="STR" type="Label" parent="GUI/Character/Attributes/STR"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="PlusSTR" type="Button" parent="GUI/Character/Attributes/STR"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+STR" type="TextureRect" parent="GUI/Character/Attributes/STR/PlusSTR"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="MinusSTR" type="Button" parent="GUI/Character/Attributes/STR"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-STR" type="TextureRect" parent="GUI/Character/Attributes/STR/MinusSTR"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotSTR" type="TextureRect" parent="GUI/Character/Attributes/STR"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconSTR" type="TextureRect" parent="GUI/Character/Attributes/STR/SlotSTR"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 10 )
+expand = true
+
+[node name="VIT" type="Control" parent="GUI/Character/Attributes"]
+margin_top = 52.0
+margin_right = 40.0
+margin_bottom = 92.0
+
+[node name="PlusVIT" type="Button" parent="GUI/Character/Attributes/VIT"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+VIT" type="TextureRect" parent="GUI/Character/Attributes/VIT/PlusVIT"]
+margin_left = 9.42924
+margin_top = 7.10608
+margin_right = 49.4293
+margin_bottom = 47.1061
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="VIT" type="Label" parent="GUI/Character/Attributes/VIT"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="MinusVIT" type="Button" parent="GUI/Character/Attributes/VIT"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-VIT" type="TextureRect" parent="GUI/Character/Attributes/VIT/MinusVIT"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotVIT" type="TextureRect" parent="GUI/Character/Attributes/VIT"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconVIT" type="TextureRect" parent="GUI/Character/Attributes/VIT/SlotVIT"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 17 )
+expand = true
+
+[node name="INT" type="Control" parent="GUI/Character/Attributes"]
+margin_top = 105.0
+margin_right = 40.0
+margin_bottom = 145.0
+
+[node name="INT" type="Label" parent="GUI/Character/Attributes/INT"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="PlusINT" type="Button" parent="GUI/Character/Attributes/INT"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+INT" type="TextureRect" parent="GUI/Character/Attributes/INT/PlusINT"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="MinusINT" type="Button" parent="GUI/Character/Attributes/INT"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-INT" type="TextureRect" parent="GUI/Character/Attributes/INT/MinusINT"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotSTR" type="TextureRect" parent="GUI/Character/Attributes/INT"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconSTR" type="TextureRect" parent="GUI/Character/Attributes/INT/SlotSTR"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 15 )
+expand = true
+
+[node name="Acc" type="Control" parent="GUI/Character/Attributes"]
+margin_top = 160.0
+margin_right = 40.0
+margin_bottom = 200.0
+
+[node name="Acc" type="Label" parent="GUI/Character/Attributes/Acc"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="PlusACC" type="Button" parent="GUI/Character/Attributes/Acc"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+ACC" type="TextureRect" parent="GUI/Character/Attributes/Acc/PlusACC"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="MinusACC" type="Button" parent="GUI/Character/Attributes/Acc"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-ACC" type="TextureRect" parent="GUI/Character/Attributes/Acc/MinusACC"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotACC" type="TextureRect" parent="GUI/Character/Attributes/Acc"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconACC" type="TextureRect" parent="GUI/Character/Attributes/Acc/SlotACC"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 16 )
+expand = true
+
+[node name="CriticalChance" type="Label" parent="GUI/Character/Attributes/Acc"]
+margin_left = 502.618
+margin_top = 574.687
+margin_right = 553.618
+margin_bottom = 605.687
+rect_scale = Vector2( 2.88285, 2.66612 )
+text = "Criticals
+"
+
+[node name="AGI" type="Control" parent="GUI/Character/Attributes"]
+margin_top = 216.0
+margin_right = 40.0
+margin_bottom = 256.0
+
+[node name="AGI" type="Label" parent="GUI/Character/Attributes/AGI"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="PlusAGI" type="Button" parent="GUI/Character/Attributes/AGI"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+AGI" type="TextureRect" parent="GUI/Character/Attributes/AGI/PlusAGI"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="MinusAGI" type="Button" parent="GUI/Character/Attributes/AGI"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-AGI" type="TextureRect" parent="GUI/Character/Attributes/AGI/MinusAGI"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotAGI" type="TextureRect" parent="GUI/Character/Attributes/AGI"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconAGI" type="TextureRect" parent="GUI/Character/Attributes/AGI/SlotAGI"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 16 )
+expand = true
+
+[node name="STR6" type="Control" parent="GUI/Character/Attributes"]
+margin_top = 271.0
+margin_right = 40.0
+margin_bottom = 311.0
+
+[node name="H2" type="Label" parent="GUI/Character/Attributes/STR6"]
+anchor_top = 1.0
+anchor_bottom = 1.0
+margin_left = 628.0
+margin_top = 223.0
+margin_right = 668.0
+margin_bottom = 237.0
+rect_scale = Vector2( 1.82437, 3.09251 )
+custom_colors/font_color = Color( 1, 0.929412, 0.929412, 1 )
+custom_colors/font_outline_modulate = Color( 0, 0, 0, 1 )
+custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
+custom_constants/shadow_offset_x = 2
+custom_constants/line_spacing = 2
+custom_constants/shadow_offset_y = 1
+custom_constants/shadow_as_outline = 0
+text = "1.00"
+
+[node name="PlusSTR" type="Button" parent="GUI/Character/Attributes/STR6"]
+margin_left = 541.0
+margin_top = 267.0
+margin_right = 589.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="+STR" type="TextureRect" parent="GUI/Character/Attributes/STR6/PlusSTR"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 14 )
+expand = true
+
+[node name="MinusSTR" type="Button" parent="GUI/Character/Attributes/STR6"]
+margin_left = 510.0
+margin_top = 267.0
+margin_right = 558.0
+margin_bottom = 309.0
+rect_scale = Vector2( 0.644, 0.644 )
+size_flags_horizontal = 3
+size_flags_vertical = 3
+icon = ExtResource( 12 )
+flat = true
+
+[node name="-STR" type="TextureRect" parent="GUI/Character/Attributes/STR6/MinusSTR"]
+margin_left = 9.42926
+margin_top = 7.10616
+margin_right = 49.4293
+margin_bottom = 47.1062
+rect_scale = Vector2( 0.711543, 0.699568 )
+texture = ExtResource( 9 )
+expand = true
+
+[node name="SlotSTR" type="TextureRect" parent="GUI/Character/Attributes/STR6"]
+margin_left = 576.0
+margin_top = 256.0
+margin_right = 616.0
+margin_bottom = 296.0
+rect_scale = Vector2( 1.45472, 1.36795 )
+texture = ExtResource( 12 )
+
+[node name="IconSTR" type="TextureRect" parent="GUI/Character/Attributes/STR6/SlotSTR"]
+margin_left = 4.81192
+margin_top = 5.11711
+margin_right = 44.8119
+margin_bottom = 45.1171
+rect_scale = Vector2( 0.666731, 0.65441 )
+texture = ExtResource( 16 )
+expand = true
+
+[node name="AttributePoints" type="Label" parent="GUI/Character/Attributes"]
+margin_left = 516.663
+margin_top = 577.714
+margin_right = 556.663
+margin_bottom = 591.714
+rect_scale = Vector2( 4.31433, 5.31931 )
+
+[node name="Save" type="Button" parent="GUI"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = 232.0
+margin_top = 220.0
+margin_right = 280.0
+margin_bottom = 262.0
+icon = ExtResource( 12 )
+script = ExtResource( 19 )
+
+[node name="Load" type="Button" parent="GUI"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = 281.0
+margin_top = 220.0
+margin_right = 329.0
+margin_bottom = 262.0
+icon = ExtResource( 12 )
+script = ExtResource( 18 )
+
+[node name="Knight" parent="." instance=ExtResource( 3 )]
+
+[node name="AnimationPlayer" parent="Knight" index="1"]
+anims/RESET = SubResource( 50 )
+
+[node name="Hitbox" type="Area" parent="Knight"]
+transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Knight/Hitbox"]
+transform = Transform( 110.467, 0, 0, 0, 401.58, 0, 0, 0, 91.2764, 64.3885, 137.271, -81.4751 )
+shape = SubResource( 49 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0.918, 0 )
+shape = SubResource( 51 )
+
+[node name="MobileControls" parent="." instance=ExtResource( 6 )]
+
+[connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="GUI/Character/Attributes" method="_on_PlusSTR_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/STR/MinusSTR" to="." method="_on_MinusSTR_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/VIT/PlusVIT" to="." method="_on_PlusVIT_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/VIT/MinusVIT" to="." method="_on_MinusVIT_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/VIT/MinusVIT" to="GUI/Character/Attributes" method="_on_MinusVIT_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/INT/PlusINT" to="." method="_on_PlusINT_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/INT/MinusINT" to="." method="_on_MinusINT_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/Acc/PlusACC" to="." method="_on_PlusACC_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/Acc/MinusACC" to="." method="_on_MinusACC_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/AGI/PlusAGI" to="." method="_on_PlusAGI_pressed"]
+[connection signal="pressed" from="GUI/Character/Attributes/AGI/MinusAGI" to="." method="_on_MinusAGI_pressed"]
+
+[editable path="Knight"]

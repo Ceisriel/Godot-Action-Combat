@@ -12,25 +12,32 @@ const minChangeInterval = 3.0
 const maxChangeInterval = 12.0
 const turn = 32
 var vertical_velocity = Vector3()
-var gravity = 30
 var state = "walk"
 var target
 # stats
-var health = 100
-var damage = 2
-var criticalChance = 0.70
-var criticalMultiplier = 2.5
+var health = 400
+var damage = 3
+var criticalChance = 0.85
+var criticalMultiplier = 3.75
 var criticalDefenseChance = 0.60
 var criticalDefenseMultiplier = 2
 # artificial fps timer
 onready var fps = $Timer
 var FPS = 0.1
+# Gravity strength
+var gravity = Vector3(0, -9.8, 0)
+
+# Vertical speed
+var velocity = Vector3()
+
+# Character movement speed
+var speed = 5
 
 
 # movement speed variables
-var walkSpeed = 6.0
-var chaseSpeed = 8.0
-var fleeSpeed = 12.50
+var walkSpeed = 4.0
+var chaseSpeed = 6.0
+var fleeSpeed =6.00
 
 # states list
 enum {
@@ -159,7 +166,19 @@ func getSlideVelocity(speed: float) -> Vector3:
 
 
 
+
 func pc(delta):
+	# Apply gravity
+	velocity += gravity * delta
+
+	# Move the character
+	var movement = velocity * delta
+	move_and_collide(movement)
+
+	# Reset vertical speed if on the ground
+	if is_on_floor():
+		velocity.y = 0
+
 	var players = get_tree().get_nodes_in_group("Player")
 	if players.size() > 0:
 		var player = players[0]
@@ -172,10 +191,3 @@ func pc(delta):
 			self.visible = true
 	else:
 		self.visible = true
-
-	if not is_on_floor():
-		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
-	else:
-		vertical_velocity = -get_floor_normal() * gravity / 2.5
-
-	move_and_slide(vertical_velocity, Vector3.UP)

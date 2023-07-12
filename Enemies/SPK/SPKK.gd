@@ -18,30 +18,46 @@ var switchTimeMax = 1.5
 #movement
 const turn = 32
 var vertical_velocity = Vector3()
-var gravity = 30
+#var gravity = 30
 var state = "walk"
 var target
 # stats
 var health = 100
+var maxhealth = 100
 var damage = 2
 var criticalChance = 0.70
 var criticalMultiplier = 2.5
 var criticalDefenseChance = 0.60
 var criticalDefenseMultiplier = 2
-var impact = 180
+var impact 
+var blockdamage = 3
 # artificial fps timer
 onready var fps = $Timer
 var FPS = 0.05
+#bools
+var isGrounded = false
 var blocking : bool
 var kick : bool
 var stabbing : bool
 var slashing : bool
 var slash_still : bool
 var trust: bool
+var is_blocking : bool
+#live or die
+var dead = false
 # movement speed variables
 var walkSpeed = 6.0
-var chaseSpeed = 8.0
+var chaseSpeed = 5.0
 var fleeSpeed = 12.50
+
+# Gravity strength
+var gravity = Vector3(0, -9.8, 0)
+
+# Vertical speed
+var velocity = Vector3()
+
+# Character movement speed
+var speed = 5
 
 # states list
 enum {
@@ -51,7 +67,6 @@ enum {
 	attack,
 	attack2,
 	attack3,
-	dead,
 	stunned,
 	hit,
 	block,
@@ -78,11 +93,16 @@ func _ready():
 
 	
 func _on_Timer_timeout():
-	chase(fps.wait_time)  
-	pc(fps.wait_time)  
+
+	if not dead:
+		chase(fps.wait_time)  # Pass the timer wait time instead of delta time
+		pc(fps.wait_time)  # Pass the timer wait time instead of delta time
+	if dead: 
+		animation.play("dead")	 
 	
 func _on_SwitchTimer_timeout():
 	var randomValue = randf()
+	var randblock = randf()
 
 	if randomValue < 0.5:  # walks and stabs
 		stabbing = true
@@ -90,35 +110,42 @@ func _on_SwitchTimer_timeout():
 		kick = false
 		slash_still = false
 		trust = false
-		impact = 15
+		impact = chaseSpeed 
 	elif randomValue < 0.4:  # walks and slashes
 		stabbing = false
 		slashing = true
 		kick = false
 		slash_still = false
 		trust = false
-		impact = 15
+		impact = chaseSpeed
 	elif randomValue < 0.6:  # kicks
 		stabbing = false
 		slashing = false
 		kick = true
 		slash_still = false
 		trust = false
-		impact = 180
+		impact = 45 + rand_range(15,30)
 	elif randomValue < 0.8:  # stays still and slashes
 		stabbing = false
 		slashing = true
 		kick = false
 		slash_still = true
 		trust = false
-		impact = 200
+		impact = chaseSpeed
 	else:
 		stabbing = false
 		slashing = false
 		kick = false
 		slash_still = false
 		trust = true
-		impact = 15
+		impact = chaseSpeed 
+		
+	if randblock < 0.5:
+		is_blocking = true
+	else:
+		is_blocking = false	
+		
+		
 
 	switchTimer.wait_time = rand_range(switchTimeMin, switchTimeMax)
 	switchTimer.start()
@@ -131,14 +158,31 @@ func onhit(damage):
 	# Apply critical defense chance
 		if randf() <= criticalDefenseChance:
 			damage = damage / criticalDefenseMultiplier
+			state = stunned
 		# Basic formula for damage
 		health -= damage
 		var text = floatingtext.instance()
 		text.amount = float(damage)
 		add_child(text)
 		if health <= 0:
+			dead = true
+		if health <= -200:
 			self.queue_free()
-
+	if blocking: 
+		if damage <= 0:
+			return
+	# Apply critical defense chance
+		if randf() <= criticalDefenseChance:
+			damage = damage / criticalDefenseMultiplier
+		# Basic formula for damage
+		health -= damage / blockdamage
+		var text = floatingtext.instance()
+		text.amount = float(damage)
+		add_child(text)
+	if health <= 0:
+			dead = true	
+	if health <= -200:
+			self.queue_free()
 
 func attack():
 		var enemies = hitbox.get_overlapping_bodies()
@@ -160,6 +204,7 @@ func knockback():
 
 
 func chase(delta):
+#locate players and define distances and orientation
 	var players = get_tree().get_nodes_in_group("Player")
 	var target = null
 
@@ -172,21 +217,21 @@ func chase(delta):
 			if distance < minDistance:
 				minDistance = distance
 				target = player
-
+#state logic based on range 
 	if target != null:
 		var distanceToPlayer = self.global_transform.origin.distance_to(target.global_transform.origin)
 
-		if distanceToPlayer > 2.6 and distanceToPlayer <= 15:
+		if distanceToPlayer > 0 and distanceToPlayer <= 20:
 			state = chase
 			target = target
-		elif distanceToPlayer > 0 and distanceToPlayer <= 2.5:
-			state = attack
-			target = target		
-		#elif distanceToPlayer > 0 and distanceToPlayer <= 0.85:
-		#	state = block
-			#target = target
+			if distanceToPlayer > 0 and distanceToPlayer <= 2.5 and health >= maxhealth/3.5:
+				state = attack
+				target = target		
+			elif distanceToPlayer > 0 and distanceToPlayer <= 2 and health <= maxhealth/3.5:
+				state = block
+				target = target
 		else:
-			state = walk
+				state = walk
 	else:
 		state = walk
 
@@ -202,19 +247,23 @@ func chase(delta):
 				if 	stabbing: 
 					animation.play("stab", 0.2)
 					move_and_slide(getSlideVelocity(chaseSpeed)) 
+					knockback()
 
 	
 				elif slashing:
 					animation.play("slash walking", 0.25)
 					move_and_slide(getSlideVelocity(chaseSpeed)) 
+					knockback()
 
 
 				elif slash_still:
 					animation.play("slash", 0.25)	
+					knockback()
 
 
 				elif trust: 
 					animation.play("forceful trust", 0.25)
+					knockback()
 
 
 				elif kick: 
@@ -239,12 +288,22 @@ func chase(delta):
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 				move_and_slide(targetDirection * getSlideVelocity(chaseSpeed).length())  # Pass the chase speed
 		block:
-			if target != null:
-				var fleeDirection = (global_transform.origin - target.global_transform.origin).normalized()
-				eyes.look_at(global_transform.origin - fleeDirection, Vector3.UP)
-				rotate_y(deg2rad(eyes.rotation.y * turn))
-				blocking = true
-				animation.play("block")	
+			if is_blocking:
+				if target != null:
+					var fleeDirection = (global_transform.origin - target.global_transform.origin).normalized()
+					eyes.look_at(global_transform.origin - fleeDirection, Vector3.UP)
+					rotate_y(deg2rad(eyes.rotation.y * turn))
+					blocking = true
+					animation.play("block")	
+			else:
+				if target != null:
+					eyes.look_at(target.global_transform.origin, Vector3.UP)
+					rotate_y(deg2rad(eyes.rotation.y * turn))
+					animation.play("stab", 0.2)
+					move_and_slide(getSlideVelocity(chaseSpeed)) 
+					damage += 6
+					knockback()
+						
 
 
 func changeRandomDirection():
@@ -259,6 +318,17 @@ func getSlideVelocity(speed: float) -> Vector3:
 
 
 func pc(delta):
+	# Apply gravity
+	velocity += gravity * delta
+
+	# Move the character
+	var movement = velocity * delta
+	move_and_collide(movement)
+
+	# Reset vertical speed if on the ground
+	if is_on_floor():
+		velocity.y = 0
+
 	var players = get_tree().get_nodes_in_group("Player")
 	if players.size() > 0:
 		var player = players[0]
@@ -272,12 +342,6 @@ func pc(delta):
 	else:
 		self.visible = true
 
-	if not is_on_floor():
-		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
-	else:
-		vertical_velocity = -get_floor_normal() * gravity / 2.5
-
-	move_and_slide(vertical_velocity, Vector3.UP)
 
 
 

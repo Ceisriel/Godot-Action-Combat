@@ -23,12 +23,14 @@ var state = "walk"
 var target
 # stats
 var health = 100
+var maxhealth = 100
 var damage = 2
 var criticalChance = 0.70
 var criticalMultiplier = 2.5
 var criticalDefenseChance = 0.60
 var criticalDefenseMultiplier = 2
-var impact = 180
+var impact 
+var blockdamage = 3
 # artificial fps timer
 onready var fps = $Timer
 var FPS = 0.05
@@ -38,6 +40,7 @@ var stabbing : bool
 var slashing : bool
 var slash_still : bool
 var trust: bool
+var dead = false
 # movement speed variables
 var walkSpeed = 6.0
 var chaseSpeed = 8.0
@@ -51,7 +54,6 @@ enum {
 	attack,
 	attack2,
 	attack3,
-	dead,
 	stunned,
 	hit,
 	block,
@@ -78,47 +80,23 @@ func _ready():
 
 	
 func _on_Timer_timeout():
-	chase(fps.wait_time)  
-	pc(fps.wait_time)  
+	if not dead:
+		chase(fps.wait_time)  # Pass the timer wait time instead of delta time
+		pc(fps.wait_time)  # Pass the timer wait time instead of delta time
+	if dead: 
+		animation.play("dead")	
 	
 func _on_SwitchTimer_timeout():
 	var randomValue = randf()
 
-	if randomValue < 0.5:  # walks and stabs
+	if randomValue < 0.75:  # walks and stabs
 		stabbing = true
-		slashing = false
 		kick = false
-		slash_still = false
-		trust = false
-		impact = 15
-	elif randomValue < 0.4:  # walks and slashes
-		stabbing = false
-		slashing = true
-		kick = false
-		slash_still = false
-		trust = false
-		impact = 15
-	elif randomValue < 0.6:  # kicks
-		stabbing = false
-		slashing = false
-		kick = true
-		slash_still = false
-		trust = false
-		impact = 180
-	elif randomValue < 0.8:  # stays still and slashes
-		stabbing = false
-		slashing = true
-		kick = false
-		slash_still = true
-		trust = false
-		impact = 200
+		impact = chaseSpeed + rand_range(1.5, 3.0)
 	else:
 		stabbing = false
-		slashing = false
-		kick = false
-		slash_still = false
-		trust = true
-		impact = 15
+		kick = true
+		impact = 90 + randf()
 
 	switchTimer.wait_time = rand_range(switchTimeMin, switchTimeMax)
 	switchTimer.start()
@@ -137,6 +115,23 @@ func onhit(damage):
 		text.amount = float(damage)
 		add_child(text)
 		if health <= 0:
+			dead = true
+		if health <= -200:
+			self.queue_free()
+	if blocking: 
+		if damage <= 0:
+			return
+	# Apply critical defense chance
+		if randf() <= criticalDefenseChance:
+			damage = damage / criticalDefenseMultiplier
+		# Basic formula for damage
+		health -= damage / blockdamage
+		var text = floatingtext.instance()
+		text.amount = float(damage)
+		add_child(text)
+	if health <= 0:
+			dead = true	
+	if health <= -200:
 			self.queue_free()
 
 
@@ -147,8 +142,10 @@ func attack():
 				if randf() <= criticalChance:
 					var criticalDamage = damage * criticalMultiplier
 					enemy.onhitP(criticalDamage)
+					knockback()
 				else:
 					enemy.onhitP(damage)
+					knockback()
 
 
 func knockback(): 
@@ -182,9 +179,9 @@ func chase(delta):
 		elif distanceToPlayer > 0 and distanceToPlayer <= 2.5:
 			state = attack
 			target = target		
-		#elif distanceToPlayer > 0 and distanceToPlayer <= 0.85:
-		#	state = block
-			#target = target
+		elif distanceToPlayer > 0 and distanceToPlayer <= 0.85 and health <= maxhealth/2:
+			state = block
+			target = target
 		else:
 			state = walk
 	else:
@@ -202,19 +199,7 @@ func chase(delta):
 				if 	stabbing: 
 					animation.play("stab", 0.2)
 					move_and_slide(getSlideVelocity(chaseSpeed)) 
-
-	
-				elif slashing:
-					animation.play("slash walking", 0.25)
-					move_and_slide(getSlideVelocity(chaseSpeed)) 
-
-
-				elif slash_still:
-					animation.play("slash", 0.25)	
-
-
-				elif trust: 
-					animation.play("forceful trust", 0.25)
+					#knockback()
 
 
 				elif kick: 
@@ -245,6 +230,8 @@ func chase(delta):
 				rotate_y(deg2rad(eyes.rotation.y * turn))
 				blocking = true
 				animation.play("block")	
+		dead:
+			animation.play("dead")		
 
 
 func changeRandomDirection():

@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://env/blocks/cube.glb" type="PackedScene" id=1]
+[ext_resource path="res://env/blocks/cube.gd" type="Script" id=2]
+
+[sub_resource type="ConcavePolygonShape" id=1]
+data = PoolVector3Array( -1.0036, -1, 1.0019, -1, 1, -1, -1, 1, 1, -1.0036, -1, 1.0019, -1.0003, -1, -0.9981, -1, 1, -1, -1.0003, -1, -0.9981, 0.9997, 1, -0.9981, -1, 1, -1, -1.0003, -1, -0.9981, 0.9997, -1, -0.9981, 0.9997, 1, -0.9981, 0.9997, -1, -0.9981, 1.0035, 1, 1, 0.9997, 1, -0.9981, 0.9997, -1, -0.9981, 0.9997, -1, 1.0019, 1.0035, 1, 1, 0.9997, -1, 1.0019, -1, 1, 1, 1.0035, 1, 1, 0.9997, -1, 1.0019, -1.0036, -1, 1.0019, -1, 1, 1, -1.0003, -1, -0.9981, 0.9997, -1, 1.0019, 0.9997, -1, -0.9981, -1.0003, -1, -0.9981, -1.0036, -1, 1.0019, 0.9997, -1, 1.0019, 0.9997, 1, -0.9981, -1, 1, 1, -1, 1, -1, 0.9997, 1, -0.9981, 1.0035, 1, 1, -1, 1, 1 )
+
+[node name="cube" instance=ExtResource( 1 )]
+script = ExtResource( 2 )
+
+[node name="cube" parent="." index="0"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
+
+[node name="StaticBody" type="StaticBody" parent="cube" index="0"]
+
+[node name="CollisionShape" type="CollisionShape" parent="cube/StaticBody" index="0"]
+shape = SubResource( 1 )

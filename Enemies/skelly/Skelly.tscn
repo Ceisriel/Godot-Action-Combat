@@ -24,10 +24,6 @@ transform = Transform( 0.00878614, 0, -1.71137e-08, 0, 0.00568839, 0, -1.77895e-
 transform = Transform( 50.5118, 0, 0.000249098, 0, 181.905, 0, -2.24991e-05, 0, 169.623, 64.3881, 197.324, -154.591 )
 shape = SubResource( 10 )
 
-[node name="RayCast" type="RayCast" parent="."]
-transform = Transform( -1, -8.7416e-08, 1.09091e-09, 0, 0.0124786, 0.999922, -8.74228e-08, 0.999922, -0.0124786, 0, 0.516182, 0 )
-cast_to = Vector3( 0, -20, 0 )
-
 [node name="Eyes" type="Spatial" parent="."]
 transform = Transform( -0.998512, 0, -0.0545318, 0, 1, 0, 0.0545318, 0, -0.998512, 0, 0, 0 )
 

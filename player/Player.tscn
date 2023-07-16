@@ -39,8 +39,7 @@ tracks/0/keys = {
 [sub_resource type="BoxShape" id=49]
 
 [sub_resource type="CapsuleShape" id=51]
-radius = 0.170336
-height = 1.48893
+radius = 0.434429
 
 [node name="Player" type="KinematicBody" groups=["Entity", "Player", "Predator", "Save", "prey"]]
 collision_mask = 2
@@ -56,9 +55,9 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.14596, -0.53851 )
 [node name="Camera" type="ClippedCamera" parent="Camroot/Camera_holder"]
 transform = Transform( -1, 9.05942e-14, -1.50996e-07, -4.07327e-08, 0.962927, 0.269761, 1.45398e-07, 0.269761, -0.962927, -4.03244e-07, 2.74813, -3.49268 )
 current = true
-far = 987.1
+fov = 75.0
+far = 8192.0
 process_mode = 1
-collision_mask = 2
 
 [node name="GUI" type="CanvasLayer" parent="."]
 follow_viewport_enable = true
@@ -174,7 +173,7 @@ handle_input_locally = false
 render_target_update_mode = 3
 
 [node name="Camera" type="Camera" parent="GUI/Minimap/ViewportContainer/Viewport"]
-transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 149.569, 0 )
+transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 9661.9, 0 )
 projection = 1
 fov = 83.6
 size = 200.0
@@ -751,7 +750,7 @@ transform = Transform( 110.467, 0, 0, 0, 401.58, 0, 0, 0, 91.2764, 64.3885, 137.
 shape = SubResource( 49 )
 
 [node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( -1, 0, 0, 0, 0, -1, 0, -1, 0, 0, 0.918, 0 )
+transform = Transform( 1, 0, 0, 0, -0.00190238, 0.999998, 0, -0.999998, -0.00190238, 0, 0.836297, 0 )
 shape = SubResource( 51 )
 
 [node name="MobileControls" parent="." instance=ExtResource( 6 )]

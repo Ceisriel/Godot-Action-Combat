@@ -10,10 +10,6 @@ onready var collisionShape = $CollisionShape
 func onhit(damage):
 	if damage <= 0:
 		return
-
-	# Calculate damage percentage
-	var damagePercentage = float(damage) / float(health)
-
 	# Basic formula for damage
 	health -= damage
 
@@ -22,7 +18,7 @@ func onhit(damage):
 	add_child(text)
 
 	# Update the scale based on the remaining health percentage
-	var scaleRatio = float(health) / float(maxhealth)
+	var scaleRatio = 1
 	rock.scale *= scaleRatio
 	collisionShape.scale *= scaleRatio
 

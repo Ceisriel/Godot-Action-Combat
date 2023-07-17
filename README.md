@@ -6,10 +6,11 @@ it has:
 
 -Swimming
 
+-Climbing
 
 -Dodging
 
--Parrying/blocking/guarding
+-Parrying/Blocking/Guarding
 
 -Walk/Run/Sprint
 
@@ -17,7 +18,7 @@ it has:
 
 -Minimap
 
--free third person camera
+-Free third person camera
 
 -Optional strafing
 

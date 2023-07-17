@@ -368,7 +368,7 @@ func _physics_process(delta: float):
 	elif is_walking and is_on_floor() and not is_swimming:
 		animation.play("walk", 0.25)
 		weapon.visible = false
-	elif is_swimming and not is_walking and Input.is_action_pressed("backward") or Input.is_action_pressed("forward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
+	elif is_swimming and Input.is_action_pressed("backward") or Input.is_action_pressed("forward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
 		animation.play("swim", 0.35)					
 	elif is_swimming: 
 		animation.play("float", 0.35)	

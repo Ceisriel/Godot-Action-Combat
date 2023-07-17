@@ -4,13 +4,21 @@ Trying to recreate The combat system from Tera online but with more indepth mech
 it has: 
 
 
--swimming
+-Swimming
 
+
+-Dodging
+
+-Parrying/blocking/guarding
+
+-Walk/Run/Sprint
+
+-Mobile controls
+
+-Minimap
 
 -free third person camera
 
+-Optional strafing
 
--optional strafing
-
-
--melee combat with a crossair instead of lock on or tab target
+-Melee combat with a crossair instead of lock on or tab target

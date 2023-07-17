@@ -38,6 +38,8 @@ var dash_timer3: float = 0.0
 var dash_count4: int = 0
 var dash_timer4: float = 0.0
 # Condition States
+var is_falling = bool()
+var is_swimming =bool()
 var is_rolling = bool()
 var is_walking = bool()
 var is_running = bool()
@@ -183,7 +185,10 @@ func dodge(delta):
 
 
 func _physics_process(delta: float):
-	dodge(delta / 2)
+	if !is_swimming:
+		dodge(delta / 2)
+	else:
+		pass		
 # Update attribute and stats 
 	dash_power = basedash * agility 
 	sprint_speed = basesprint * agility
@@ -213,9 +218,7 @@ func _physics_process(delta: float):
 
 	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") :
 		enabled_climbing = false
-		if is_on_wall():
-			vertical_velocity = Vector3.UP * climb_speed
-			is_climbing = true
+
 		if  enabled_climbing:
 			vertical_velocity = Vector3.UP * climb_speed
 			is_climbing = true
@@ -237,15 +240,18 @@ func _physics_process(delta: float):
 	acceleration = 15
 
 # Gravity and stop sliding on floors
-	if not is_on_floor():
+	if not is_on_floor() and not is_swimming:
 		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
+		is_falling = true
 	else:
 		vertical_velocity = -get_floor_normal() * gravity / 2.5
+		is_falling = false
 
 # Jump
 	if Input.is_action_just_pressed("jump") and is_on_floor():
 		vertical_velocity = Vector3.UP * jump_force
-
+	if Input.is_action_pressed("jump") and is_swimming:
+		vertical_velocity = Vector3.UP * 15 * delta
 # Teleportation
 	if Input.is_action_just_pressed("blink") and energy >= 5:
 		energy -= 5
@@ -267,19 +273,21 @@ func _physics_process(delta: float):
 					Input.get_action_strength("forward") - Input.get_action_strength("backward"))
 		direction = direction.rotated(Vector3.UP, h_rot).normalized()
 		is_walking = true
+		
+		
 
 		# Movement States
-		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking:
+		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking and not is_swimming:
 			movement_speed = run_speed
 			is_running = true
 			enabled_climbing = false
 		#Mobile
-		elif runToggle and not is_climbing and not blocking:
+		elif runToggle and not is_climbing and not blocking and not is_swimming:
 			movement_speed = run_speed
 			is_running = true
 			enabled_climbing = false	
 		#Computer	
-		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking:
+		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming:
 			movement_speed = sprint_speed
 			is_sprinting = true
 			enabled_climbing = false	
@@ -304,15 +312,6 @@ func _physics_process(delta: float):
 
 
 
-
-
-
-
-		
-		
-		
-		
-		
 	# Strafe and normal movement
 	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
@@ -321,9 +320,9 @@ func _physics_process(delta: float):
 
 
 	# Attacking while moving
-	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")):
+	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming:
 		horizontal_velocity = direction * 12
-	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge:
+	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming:
 		horizontal_velocity = direction * 0.85
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
@@ -334,44 +333,46 @@ func _physics_process(delta: float):
 	else: 
 		blocking = false	
 		
+	if Input.is_action_pressed("crouch") and is_swimming:
+		vertical_velocity += Vector3.DOWN * 15 * delta
 		
+		 
 	movement.z = horizontal_velocity.z + vertical_velocity.z
 	movement.x = horizontal_velocity.x + vertical_velocity.x
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
 
 	# Animation order
-	if dodge:
+	if dodge and not is_swimming:
 		animation.play("slide")
 		weapon.visible = false
-
-	if Input.is_action_pressed("guard") and not mousemode and not is_climbing and energy >= 0.125:
+	if Input.is_action_pressed("guard") and not is_swimming and not mousemode and not is_climbing and energy >= 0.125:
 		animation.play("guard", 0.1)
 		weapon.visible = true
-
-	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge:
+	elif is_falling and not is_climbing:
+		animation.play("Rest Pose",0.15)	
+	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge and not is_swimming:
 		animation.play("base attack", 0.1, 0.5 + agility * 0.50)
 		weapon.visible = true
-
-	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim"):
+	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and not is_swimming:
 		animation.play_backwards("walk")	
-	elif is_climbing and is_on_wall():
+	elif is_climbing and is_on_wall() and not is_swimming:
 		animation.play("climb")	
 		weapon.visible = false
-
-	elif is_sprinting and not dodge:
+	elif is_sprinting and not dodge and not is_swimming:
 		animation.play("sprint", 0, agility * 0.95)
 		weapon.visible = false
-
-	elif is_running:
+	elif is_running and not is_swimming:
 		animation.play("run", 0, agility * 0.89)
 		weapon.visible = false
-
-
-	elif is_walking and is_on_floor():
+	elif is_walking and is_on_floor() and not is_swimming:
 		animation.play("walk", 0.25)
 		weapon.visible = false
-
+	elif is_swimming and not is_walking and Input.is_action_pressed("backward") or Input.is_action_pressed("forward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
+		animation.play("swim", 0.35)					
+	elif is_swimming: 
+		animation.play("float", 0.35)	
+		weapon.visible = false
 	else:
 		animation.play("idle", 0.2)
 		weapon.visible = false
@@ -493,3 +494,15 @@ func _on_MinusAGI_pressed():
 	if agility > 0.11:
 		attribute += 1
 		agility -= 0.025
+
+
+func _on_WaterDetector_area_entered(area):
+	if area.is_in_group("Water"):
+		is_swimming = true
+		print("Player touched water!")
+
+
+func _on_WaterDetector_area_exited(area):
+	if area.is_in_group("Water"):
+		is_swimming = false
+		print("Player exited water!")

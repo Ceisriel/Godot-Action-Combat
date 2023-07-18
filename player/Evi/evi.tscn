@@ -1,4 +1,4 @@
-[gd_scene load_steps=46 format=2]
+[gd_scene load_steps=47 format=2]
 
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=1]
 [ext_resource path="res://player/Evi/climb.anim" type="Animation" id=2]
@@ -37,9 +37,6 @@
 [ext_resource path="res://player/Evi/body.material" type="Material" id=35]
 [ext_resource path="res://player/Evi/eyes.material" type="Material" id=36]
 [ext_resource path="res://player/Evi/hair.material" type="Material" id=37]
-
-[sub_resource type="CapsuleShape" id=51]
-radius = 0.434429
 
 [sub_resource type="BoxShape" id=49]
 
@@ -308,6 +305,12 @@ surfaces/0 = {
 [sub_resource type="BoxShape" id=52]
 extents = Vector3( 0.542627, 0.86855, 0.36014 )
 
+[sub_resource type="CapsuleShape" id=53]
+radius = 0.434429
+height = 0.816127
+
+[sub_resource type="BoxShape" id=54]
+
 [node name="Player" type="KinematicBody" groups=["Entity", "Player", "Predator", "Save", "prey"]]
 collision_mask = 2
 script = ExtResource( 34 )
@@ -326,6 +329,12 @@ fov = 75.0
 far = 8192.0
 process_mode = 1
 collision_mask = 0
+
+[node name="Hook" type="RayCast" parent="Camroot/Camera_holder/Camera"]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.845428, 0 )
+visible = false
+enabled = true
+cast_to = Vector3( 0, 0, -400 )
 
 [node name="GUI" type="CanvasLayer" parent="."]
 follow_viewport_enable = true
@@ -1005,17 +1014,13 @@ margin_bottom = 262.0
 icon = ExtResource( 12 )
 script = ExtResource( 18 )
 
-[node name="CollisionShape" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, -0.00190238, 0.999998, 0, -0.999998, -0.00190238, 0, 0.836297, 0 )
-shape = SubResource( 51 )
-
 [node name="MobileControls" parent="." instance=ExtResource( 6 )]
 
 [node name="Hitbox" type="Area" parent="."]
 transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
 
 [node name="CollisionShape" type="CollisionShape" parent="Hitbox"]
-transform = Transform( 110.467, 0, 0, 0, 401.58, 0, 0, 0, 91.2764, 64.3885, 137.271, -81.4751 )
+transform = Transform( 53.6645, 0, 0, 0, 334.628, 0, 0, 0, 59.8815, 64.5046, 114.12, -45.1891 )
 shape = SubResource( 49 )
 
 [node name="Evi" type="Spatial" parent="."]
@@ -1389,11 +1394,19 @@ anims/swim = ExtResource( 31 )
 anims/walk = ExtResource( 28 )
 
 [node name="WaterDetector" type="Area" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.80046, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.16541, 0 )
 
 [node name="CollisionShape" type="CollisionShape" parent="WaterDetector"]
-transform = Transform( 0.476995, 0, 0, 0, 0.464998, 0, 0, 0, 0.460239, 0, 0.00628102, 0 )
+transform = Transform( 0.476995, 0, 0, 0, 0.456167, 0, 0, 0, 0.460239, 0, -0.382939, 0 )
 shape = SubResource( 52 )
+
+[node name="CollisonTorso" type="CollisionShape" parent="."]
+transform = Transform( 1, 0, 0, 0, -4.37178e-08, 0.519284, 0, -1.00015, -2.26986e-08, 0, 1.08783, 0.000118047 )
+shape = SubResource( 53 )
+
+[node name="CollisonLegs" type="CollisionShape" parent="."]
+transform = Transform( 0.160731, 0, 0, 0, -4.36444e-09, 0.335269, 0, -0.0998468, -1.46551e-08, 0, 0.332464, 0.00011808 )
+shape = SubResource( 54 )
 
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="GUI/Character/Attributes" method="_on_PlusSTR_pressed"]

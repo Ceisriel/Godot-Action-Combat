@@ -14,6 +14,10 @@ onready var camera = $Camroot/Camera_holder/Camera
 onready var hitbox = $Hitbox
 onready var animation = $Evi/AnimationPlayer
 onready var weapon = $Evi/Armature/Skeleton/sword
+onready var hook = $Camroot/Camera_holder/Camera/Hook
+onready var collision_torso = $CollisonTorso
+export var grapple_point : NodePath 
+var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
 export onready var player_mesh = get_node(PlayerCharacterMesh)
@@ -29,6 +33,9 @@ const basedash = 25
 export var dash_power = 25
 export var dodge_power = 12
 export (float) var mouse_sense = 0.1
+#climbing 
+const base_climb_speed = 4
+var climb_speed = 4
 # Dodge
 export var double_press_time: float = 0.4
 var dash_count2: int = 0
@@ -38,6 +45,7 @@ var dash_timer3: float = 0.0
 var dash_count4: int = 0
 var dash_timer4: float = 0.0
 # Condition States
+var enabled_climbing = true
 var is_falling = bool()
 var is_swimming =bool()
 var is_rolling = bool()
@@ -93,6 +101,9 @@ var regenerationTimer = 0
 var floatingtext = preload("res://UI/floatingtext.tscn")
 
 
+
+
+
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 
@@ -109,7 +120,7 @@ func attack():
 		if energy < maxenergy: 
 			energy += 0.5	
 			
-#getting damaged
+#Getting damaged
 func onhitP(damage):
 	if not blocking: 
 	# Apply critical defense chance
@@ -122,11 +133,7 @@ func onhitP(damage):
 			add_child(text)
 	else:
 		staggered = false	
-
-func attackmove():
-	horizontal_velocity = direction.normalized() * 1.5
-	
-
+#Getting knocked back
 func onhitKnockback(impact):
 	# Calculate the angle between the player's forward direction and the camera's forward direction
 	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
@@ -141,16 +148,13 @@ func onhitKnockback(impact):
 		pass
 		#horizontal_velocity = -direction.normalized() * impact
 
-
-
-
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
 		rotate_y(deg2rad(-event.relative.x * mouse_sense))
 		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
-		
+#Dodging by sliding on the floor, also modifies the collision shapes to slide below bostacles
 func dodge(delta):		
 	#Dodge back and front
 	if dash_count2 > 0:
@@ -165,8 +169,11 @@ func dodge(delta):
 		energy -= 0.125 * delta
 		animation.play("slide",0.1)
 		dodge = true 
+		collision_torso.disabled = true
+		enabled_climbing = false
 	else:
-		dodge = false	
+		dodge = false
+		collision_torso.disabled = false
 #Dodge right	
 	if dash_count4 > 0:
 		dash_timer4 += delta
@@ -179,17 +186,19 @@ func dodge(delta):
 		horizontal_velocity = direction * dash_power 
 		energy -= 0.125 * delta
 		animation.play("slide",0.1)
-		dodge = true 
+		collision_torso.disabled = true
+		enabled_climbing = false
 	else:
-		dodge = false		
+		dodge = false
+		collision_torso.disabled = false
+		enabled_climbing = true
 
-
-func _physics_process(delta: float):
-	if !is_swimming:
-		dodge(delta / 2)
-	else:
-		pass		
+		
+func _physics_process(delta: float):	
+	
+	dodge(delta /  2)
 # Update attribute and stats 
+	climb_speed = base_climb_speed * strength
 	dash_power = basedash * agility 
 	sprint_speed = basesprint * agility
 	criticalChance = criticalChancebase * accuracy * 10
@@ -211,12 +220,10 @@ func _physics_process(delta: float):
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
 	var ray_start = translation + Vector3(0, 0.15, 0)  # Adjust the starting position of the ray based on your character's position
 	var ray_end = ray_start + ray_direction * ray_length
-	var climb_speed = 2
 	var is_climbing = false
-	var enabled_climbing = true
 	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
 
-	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") :
+	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") or dodge :
 		enabled_climbing = false
 
 		if  enabled_climbing:
@@ -225,11 +232,16 @@ func _physics_process(delta: float):
 		else:
 			is_climbing = false
 
-	if ray_cast:
-		if Input.is_action_pressed("forward") and enabled_climbing:
-			vertical_velocity = Vector3.UP * climb_speed
-			is_climbing = true
-		else:
+	if is_on_wall() or is_on_floor() or is_on_ceiling() or ray_cast:
+		if  Input.is_action_pressed("jump") and enabled_climbing:
+			if strength >= 1:
+				vertical_velocity = Vector3.UP * climb_speed 
+				horizontal_velocity = direction * climb_speed
+				is_climbing = true
+				is_swimming = false
+			else: 
+				is_climbing = false	
+	else:
 			is_climbing = false
 
 # State control for jumping/falling/landing
@@ -243,6 +255,7 @@ func _physics_process(delta: float):
 	if not is_on_floor() and not is_swimming:
 		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
 		is_falling = true
+		is_swimming = false
 	else:
 		vertical_velocity = -get_floor_normal() * gravity / 2.5
 		is_falling = false
@@ -335,6 +348,12 @@ func _physics_process(delta: float):
 		
 	if Input.is_action_pressed("crouch") and is_swimming:
 		vertical_velocity += Vector3.DOWN * 15 * delta
+	else: 
+		pass	
+	if 	Input.is_action_pressed("crouch") and not is_swimming:
+		collision_torso.disabled = true
+	else: 
+		collision_torso.disabled = false	
 		
 		 
 	movement.z = horizontal_velocity.z + vertical_velocity.z
@@ -346,6 +365,7 @@ func _physics_process(delta: float):
 	if dodge and not is_swimming:
 		animation.play("slide")
 		weapon.visible = false
+
 	if Input.is_action_pressed("guard") and not is_swimming and not mousemode and not is_climbing and energy >= 0.125:
 		animation.play("guard", 0.1)
 		weapon.visible = true
@@ -355,29 +375,34 @@ func _physics_process(delta: float):
 		animation.play("base attack", 0.1, 0.5 + agility * 0.50)
 		weapon.visible = true
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and not is_swimming:
-		animation.play_backwards("walk")	
+		animation.play_backwards("walk")
+		
 	elif is_climbing and is_on_wall() and not is_swimming:
 		animation.play("climb")	
 		weapon.visible = false
+	
 	elif is_sprinting and not dodge and not is_swimming:
 		animation.play("sprint", 0, agility * 0.95)
 		weapon.visible = false
+	
 	elif is_running and not is_swimming:
 		animation.play("run", 0, agility * 0.89)
 		weapon.visible = false
+
 	elif is_walking and is_on_floor() and not is_swimming:
 		animation.play("walk", 0.25)
 		weapon.visible = false
+
 	elif is_swimming and Input.is_action_pressed("backward") or Input.is_action_pressed("forward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
-		animation.play("swim", 0.35)					
+		animation.play("swim", 0.35)
 	elif is_swimming: 
 		animation.play("float", 0.35)	
 		weapon.visible = false
+
 	else:
 		animation.play("idle", 0.2)
 		weapon.visible = false
 
-		
 		
 	# Energy rengeneration	
 	if regenerateEnergy and energy < maxenergy:
@@ -392,7 +417,7 @@ func _physics_process(delta: float):
 	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
 	# Update health bar
 	$GUI/HealthBar.value = int((health / maxhealth) * 100)
-	# Update the UI or display a message to indicate the attribute increase
+
 	# Update the UI or display a message to indicate the attribute increase
 	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
 	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
@@ -499,10 +524,8 @@ func _on_MinusAGI_pressed():
 func _on_WaterDetector_area_entered(area):
 	if area.is_in_group("Water"):
 		is_swimming = true
-		print("Player touched water!")
-
 
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false
-		print("Player exited water!")
+

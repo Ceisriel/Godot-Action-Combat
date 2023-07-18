@@ -128,9 +128,9 @@ func onhitP(damage):
 			damage = damage / criticalDefenseMultiplier
 			health -= (damage - defense)
 			staggered = true
-			var text = floatingtext.instance()
-			text.amount = float(damage)
-			add_child(text)
+			#var text = floatingtext.instance()
+			 #text.amount = float(damage)
+			#add_child(text)
 	else:
 		staggered = false	
 #Getting knocked back
@@ -336,13 +336,21 @@ func _physics_process(delta: float):
 	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming:
 		horizontal_velocity = direction * 12
 	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming:
-		horizontal_velocity = direction * 0.85
+		horizontal_velocity = direction * 0.70
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+	# Attacking while moving
+	if Input.is_action_pressed("slash") && (Input.is_action_pressed("slide")) and not is_swimming:
+		horizontal_velocity = direction * 12
+	elif Input.is_action_pressed("slash") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming:
+		horizontal_velocity = direction * 0.50
+	else:
+		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+
+
 	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode and energy >= 0.125:
 		energy -= 0.125
 		blocking = true
-
 	else: 
 		blocking = false	
 		
@@ -370,7 +378,13 @@ func _physics_process(delta: float):
 		animation.play("guard", 0.1)
 		weapon.visible = true
 	elif is_falling and not is_climbing:
-		animation.play("Rest Pose",0.15)	
+		animation.play("Rest Pose",0.15)
+	elif Input.is_action_pressed("slash") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge and not is_swimming:
+		animation.play("slash", 0.25, 0.5 + agility * 0.50)
+		weapon.visible = true	
+	elif Input.is_action_pressed("reverse_slash") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge and not is_swimming:
+		animation.play("reverse slash", 0.25, 0.5 + agility * 0.50)
+		weapon.visible = true			
 	elif Input.is_action_pressed("attack") and dash_count2 == 0 and not mousemode and not is_climbing and not dodge and not is_swimming:
 		animation.play("base attack", 0.1, 0.5 + agility * 0.50)
 		weapon.visible = true
@@ -435,6 +449,7 @@ func _physics_process(delta: float):
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			mousemode = false
 
+#saving data
 func get_save_stats():
 	return {
 		'filename': get_filename(),
@@ -470,7 +485,7 @@ func load_save_stats(stats):
 	accuracy = stats.stats.accuracy
 	agility = stats.stats.agility
 
-
+#increasing / decreasing stats and attributes based on buttons
 func _on_PlusVIT_pressed():
 	if attribute > 0:
 		attribute -= 1

@@ -11,7 +11,7 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-onready var hitbox = $Hitbox
+onready var hitbox = $Evi/Hitbox
 onready var animation = $Evi/AnimationPlayer
 onready var weapon = $Evi/Armature/Skeleton/sword
 onready var hook = $Camroot/Camera_holder/Camera/Hook
@@ -24,6 +24,7 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 # movement variables
 export var gravity = 9.8
 export var jump_force = 7
+export var crouch_speed = 2.75
 export var walk_speed = 4
 export var run_speed = 7.7
 const basesprint = 15
@@ -294,6 +295,12 @@ func _physics_process(delta: float):
 			movement_speed = run_speed
 			is_running = true
 			enabled_climbing = false
+			is_crouching = false
+		elif Input.is_action_pressed("crouch") and is_walking and not is_climbing and not blocking and not is_swimming:
+			movement_speed = crouch_speed
+			is_running = false
+			enabled_climbing = false
+			is_crouching = true
 		#Mobile
 		elif runToggle and not is_climbing and not blocking and not is_swimming:
 			movement_speed = run_speed
@@ -303,7 +310,8 @@ func _physics_process(delta: float):
 		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming:
 			movement_speed = sprint_speed
 			is_sprinting = true
-			enabled_climbing = false	
+			enabled_climbing = false
+			is_crouching = false	
 		#Mobile	
 		elif sprintToggle  and not is_climbing and not blocking:
 			movement_speed = sprint_speed
@@ -316,10 +324,12 @@ func _physics_process(delta: float):
 			is_sprinting = false
 			is_crouching = false
 			enabled_climbing = true
+			is_crouching = false
 	else:
 		is_walking = false
 		is_running = false
 		is_sprinting = false
+		is_crouching = false
 		is_crouching = false
 #mobile controls 		
 
@@ -356,8 +366,9 @@ func _physics_process(delta: float):
 		
 	if Input.is_action_pressed("crouch") and is_swimming:
 		vertical_velocity += Vector3.DOWN * 15 * delta
+		collision_torso.disabled = true
 	else: 
-		pass	
+		collision_torso.disabled = false
 	if 	Input.is_action_pressed("crouch") and not is_swimming:
 		collision_torso.disabled = true
 	else: 
@@ -373,7 +384,6 @@ func _physics_process(delta: float):
 	if dodge and not is_swimming:
 		animation.play("slide")
 		weapon.visible = false
-
 	if Input.is_action_pressed("guard") and not is_swimming and not mousemode and not is_climbing and energy >= 0.125:
 		animation.play("guard", 0.1)
 		weapon.visible = true
@@ -390,8 +400,7 @@ func _physics_process(delta: float):
 		weapon.visible = true
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and not is_swimming:
 		animation.play_backwards("walk")
-		
-	elif is_climbing and is_on_wall() and not is_swimming:
+	elif is_climbing  and not is_swimming:
 		animation.play("climb")	
 		weapon.visible = false
 	

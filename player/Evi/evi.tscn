@@ -1,4 +1,4 @@
-[gd_scene load_steps=47 format=2]
+[gd_scene load_steps=48 format=2]
 
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=1]
 [ext_resource path="res://player/Evi/climb.anim" type="Animation" id=2]
@@ -37,8 +37,7 @@
 [ext_resource path="res://player/Evi/body.material" type="Material" id=35]
 [ext_resource path="res://player/Evi/eyes.material" type="Material" id=36]
 [ext_resource path="res://player/Evi/hair.material" type="Material" id=37]
-
-[sub_resource type="BoxShape" id=49]
+[ext_resource path="res://addons/Compass/Source/Compass.tscn" type="PackedScene" id=38]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "Evi_mesh1001"
@@ -302,12 +301,13 @@ surfaces/0 = {
 "vertex_count": 114
 }
 
-[sub_resource type="BoxShape" id=52]
-extents = Vector3( 0.542627, 0.86855, 0.36014 )
+[sub_resource type="BoxShape" id=49]
 
-[sub_resource type="CapsuleShape" id=53]
-radius = 0.434429
-height = 0.816127
+[sub_resource type="BoxShape" id=52]
+extents = Vector3( 0.542627, 0.46766, 0.36014 )
+
+[sub_resource type="BoxShape" id=55]
+extents = Vector3( 1, 1, 0.798198 )
 
 [sub_resource type="BoxShape" id=54]
 
@@ -337,6 +337,7 @@ enabled = true
 cast_to = Vector3( 0, 0, -400 )
 
 [node name="GUI" type="CanvasLayer" parent="."]
+visible = false
 follow_viewport_enable = true
 
 [node name="H" type="Label" parent="GUI"]
@@ -430,11 +431,11 @@ nine_patch_stretch = true
 [node name="Minimap" type="Control" parent="GUI"]
 anchor_left = 1.0
 anchor_right = 1.0
-margin_left = -16.0001
-margin_top = -8.0
-margin_right = -16.0001
-margin_bottom = -8.0
-rect_scale = Vector2( 0.406377, 0.401776 )
+margin_left = -16.9999
+margin_top = -5.0
+margin_right = -16.9999
+margin_bottom = -5.0
+rect_scale = Vector2( 0.57, 0.57 )
 
 [node name="ViewportContainer" type="ViewportContainer" parent="GUI/Minimap"]
 margin_left = -287.0
@@ -447,7 +448,7 @@ rect_scale = Vector2( 3.45219, 2.84424 )
 size = Vector2( 90, 90 )
 size_override_stretch = true
 handle_input_locally = false
-render_target_update_mode = 3
+render_target_update_mode = 0
 
 [node name="Camera" type="Camera" parent="GUI/Minimap/ViewportContainer/Viewport"]
 transform = Transform( -1, -8.74228e-08, -3.82137e-15, 0, -4.37114e-08, 1, -8.74228e-08, 1, 4.37114e-08, 0, 9661.9, 0 )
@@ -467,6 +468,14 @@ margin_bottom = 46.0
 rect_scale = Vector2( 11.8514, 9.84932 )
 texture = ExtResource( 11 )
 expand = true
+
+[node name="Compass" parent="GUI/Minimap" instance=ExtResource( 38 )]
+margin_left = -63.1582
+margin_top = 301.754
+margin_right = -23.1582
+margin_bottom = 341.754
+rect_min_size = Vector2( 40, 40 )
+rect_scale = Vector2( 2.49697, 2.3802 )
 
 [node name="Character" type="Control" parent="GUI"]
 visible = false
@@ -1016,13 +1025,6 @@ script = ExtResource( 18 )
 
 [node name="MobileControls" parent="." instance=ExtResource( 6 )]
 
-[node name="Hitbox" type="Area" parent="."]
-transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Hitbox"]
-transform = Transform( 53.6645, 0, 0, 0, 334.628, 0, 0, 0, 59.8815, 64.5046, 114.12, -45.1891 )
-shape = SubResource( 49 )
-
 [node name="Evi" type="Spatial" parent="."]
 
 [node name="Armature" type="Spatial" parent="Evi"]
@@ -1393,19 +1395,26 @@ anims/sprint = ExtResource( 27 )
 anims/swim = ExtResource( 31 )
 anims/walk = ExtResource( 28 )
 
+[node name="Hitbox" type="Area" parent="Evi"]
+transform = Transform( 0.01, 0, 0, 0, 0.0027218, 0, 0, 0, 0.012355, -0.818588, 0.67489, 1.39437 )
+
+[node name="CollisionShape" type="CollisionShape" parent="Evi/Hitbox"]
+transform = Transform( 53.6645, 0, 0, 0, 334.628, 0, 0, 0, 59.8815, 64.5046, 114.12, -45.1891 )
+shape = SubResource( 49 )
+
 [node name="WaterDetector" type="Area" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.16541, 0 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.19921, 0 )
 
 [node name="CollisionShape" type="CollisionShape" parent="WaterDetector"]
-transform = Transform( 0.476995, 0, 0, 0, 0.456167, 0, 0, 0, 0.460239, 0, -0.382939, 0 )
+transform = Transform( 0.476995, 0, 0, 0, 0.364185, 0, 0, 0, 0.460239, 0, -0.0491846, 0 )
 shape = SubResource( 52 )
 
 [node name="CollisonTorso" type="CollisionShape" parent="."]
-transform = Transform( 1, 0, 0, 0, -4.37178e-08, 0.519284, 0, -1.00015, -2.26986e-08, 0, 1.08783, 0.000118047 )
-shape = SubResource( 53 )
+transform = Transform( 0.230794, 0, 0, 0, -6.44486e-09, 0.55288, 0, -0.147441, -2.41672e-08, 0, 1.03802, -0.0586689 )
+shape = SubResource( 55 )
 
 [node name="CollisonLegs" type="CollisionShape" parent="."]
-transform = Transform( 0.160731, 0, 0, 0, -4.36444e-09, 0.335269, 0, -0.0998468, -1.46551e-08, 0, 0.332464, 0.00011808 )
+transform = Transform( 0.160731, 0, 0, 0, -4.36444e-09, 0.303417, 0, -0.0998468, -1.32628e-08, 0, 0.302616, 0.000118081 )
 shape = SubResource( 54 )
 
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]

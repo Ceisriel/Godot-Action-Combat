@@ -74,6 +74,8 @@ var rightstep =bool()
 var dodge = bool()
 var tackle = bool()
 var can_tackle = true
+#combat stance 
+var is_in_combat = false
 # Mobile 
 var runToggle := false
 var sprintToggle := false
@@ -230,7 +232,6 @@ func dodgeRight(delta):
 		if dash_countright == 2 and dash_timerright < double_press_time and energy >= 1.25:
 			horizontal_velocity = direction * dash_power 
 			energy -= 0.125 * delta
-			animation.play("slide",0.1)
 			collision_torso.disabled = true
 			enabled_climbing = false
 			rightstep = true
@@ -317,6 +318,9 @@ func climbing(delta):
 				is_climbing = false	
 	else:
 			is_climbing = false
+func combatStanceBarehanded():
+	if  Input.is_action_just_pressed("Combat"):
+		is_in_combat = !is_in_combat
 func consumeEnergy(delta):
 	if is_sprinting:
 		energy -= 0.005
@@ -385,7 +389,7 @@ func _physics_process(delta: float):
 	dodgeFront(delta/1.5)
 	dodgeLeft(delta/1.5)
 	slide(delta/1.5)
-	animationorder()
+	animationOrderNoCombat()
 	updateattributes()
 	updateinternface()
 	mouseMode()
@@ -393,6 +397,7 @@ func _physics_process(delta: float):
 	climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
+	combatStanceBarehanded()
 	
 	
 # State control for jumping/falling/landing
@@ -418,9 +423,10 @@ func _physics_process(delta: float):
 		
 			
 	if (Input.is_action_just_pressed("RunOFFON")):
-		runToggle = !runToggle				
+		runToggle = !runToggle		
 	if (Input.is_action_just_pressed("SprintOFFON")):
 		sprintToggle = !sprintToggle
+
 # Movement and strafe
 	if Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
 		direction = Vector3(Input.get_action_strength("left") - Input.get_action_strength("right"),
@@ -435,29 +441,34 @@ func _physics_process(delta: float):
 			is_running = true
 			enabled_climbing = false
 			is_crouching = false
+			is_in_combat = false
 		elif Input.is_action_pressed("crouch") and is_walking and not is_climbing and not blocking and not is_swimming:
 			movement_speed = crouch_speed
 			is_running = false
 			enabled_climbing = false
 			is_crouching = true
+			is_in_combat = false
 		#Mobile
 		elif runToggle and not is_climbing and not blocking and not is_swimming and energy >= 0:
 			movement_speed = run_speed
 			is_running = true
 			is_sprinting = false
-			enabled_climbing = false	
+			enabled_climbing = false
+			is_in_combat = false	
 		#Computer	
 		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
 				movement_speed = sprint_speed
 				is_sprinting = true
 				enabled_climbing = false
 				is_crouching = false	
+				is_in_combat = false
 		#Mobile	
 		elif sprintToggle  and not is_climbing and not blocking and energy >= 0:
 			movement_speed = sprint_speed
 			is_sprinting = true
 			is_running= false
 			enabled_climbing = false	
+			is_in_combat = false
 			
 		else:  # Walk State and speed
 			movement_speed = walk_speed
@@ -495,39 +506,73 @@ func _physics_process(delta: float):
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
 
-func animationorder():#I'm human, not a robot so i prefer words over node trees
-	if is_sprinting and not dodge and not is_swimming:
-		animation.play("sprint")
-	elif dash_count2 == 2 or dash_count1 == 2: 
-		animation.play("slide")	
-	elif tackle:
-		animation.play("tackle")
-	elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
-		animation.play_backwards("strafe right front", 0.25)		
-	elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
-		animation.play_backwards("strafe left front", 0.25)	
-	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and not is_swimming:
-		animation.play_backwards("walk")	
-	elif Input.is_action_pressed("aim") and Input.is_action_pressed("right") and Input.is_action_pressed("forward"):
-		animation.play("strafe right front", 0.25)
-	elif Input.is_action_pressed("aim") and Input.is_action_pressed("left") and Input.is_action_pressed("forward"):
-		animation.play("strafe left front", 0.25)	
-	elif Input.is_action_pressed("aim") and Input.is_action_pressed("left"):
-		animation.play("strafe left", 0.25)
-	elif Input.is_action_pressed("aim") and Input.is_action_pressed("right"):
-		animation.play("strafe right", 0.25)
-	elif backstep:
-		animation.play("backstep")
-	elif leftstep:
-		animation.play("leftstep")	
-	elif rightstep:
-		animation.play_backwards("leftstep")	
-	elif frontstep:
-		animation.play("frontstep")	
-	elif is_walking and is_on_floor() and not is_swimming:
-		animation.play("walk")	
-	else:
-		animation.play("Rest", 0.25)
+func animationOrderNoCombat():#I'm human, not a robot so i prefer words over node trees
+	if not is_in_combat:
+		if is_sprinting and not dodge and not is_swimming:
+			animation.play("sprint")
+		elif dash_count2 == 2 or dash_count1 == 2: 
+			animation.play("slide")	
+		elif tackle:
+			animation.play("tackle")
+		elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
+			animation.play_backwards("strafe right front", 0.25)		
+		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
+			animation.play_backwards("strafe left front", 0.25)	
+		elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and !is_swimming :
+			animation.play_backwards("walk")	
+		elif Input.is_action_pressed("aim") and Input.is_action_pressed("right") and Input.is_action_pressed("forward") :
+			animation.play("strafe right front", 0.25)
+		elif Input.is_action_pressed("aim") and Input.is_action_pressed("left") and Input.is_action_pressed("forward") :
+			animation.play("strafe left front", 0.25)	
+		elif Input.is_action_pressed("aim") and Input.is_action_pressed("left"):
+			animation.play("strafe left", 0.25)
+		elif Input.is_action_pressed("aim") and Input.is_action_pressed("right"):
+			animation.play("strafe right", 0.25)					
+		elif backstep:
+			animation.play("backstep",0.25)
+		elif leftstep:
+			animation.play("leftstep",0.25)	
+		elif rightstep:
+			animation.play_backwards("leftstep",0.25)	
+		elif frontstep:
+			animation.play("frontstep",0.2)	
+		elif is_walking and is_on_floor():
+			animation.play("walk",0.2)	
+		else:
+			animation.play("idle", 0.25)
+			
+			
+	if is_in_combat and not is_aiming:
+		if is_walking:
+			animation.play_backwards("combat walk")
+		elif dash_count2 == 2 or dash_count1 == 2: 
+			animation.play("slide")				
+		elif tackle:
+			animation.play("tackle")		
+		else: 
+			animation.play("combat idle", 0.25)
+	if is_in_combat and is_aiming:
+		if 	Input.is_action_pressed("left"):
+			animation.play_backwards("combat strafe")
+		elif 	Input.is_action_pressed("right"):
+			animation.play("combat strafe")			
+		elif Input.is_action_pressed("forward"):
+			animation.play_backwards("combat walk")	
+		elif Input.is_action_pressed("backward"):
+			animation.play("combat walk")	
+		elif backstep:
+			animation.play("backstep",0.25)
+		elif leftstep:
+			animation.play("leftstep",0.25)	
+		elif rightstep:
+			animation.play_backwards("leftstep",0.25)	
+		elif frontstep:
+			animation.play("frontstep",0.2)					
+		else:
+			animation.play("combat idle")
+			
+			
+				
 func get_save_stats():#saving data
 	return {
 		'filename': get_filename(),

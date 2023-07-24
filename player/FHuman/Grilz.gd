@@ -38,13 +38,10 @@ const base_climb_speed = 4
 var climb_speed = 4
 # Dodge
 export var double_press_time: float = 0.4
-var dash_count2: int = 0
-var dash_timer2: float = 0.0
-var dash_count3: int = 0
-var dash_timer3: float = 0.0
+var dash_countback: int = 0
+var dash_timerback: float = 0.0
 var dash_count4: int = 0
 var dash_timer4: float = 0.0
-
 # Dodge Left
 var dash_countleft: int = 0
 var dash_timerleft: float = 0.0
@@ -65,6 +62,8 @@ var is_running = bool()
 var is_sprinting = bool()
 var is_aiming = bool()
 var is_crouching = bool()
+var is_attacking = bool()
+var is_climbing = false
 var mousemode = bool()
 var staggered = false
 var blocking = false
@@ -73,6 +72,8 @@ var frontstep = bool()
 var leftstep = bool()
 var rightstep =bool()
 var dodge = bool()
+var tackle = bool()
+
 
 # Mobile 
 var runToggle := false
@@ -157,14 +158,14 @@ func _input(event):  # All major mouse and button input events
 #Dodging by sliding on the floor, also modifies the collision shapes to slide below bostacles
 func dodgeBack(delta):
 	if is_aiming:
-		if dash_count2 > 0:
-			dash_timer2 += delta
-		if dash_timer2 >= double_press_time:
-			dash_count2 = 0
-			dash_timer2 = 0.0	
+		if dash_countback > 0:
+			dash_timerback += delta
+		if dash_timerback >= double_press_time:
+			dash_countback = 0
+			dash_timerback = 0.0	
 		if Input.is_action_just_pressed("backward"):
-			dash_count2 += 1
-		if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
+			dash_countback += 1
+		if dash_countback == 2 and dash_timerback < double_press_time and energy >= 1.25:
 			horizontal_velocity = direction * dash_power  
 			energy -= 0.125 * delta
 			backstep = true 
@@ -189,7 +190,7 @@ func dodgeFront(delta):
 			dash_timerforward = 0.0	
 		if Input.is_action_just_pressed("forward"):
 			dash_countforward += 1
-		if dash_countforward == 2 and dash_timer2 < double_press_time and energy >= 1.25:
+		if dash_countforward == 2 and dash_timerback < double_press_time and energy >= 1.25:
 			horizontal_velocity = direction * dash_power *1.55
 			energy -= 0.125 * delta
 			frontstep = true 
@@ -257,38 +258,25 @@ func dodgeRight(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			rightstep = false
-		
-func _physics_process(delta: float):	
-	dodgeRight(delta/2.25)
-	dodgeBack(delta/2.25)
-	dodgeFront(delta/2.25)
-	dodgeLeft(delta/2.25)
-	animationorder()
+			
+func tackle(delta):
+	pass
 	
-# Update attribute and stats 
-	climb_speed = base_climb_speed * strength
-	dash_power = basedash * agility 
-	sprint_speed = basesprint * agility
-	criticalChance = criticalChancebase * accuracy * 10
-	damage = basedamage * strength
-	maxhealth = basemaxhealth * vitality
-	maxenergy = basemaxenergy * intelligence
-	
-	criticallabel.text =  "%.3f" % criticalChance
-	agillabel.text = "%.3f" % agility
-	acclabel.text = "%.3f" % accuracy
-	intlabel.text = "%.3f" % intelligence
-	strlabel.text = "%.3f" % strength
-	vitalitylabel.text = "%.3f" % vitality
-	attributelabel.text = "Attribute Points: " + str(attribute)
-	
-	
-# Raycast to detect obstacles in front of the character
+func teleport():
+	if Input.is_action_just_pressed("blink") and energy >= 5:
+		energy -= 5
+		var teleport_vector = direction.normalized() * teleport_distance
+		var teleport_position = translation + teleport_vector
+		var collision = move_and_collide(teleport_vector)
+		if collision:
+			teleport_position = collision.position
+			translation = teleport_position	
+			
+func climbing(delta):
 	var ray_length = 1  # Adjust this value based on the desired length of the ray
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
 	var ray_start = translation + Vector3(0, 0.15, 0)  # Adjust the starting position of the ray based on your character's position
 	var ray_end = ray_start + ray_direction * ray_length
-	var is_climbing = false
 	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
 
 	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") or dodge :
@@ -310,7 +298,41 @@ func _physics_process(delta: float):
 			else: 
 				is_climbing = false	
 	else:
-			is_climbing = false
+			is_climbing = false			
+
+func updateattributes():
+	# Update attribute and stats 
+	climb_speed = base_climb_speed * strength
+	dash_power = basedash * agility 
+	sprint_speed = basesprint * agility
+	criticalChance = criticalChancebase * accuracy * 10
+	damage = basedamage * strength
+	maxhealth = basemaxhealth * vitality
+	maxenergy = basemaxenergy * intelligence
+	
+	criticallabel.text =  "%.3f" % criticalChance
+	agillabel.text = "%.3f" % agility
+	acclabel.text = "%.3f" % accuracy
+	intlabel.text = "%.3f" % intelligence
+	strlabel.text = "%.3f" % strength
+	vitalitylabel.text = "%.3f" % vitality
+	attributelabel.text = "Attribute Points: " + str(attribute)	
+		
+func _physics_process(delta: float):	
+	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+	tackle(delta/2.25)
+	dodgeRight(delta/2.25)
+	dodgeBack(delta/2.25)
+	dodgeFront(delta/2.25)
+	dodgeLeft(delta/2.25)
+	animationorder()
+	updateattributes()
+	mouseMode()
+	teleport()
+	climbing(delta)
+	
+	
+	
 
 # State control for jumping/falling/landing
 	var on_floor = is_on_floor()
@@ -333,15 +355,7 @@ func _physics_process(delta: float):
 		vertical_velocity = Vector3.UP * jump_force
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
-# Teleportation
-	if Input.is_action_just_pressed("blink") and energy >= 5:
-		energy -= 5
-		var teleport_vector = direction.normalized() * teleport_distance
-		var teleport_position = translation + teleport_vector
-		var collision = move_and_collide(teleport_vector)
-		if collision:
-			teleport_position = collision.position
-			translation = teleport_position
+		
 			
 	if (Input.is_action_just_pressed("RunOFFON")):
 		runToggle = !runToggle				
@@ -411,19 +425,9 @@ func _physics_process(delta: float):
 	# Attacking while moving
 	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming and not is_swimming and not is_crouching and not is_running and not is_sprinting:
 		horizontal_velocity = direction * 12
-
-	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming and not is_running and not is_sprinting:
-		horizontal_velocity = direction * 0.70
+		is_attacking = true 
 	else:
-		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
-	# Attacking while moving
-	if Input.is_action_pressed("slash") && (Input.is_action_pressed("slide")) and not is_swimming:
-		horizontal_velocity = direction * 12
-	elif Input.is_action_pressed("slash") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming:
-		horizontal_velocity = direction * 0.50
-	else:
-		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
-
+		is_attacking = false
 
 	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode and energy >= 0.125:
 		energy -= 0.125
@@ -461,15 +465,17 @@ func _physics_process(delta: float):
 	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
 	# Update health bar
 	$GUI/HealthBar.value = int((health / maxhealth) * 100)
+	
 
 	# Update the UI or display a message to indicate the attribute increase
 	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
 	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
-
+	var FPS =  Engine.get_frames_per_second()
 	$GUI/H.text = healthText
 	$GUI/E.text = energyText	
+
 	
-		
+func mouseMode():	
 	# Toggle mouse mode
 	if Input.is_action_just_pressed("ESC"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -482,9 +488,11 @@ func _physics_process(delta: float):
 
 
 func animationorder():
-	if is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
-		animation.play_backwards("strafe right front", 0.25)	
-		
+
+	if tackle and Input.is_action_pressed("attack"):
+		animation.play("tackle")
+	elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
+		animation.play_backwards("strafe right front", 0.25)		
 	elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
 		animation.play_backwards("strafe left front", 0.25)	
 	elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and not is_swimming:
@@ -508,9 +516,10 @@ func animationorder():
 	elif frontstep:
 		animation.play("frontstep")	
 	elif is_walking and is_on_floor() and not is_swimming:
-		animation.play("walk", 0.25)
+		animation.play("walk")	
 	else:
 		animation.play("Rest", 0.25)
+		
 
 		
 

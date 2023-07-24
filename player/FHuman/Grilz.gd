@@ -40,8 +40,6 @@ var climb_speed = 4
 export var double_press_time: float = 0.4
 var dash_countback: int = 0
 var dash_timerback: float = 0.0
-var dash_count4: int = 0
-var dash_timer4: float = 0.0
 # Dodge Left
 var dash_countleft: int = 0
 var dash_timerleft: float = 0.0
@@ -51,6 +49,12 @@ var dash_timerright: float = 0.0
 # Dodge forward
 var dash_countforward: int = 0
 var dash_timerforward: float = 0.0
+# Dodge multidirection (not in strafe mode)
+var dash_count1 : int = 0
+var dash_timer1 : float = 0.0
+var dash_count2 : int = 0
+var dash_timer2 : float = 0.0
+
 
 # Condition States
 var enabled_climbing = true
@@ -175,7 +179,6 @@ func dodgeBack(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			backstep = false
-				
 	else:
 			collision_torso.disabled = false
 			enabled_climbing = true
@@ -190,7 +193,7 @@ func dodgeFront(delta):
 			dash_timerforward = 0.0	
 		if Input.is_action_just_pressed("forward"):
 			dash_countforward += 1
-		if dash_countforward == 2 and dash_timerback < double_press_time and energy >= 1.25:
+		if dash_countforward == 2 and dash_timerforward < double_press_time and energy >= 1.25:
 			horizontal_velocity = direction * dash_power *1.55
 			energy -= 0.125 * delta
 			frontstep = true 
@@ -200,12 +203,10 @@ func dodgeFront(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			frontstep = false
-				
 	else:
 			collision_torso.disabled = false
 			enabled_climbing = true
 			frontstep = false
-
 
 func dodgeLeft(delta):
 	if is_aiming: 
@@ -227,7 +228,6 @@ func dodgeLeft(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			leftstep = false
-				
 	else:
 			collision_torso.disabled = false
 			enabled_climbing = true
@@ -253,12 +253,48 @@ func dodgeRight(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			rightstep = false
-				
 	else:
 			collision_torso.disabled = false
 			enabled_climbing = true
 			rightstep = false
-			
+
+func slide(delta):		
+	if not is_aiming:
+		if dash_count1 > 0:
+			dash_timer1 += delta
+		if dash_timer1 >= double_press_time:
+			dash_count1 = 0
+			dash_timer1 = 0.0	
+		if Input.is_action_just_pressed("backward") or Input.is_action_just_pressed("forward"):
+			dash_count1 += 1
+		if dash_count1 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
+			horizontal_velocity = direction * dash_power  
+			energy -= 0.125 * delta
+			dodge = true 
+			collision_torso.disabled = true
+			enabled_climbing = false
+		else:
+			dodge = false
+			collision_torso.disabled = false
+
+		if dash_count2 > 0:
+			dash_timer2 += delta
+		if dash_timer2 >= double_press_time:
+			dash_count2 = 0
+			dash_timer2 = 0.0	
+		if Input.is_action_just_pressed("right") or Input.is_action_just_pressed("left") :
+			dash_count2 += 1
+		if dash_count2 == 2 and dash_timer2 < double_press_time and energy >= 1.25:
+			horizontal_velocity = direction * dash_power 
+			energy -= 0.125 * delta
+			collision_torso.disabled = true
+			enabled_climbing = false
+		else:
+			dodge = false
+			collision_torso.disabled = false
+			enabled_climbing = true
+
+
 func tackle(delta):
 	pass
 	
@@ -299,7 +335,33 @@ func climbing(delta):
 				is_climbing = false	
 	else:
 			is_climbing = false			
+			
+func consumeenergy(delta):
+	if is_sprinting:
+		energy -= 0.005
+	if is_running:
+		energy -= 0.001	
 
+func regeneration(delta):
+	# Energy rengeneration	
+	if energy < maxenergy:
+		regenerationTimer += delta
+		if regenerationTimer >= 0.5:  # Regenerate every 2 seconds
+			regenerationTimer = 0
+			energy += 0.05
+			if energy >= maxenergy:
+				energy = maxenergy
+				regenerateEnergy = false			
+func mouseMode():	
+	# Toggle mouse mode
+	if Input.is_action_just_pressed("ESC"):
+		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			mousemode = true
+		else:
+			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
+			mousemode = false
+			
 func updateattributes():
 	# Update attribute and stats 
 	climb_speed = base_climb_speed * strength
@@ -317,25 +379,39 @@ func updateattributes():
 	strlabel.text = "%.3f" % strength
 	vitalitylabel.text = "%.3f" % vitality
 	attributelabel.text = "Attribute Points: " + str(attribute)	
+func updateinternface():
+	# Update energy bar
+	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
+	# Update health bar
+	$GUI/HealthBar.value = int((health / maxhealth) * 100)
+	# Update the UI or display a message to indicate the attribute increase
+	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
+	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
+	$GUI/H.text = healthText
+	$GUI/E.text = energyText	
+	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
+	
 		
 func _physics_process(delta: float):	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
-	tackle(delta/2.25)
-	dodgeRight(delta/2.25)
-	dodgeBack(delta/2.25)
-	dodgeFront(delta/2.25)
-	dodgeLeft(delta/2.25)
+	tackle(delta/1.5)
+	dodgeRight(delta/1.5)
+	dodgeBack(delta/1.5)
+	dodgeFront(delta/1.5)
+	dodgeLeft(delta/1.5)
+	slide(delta/1.5)
 	animationorder()
 	updateattributes()
+	updateinternface()
 	mouseMode()
 	teleport()
 	climbing(delta)
-	
+	consumeenergy(delta)
+	regeneration(delta)
 	
 	
 
 # State control for jumping/falling/landing
-	var on_floor = is_on_floor()
 	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
 	movement_speed = 0
 	angular_acceleration = 10
@@ -370,7 +446,7 @@ func _physics_process(delta: float):
 		is_walking = true
 
 		# Movement States
-		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking and not is_swimming:
+		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
 			movement_speed = run_speed
 			is_running = true
 			enabled_climbing = false
@@ -381,20 +457,22 @@ func _physics_process(delta: float):
 			enabled_climbing = false
 			is_crouching = true
 		#Mobile
-		elif runToggle and not is_climbing and not blocking and not is_swimming:
+		elif runToggle and not is_climbing and not blocking and not is_swimming and energy >= 0:
 			movement_speed = run_speed
 			is_running = true
+			is_sprinting = false
 			enabled_climbing = false	
 		#Computer	
-		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming:
-			movement_speed = sprint_speed
-			is_sprinting = true
-			enabled_climbing = false
-			is_crouching = false	
+		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
+				movement_speed = sprint_speed
+				is_sprinting = true
+				enabled_climbing = false
+				is_crouching = false	
 		#Mobile	
-		elif sprintToggle  and not is_climbing and not blocking:
+		elif sprintToggle  and not is_climbing and not blocking and energy >= 0:
 			movement_speed = sprint_speed
 			is_sprinting = true
+			is_running= false
 			enabled_climbing = false	
 			
 		else:  # Walk State and speed
@@ -410,7 +488,6 @@ func _physics_process(delta: float):
 		is_sprinting = false
 		is_crouching = false
 		is_crouching = false
-#mobile controls 		
 
 
 
@@ -452,45 +529,14 @@ func _physics_process(delta: float):
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
 
-	# Energy rengeneration	
-	if regenerateEnergy and energy < maxenergy:
-		regenerationTimer += delta
-		if regenerationTimer >= 2.0:  # Regenerate every 2 seconds
-			regenerationTimer = 0
-			energy += 1
-			if energy >= maxenergy:
-				energy = maxenergy
-				regenerateEnergy = false	
-	# Update energy bar
-	$GUI/EnergyBar.value = int((energy / maxenergy) * 100)
-	# Update health bar
-	$GUI/HealthBar.value = int((health / maxhealth) * 100)
 	
-
-	# Update the UI or display a message to indicate the attribute increase
-	var healthText = "Health: %.2f / %.2f" % [health, maxhealth]
-	var energyText = "Energy: %.2f / %.2f" % [energy, maxenergy]
-	var FPS =  Engine.get_frames_per_second()
-	$GUI/H.text = healthText
-	$GUI/E.text = energyText	
-
-	
-func mouseMode():	
-	# Toggle mouse mode
-	if Input.is_action_just_pressed("ESC"):
-		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
-			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
-			mousemode = true
-		else:
-			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
-			mousemode = false
-
 
 
 func animationorder():
-
-	if tackle and Input.is_action_pressed("attack"):
-		animation.play("tackle")
+	if is_sprinting and not dodge and not is_swimming:
+		animation.play("sprint")
+	elif dash_count2 == 2 or dash_count1 == 2: 
+		animation.play("tackle")	
 	elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
 		animation.play_backwards("strafe right front", 0.25)		
 	elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
@@ -505,8 +551,6 @@ func animationorder():
 		animation.play("strafe left", 0.25)
 	elif Input.is_action_pressed("aim") and Input.is_action_pressed("right"):
 		animation.play("strafe right", 0.25)
-	elif is_sprinting and not dodge and not is_swimming:
-		animation.play("sprint")
 	elif backstep:
 		animation.play("backstep")
 	elif leftstep:
@@ -519,8 +563,6 @@ func animationorder():
 		animation.play("walk")	
 	else:
 		animation.play("Rest", 0.25)
-		
-
 		
 
 #saving data
@@ -569,8 +611,6 @@ func _on_MinusVIT_pressed():
 		attribute += 1
 		vitality -= 0.025
 		health = maxhealth
-
-
 func _on_PlusSTR_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -579,8 +619,6 @@ func _on_MinusSTR_pressed():
 	if strength > 0.076:
 		attribute += 1
 		strength -= 0.025
-
-		
 func _on_PlusINT_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -590,7 +628,6 @@ func _on_MinusINT_pressed():
 		attribute += 1
 		intelligence -= 0.025
 		energy = maxenergy
-
 func _on_PlusACC_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -599,7 +636,6 @@ func _on_MinusACC_pressed():
 	if accuracy > 0.01:
 		attribute += 1
 		accuracy -= 0.025
-
 func _on_PlusAGI_pressed():
 	if attribute > 0:
 		attribute -= 1
@@ -608,12 +644,9 @@ func _on_MinusAGI_pressed():
 	if agility > 0.11:
 		attribute += 1
 		agility -= 0.025
-
-
 func _on_WaterDetector_area_entered(area):
 	if area.is_in_group("Water"):
 		is_swimming = true
-
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false

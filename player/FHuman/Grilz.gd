@@ -11,9 +11,7 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-
 onready var animation = $Girlz/AnimationPlayer
-
 onready var hook = $Camroot/Camera_holder/Camera/Hook
 onready var collision_torso = $CollisonTorso
 var velocity := Vector3()
@@ -30,7 +28,7 @@ const basesprint = 9
 export var sprint_speed = 9
 export var teleport_distance = 35
 const basedash = 25
-export var dash_power = 25
+export var dash_power = 100
 export var dodge_power = 12
 export (float) var mouse_sense = 0.1
 #climbing 
@@ -54,8 +52,6 @@ var dash_count1 : int = 0
 var dash_timer1 : float = 0.0
 var dash_count2 : int = 0
 var dash_timer2 : float = 0.0
-
-
 # Condition States
 var enabled_climbing = true
 var is_falling = bool()
@@ -77,8 +73,7 @@ var leftstep = bool()
 var rightstep =bool()
 var dodge = bool()
 var tackle = bool()
-
-
+var can_tackle = true
 # Mobile 
 var runToggle := false
 var sprintToggle := false
@@ -121,13 +116,9 @@ var regenerateEnergy = true
 var regenerationTimer = 0
 var floatingtext = preload("res://UI/floatingtext.tscn")
 
-
-
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
-
-#Getting damaged
-func onhitP(damage):
+func onhitP(damage):#Getting damaged
 	if not blocking: 
 	# Apply critical defense chance
 		if randf() <= criticalDefenseChance:
@@ -139,8 +130,7 @@ func onhitP(damage):
 			#add_child(text)
 	else:
 		staggered = false	
-#Getting knocked back
-func onhitKnockback(impact):
+func onhitKnockback(impact):#Getting knocked back
 	# Calculate the angle between the player's forward direction and the camera's forward direction
 	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
 	# Check if the player is facing the camera
@@ -152,14 +142,12 @@ func onhitKnockback(impact):
 	else:
 		pass
 		#horizontal_velocity = -direction.normalized() * impact
-
 func _input(event):  # All major mouse and button input events
 	# Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
 		rotate_y(deg2rad(-event.relative.x * mouse_sense))
 		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
-#Dodging by sliding on the floor, also modifies the collision shapes to slide below bostacles
 func dodgeBack(delta):
 	if is_aiming:
 		if dash_countback > 0:
@@ -183,7 +171,6 @@ func dodgeBack(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			backstep = false
-			
 func dodgeFront(delta):		
 	if is_aiming:
 		if dash_countforward > 0:
@@ -207,7 +194,6 @@ func dodgeFront(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			frontstep = false
-
 func dodgeLeft(delta):
 	if is_aiming: 
 		if dash_countleft > 0:
@@ -232,7 +218,6 @@ func dodgeLeft(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			leftstep = false
-		
 func dodgeRight(delta):	
 	if is_aiming:	
 		if dash_countright > 0:
@@ -257,7 +242,6 @@ func dodgeRight(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			rightstep = false
-
 func slide(delta):		
 	if not is_aiming:
 		if dash_count1 > 0:
@@ -293,11 +277,13 @@ func slide(delta):
 			dodge = false
 			collision_torso.disabled = false
 			enabled_climbing = true
-
-
 func tackle(delta):
-	pass
-	
+	if Input.is_action_pressed("tackle") and energy >= 0:
+		horizontal_velocity = direction * dash_power / 5
+		energy -= 0.5 * delta
+		tackle = true
+	else:
+		tackle = false	
 func teleport():
 	if Input.is_action_just_pressed("blink") and energy >= 5:
 		energy -= 5
@@ -307,23 +293,19 @@ func teleport():
 		if collision:
 			teleport_position = collision.position
 			translation = teleport_position	
-			
 func climbing(delta):
 	var ray_length = 1  # Adjust this value based on the desired length of the ray
 	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
 	var ray_start = translation + Vector3(0, 0.15, 0)  # Adjust the starting position of the ray based on your character's position
 	var ray_end = ray_start + ray_direction * ray_length
 	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
-
 	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") or dodge :
 		enabled_climbing = false
-
 		if  enabled_climbing:
 			vertical_velocity = Vector3.UP * climb_speed
 			is_climbing = true
 		else:
 			is_climbing = false
-
 	if is_on_wall() or is_on_floor() or is_on_ceiling() or ray_cast:
 		if  Input.is_action_pressed("jump") and enabled_climbing:
 			if strength >= 1:
@@ -334,24 +316,30 @@ func climbing(delta):
 			else: 
 				is_climbing = false	
 	else:
-			is_climbing = false			
-			
-func consumeenergy(delta):
+			is_climbing = false
+func consumeEnergy(delta):
 	if is_sprinting:
 		energy -= 0.005
 	if is_running:
 		energy -= 0.001	
-
 func regeneration(delta):
 	# Energy rengeneration	
 	if energy < maxenergy:
 		regenerationTimer += delta
-		if regenerationTimer >= 0.5:  # Regenerate every 2 seconds
-			regenerationTimer = 0
-			energy += 0.05
-			if energy >= maxenergy:
-				energy = maxenergy
-				regenerateEnergy = false			
+		if is_walking or is_sprinting or is_climbing or is_running or is_sprinting:	
+			if regenerationTimer >= 0.2: 
+				regenerationTimer = 0
+				energy += 0.001
+				if energy >= maxenergy:
+					energy = maxenergy
+					regenerateEnergy = false	
+		else:		
+			if regenerationTimer >= 0.2: 
+				regenerationTimer = 0
+				energy += 0.0025
+				if energy >= maxenergy:
+					energy = maxenergy
+					regenerateEnergy = false	
 func mouseMode():	
 	# Toggle mouse mode
 	if Input.is_action_just_pressed("ESC"):
@@ -361,7 +349,6 @@ func mouseMode():
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			mousemode = false
-			
 func updateattributes():
 	# Update attribute and stats 
 	climb_speed = base_climb_speed * strength
@@ -390,8 +377,6 @@ func updateinternface():
 	$GUI/H.text = healthText
 	$GUI/E.text = energyText	
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
-	
-		
 func _physics_process(delta: float):	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	tackle(delta/1.5)
@@ -406,11 +391,10 @@ func _physics_process(delta: float):
 	mouseMode()
 	teleport()
 	climbing(delta)
-	consumeenergy(delta)
+	consumeEnergy(delta)
 	regeneration(delta)
 	
 	
-
 # State control for jumping/falling/landing
 	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
 	movement_speed = 0
@@ -477,7 +461,7 @@ func _physics_process(delta: float):
 			
 		else:  # Walk State and speed
 			movement_speed = walk_speed
-			is_running = false
+
 			is_sprinting = false
 			is_crouching = false
 			enabled_climbing = true
@@ -488,9 +472,6 @@ func _physics_process(delta: float):
 		is_sprinting = false
 		is_crouching = false
 		is_crouching = false
-
-
-
 	# Strafe and normal movement
 	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
@@ -499,20 +480,6 @@ func _physics_process(delta: float):
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
 		is_aiming = false
 
-	# Attacking while moving
-	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming and not is_swimming and not is_crouching and not is_running and not is_sprinting:
-		horizontal_velocity = direction * 12
-		is_attacking = true 
-	else:
-		is_attacking = false
-
-	if Input.is_action_pressed("guard") and is_on_floor() and not mousemode and energy >= 0.125:
-		energy -= 0.125
-		blocking = true
-	else: 
-		blocking = false	
-		
-		
 	if Input.is_action_pressed("crouch") and is_swimming:
 		vertical_velocity += Vector3.DOWN * 15 * delta
 		collision_torso.disabled = true
@@ -522,21 +489,19 @@ func _physics_process(delta: float):
 		collision_torso.disabled = true
 	else: 
 		collision_torso.disabled = false	
-		
-		 
+
 	movement.z = horizontal_velocity.z + vertical_velocity.z
 	movement.x = horizontal_velocity.x + vertical_velocity.x
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
 
-	
-
-
-func animationorder():
+func animationorder():#I'm human, not a robot so i prefer words over node trees
 	if is_sprinting and not dodge and not is_swimming:
 		animation.play("sprint")
 	elif dash_count2 == 2 or dash_count1 == 2: 
-		animation.play("tackle")	
+		animation.play("slide")	
+	elif tackle:
+		animation.play("tackle")
 	elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
 		animation.play_backwards("strafe right front", 0.25)		
 	elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
@@ -563,10 +528,7 @@ func animationorder():
 		animation.play("walk")	
 	else:
 		animation.play("Rest", 0.25)
-		
-
-#saving data
-func get_save_stats():
+func get_save_stats():#saving data
 	return {
 		'filename': get_filename(),
 		'parent': get_parent().get_path(),
@@ -587,8 +549,7 @@ func get_save_stats():
 			'agility': agility
 		}
 	}
-
-func load_save_stats(stats):
+func load_save_stats(stats):#loading saved data
 	global_transform.origin = Vector3(stats.x_pos, stats.y_pos, stats.z_pos)
 	health = stats.stats.health
 	energy = stats.stats.energy
@@ -600,7 +561,6 @@ func load_save_stats(stats):
 	attribute = stats.stats.attribute
 	accuracy = stats.stats.accuracy
 	agility = stats.stats.agility
-
 #increasing / decreasing stats and attributes based on buttons
 func _on_PlusVIT_pressed():
 	if attribute > 0:

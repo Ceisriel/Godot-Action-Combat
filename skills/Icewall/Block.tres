@@ -1,0 +1,51 @@
+[gd_resource type="ShaderMaterial" load_steps=7 format=2]
+
+[ext_resource path="res://skills/Icewall/textures/blockFade.png" type="Texture" id=1]
+[ext_resource path="res://skills/Icewall/textures/blockNorm.png" type="Texture" id=2]
+[ext_resource path="res://skills/Icewall/textures/blockRough.png" type="Texture" id=3]
+[ext_resource path="res://skills/Icewall/textures/basePattern.png" type="Texture" id=4]
+[ext_resource path="res://skills/Icewall/textures/blockDiff.png" type="Texture" id=5]
+
+[sub_resource type="Shader" id=4]
+code = "shader_type spatial;
+render_mode blend_mix, cull_disabled;
+
+uniform float dissolve_threshold: hint_range(0.0, 1.0, 0.01);
+uniform sampler2D dissolve_texture;
+uniform sampler2D albedo_texture;
+uniform sampler2D roughness_texture;
+uniform sampler2D normal_map;
+uniform sampler2D emission_map;
+uniform float emission_strength: hint_range(0.0, 1.0, 0.01);
+
+void fragment() {
+	vec3 color = texture(albedo_texture, UV).rgb;
+	float rough = texture(roughness_texture, UV).r;
+	vec3 normal = texture(normal_map, UV).rgb;
+	
+	// emission
+	vec3 emit = texture(emission_map, UV).rgb;
+	
+	// dissolve
+	float dissolve = texture(dissolve_texture, UV).r;
+	float alpha = step(dissolve, dissolve_threshold);
+	
+	ALPHA = alpha;
+	ALPHA_SCISSOR = 0.1;
+	ALBEDO = color;
+	ROUGHNESS = rough;
+	SPECULAR = 0.0;
+	NORMALMAP = normal;
+	EMISSION = emit * emission_strength;
+}"
+
+[resource]
+resource_local_to_scene = true
+shader = SubResource( 4 )
+shader_param/dissolve_threshold = 0.5
+shader_param/emission_strength = 0.91
+shader_param/dissolve_texture = ExtResource( 1 )
+shader_param/albedo_texture = ExtResource( 5 )
+shader_param/roughness_texture = ExtResource( 3 )
+shader_param/normal_map = ExtResource( 2 )
+shader_param/emission_map = ExtResource( 4 )

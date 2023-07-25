@@ -120,6 +120,14 @@ var floatingtext = preload("res://UI/floatingtext.tscn")
 
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
+	
+func combopunch():
+	if is_in_combat:
+		if Input.is_action_pressed("attack"):
+			horizontal_velocity = direction * walk_speed/1.5
+			is_attacking = true 
+		else:
+			is_attacking = false	
 func onhitP(damage):#Getting damaged
 	if not blocking: 
 	# Apply critical defense chance
@@ -383,6 +391,7 @@ func updateinternface():
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
 func _physics_process(delta: float):	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+	combopunch()
 	tackle(delta/1.5)
 	dodgeRight(delta/1.5)
 	dodgeBack(delta/1.5)
@@ -543,7 +552,9 @@ func animationOrderNoCombat():#I'm human, not a robot so i prefer words over nod
 			
 			
 	if is_in_combat and not is_aiming:
-		if is_walking:
+		if is_attacking:
+			animation.play("combo punch",0.25)
+		elif is_walking:
 			animation.play_backwards("combat walk")
 		elif dash_count2 == 2 or dash_count1 == 2: 
 			animation.play("slide")				

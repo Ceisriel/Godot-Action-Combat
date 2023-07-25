@@ -339,7 +339,6 @@ func dodgeLeft(delta):#Dodge when in strafe mode
 			dash_countleft += 1
 		if dash_countleft == 2 and dash_timerleft < double_press_time and energy >= 1.25:
 			horizontal_velocity = direction * dash_power 
-			vertical_velocity = Vector3.UP * 20
 			energy -= 0.125 * delta
 			collision_torso.disabled = true
 			enabled_climbing = false
@@ -456,7 +455,9 @@ func combatStanceBarehanded():
 func speak():
 	if !is_in_combat or !is_walking:
 		if  Input.is_action_just_pressed("attack"):
-			speaking = !speaking		
+			speaking = !speaking	
+		if 	Input.is_action_just_pressed("guard"):
+			speaking = false
 func consumeEnergy(delta):
 	if is_sprinting:
 		energy -= 0.005
@@ -598,14 +599,18 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 		elif frontstep:
 			animation.play("frontstep",0.2)		
 		elif is_attacking:
-			animation.play("combo punch",0.25)		
-			animation.play("combat strafe")			
+			animation.play("combo punch",0.25)			
 		elif Input.is_action_pressed("forward"):
 			animation.play_backwards("combat walk")	
 		elif Input.is_action_pressed("backward"):
-			animation.play("combat walk")				
+			animation.play("combat walk")		
+		elif Input.is_action_pressed("right"):
+			animation.play("combat strafe")		
+		elif Input.is_action_pressed("left"):
+			animation.play_backwards("combat strafe")							
 		else:
 			animation.play("combat idle")
+
 
 func get_save_stats():#saving data
 	return {

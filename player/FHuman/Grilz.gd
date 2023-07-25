@@ -191,6 +191,7 @@ func movement(delta):
 		is_sprinting = false
 		is_crouching = false
 		is_crouching = false
+		
 	# Strafe and normal movement
 	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
@@ -551,13 +552,13 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 			animation.play_backwards("strafe left front", 0.25)	
 		elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and !is_swimming :
 			animation.play_backwards("walk")	
-		elif Input.is_action_pressed("aim") and Input.is_action_pressed("right") and Input.is_action_pressed("forward") :
+		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("forward") :
 			animation.play("strafe right front", 0.25)
-		elif Input.is_action_pressed("aim") and Input.is_action_pressed("left") and Input.is_action_pressed("forward") :
+		elif is_aiming  and Input.is_action_pressed("left") and Input.is_action_pressed("forward") :
 			animation.play("strafe left front", 0.25)	
-		elif Input.is_action_pressed("aim") and Input.is_action_pressed("left"):
+		elif is_aiming  and Input.is_action_pressed("left"):
 			animation.play("strafe left", 0.25)
-		elif Input.is_action_pressed("aim") and Input.is_action_pressed("right"):
+		elif is_aiming  and Input.is_action_pressed("right"):
 			animation.play("strafe right", 0.25)					
 		elif backstep:
 			animation.play("backstep",0.25)
@@ -571,10 +572,12 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 			animation.play("walk",0.2)	
 		elif speaking:
 			animation.play("speak")	
+		elif Input.is_action_pressed("guard"):
+			animation.play("wave")
 		else:
 			animation.play("idle", 0.25)
 
-	if is_in_combat and not is_aiming:
+	if is_in_combat and !is_aiming:
 		if dash_count2 == 2 or dash_count1 == 2: 
 			animation.play("slide")				
 		elif is_attacking:
@@ -586,22 +589,21 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 		else: 
 			animation.play("combat idle", 0.25)
 	if is_in_combat and is_aiming:
-		if 	Input.is_action_pressed("left"):
-			animation.play_backwards("combat strafe")
-		elif 	Input.is_action_pressed("right"):
-			animation.play("combat strafe")			
-		elif Input.is_action_pressed("forward"):
-			animation.play_backwards("combat walk")	
-		elif Input.is_action_pressed("backward"):
-			animation.play("combat walk")	
-		elif backstep:
+		if backstep:
 			animation.play("backstep",0.25)
 		elif leftstep:
 			animation.play("leftstep",0.25)	
 		elif rightstep:
 			animation.play_backwards("leftstep",0.25)	
 		elif frontstep:
-			animation.play("frontstep",0.2)					
+			animation.play("frontstep",0.2)		
+		elif is_attacking:
+			animation.play("combo punch",0.25)		
+			animation.play("combat strafe")			
+		elif Input.is_action_pressed("forward"):
+			animation.play_backwards("combat walk")	
+		elif Input.is_action_pressed("backward"):
+			animation.play("combat walk")				
 		else:
 			animation.play("combat idle")
 

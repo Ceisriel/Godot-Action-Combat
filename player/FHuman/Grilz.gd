@@ -64,6 +64,7 @@ var is_sprinting = bool()
 var is_aiming = bool()
 var is_crouching = bool()
 var is_attacking = bool()
+var is_guarding = false
 var is_climbing = false
 var speaking = false
 var mousemode = bool()
@@ -99,10 +100,11 @@ export var health = 10.0
 const basemaxenergy = 25
 export var maxenergy = 25
 export var energy = 25
-export var defense = 0
+export var defense = 0.95 #the lower, the higher the defense, 0 is 100% protection
+export var barehanded_block = 0.9 #the lower, the higher the defense, 0 is 100% protection
 const basedamage = 2
 export var damage = 2
-export var criticalDefenseChance = 0.60
+export var criticalDefenseChance = 0.50
 export var criticalDefenseMultiplier = 2
 export var criticalChance = 0.01
 const criticalChancebase = 0.01
@@ -228,7 +230,7 @@ func gravityAndJumping(delta):
 		vertical_velocity = Vector3.UP * jump_force
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
-func attack():
+func dealDamage():
 	var enemies = hitbox.get_overlapping_bodies()
 	for enemy in enemies:
 		if enemy.has_method("onhit"):
@@ -238,28 +240,39 @@ func attack():
 			else: 	
 				enemy.onhit(damage)
 		if energy < maxenergy: 
-			energy += 0.5		
-func combopunch():
+			energy += 0.5
+func takeDamage(damage):#Getting damaged
+	is_in_combat = true
+	if is_guarding: 
+		health -= ((damage * barehanded_block) * defense)
+		staggered = true
+		var text = floatingtext.instance()
+		text.amount = float(damage * barehanded_block)
+		add_child(text)
+			
+	else:
+		health -= (damage * defense)
+		staggered = true
+		var text = floatingtext.instance()
+		text.amount = float(damage * defense)
+		add_child(text)
+func combatStanceBarehanded():#barehanded combat stace
+	if  Input.is_action_just_pressed("Combat"):
+		is_in_combat = !is_in_combat			
+func comboPunch():#Barehanded base attack
 	if is_in_combat:
 		if Input.is_action_pressed("attack"):
 			horizontal_velocity = direction * walk_speed/1.5
 			is_attacking = true 
 		else:
 			is_attacking = false	
-func onhitP(damage):#Getting damaged
-	is_in_combat = true
-	if not blocking: 
-	# Apply critical defense chance
-		if randf() <= criticalDefenseChance:
-			damage = damage / criticalDefenseMultiplier
-			health -= (damage - defense)
-			staggered = true
-			#var text = floatingtext.instance()
-			 #text.amount = float(damage)
-			#add_child(text)
-	else:
-		staggered = false	
-func onhitKnockback(impact):#Getting knocked back
+func guardingStance():#Barehanded base attack
+	if is_in_combat:
+		if Input.is_action_pressed("guard"):
+			is_guarding = true
+		else:
+			is_guarding = false
+func getKnockedBack(impact):#Getting knocked back
 	#Calculate the angle between the player's forward direction and the camera's forward direction
 	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
 	#Check if the player is facing the camera
@@ -449,9 +462,6 @@ func climbing(delta):
 				is_climbing = false	
 	else:
 			is_climbing = false
-func combatStanceBarehanded():
-	if  Input.is_action_just_pressed("Combat"):
-		is_in_combat = !is_in_combat
 func speak():
 	if !is_in_combat or !is_walking:
 		if  Input.is_action_just_pressed("attack"):
@@ -522,7 +532,8 @@ func _physics_process(delta: float):#this calls every function
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	movement(delta)
 	gravityAndJumping(delta)
-	combopunch()
+	comboPunch()
+	guardingStance()
 	tackle(delta/1.5)
 	dodgeRight(delta/1.5)
 	dodgeBack(delta/1.5)
@@ -539,7 +550,7 @@ func _physics_process(delta: float):#this calls every function
 	regeneration(delta)
 	combatStanceBarehanded()
 	speak()
-func animationOrder():#I'm human, not a robot so i prefer words over node trees
+func animationOrder():#I'm human, not a robot I understand words not nodes
 	if not is_in_combat:
 		if is_sprinting and not dodge and not is_swimming:
 			animation.play("sprint")
@@ -583,13 +594,30 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 			animation.play("slide")				
 		elif is_attacking:
 			animation.play("combo punch",0.25)
+		elif is_guarding and is_walking:
+			animation.play_backwards("barehanded guard walk",0.3)			
+		elif is_guarding:
+			animation.play("guard",0.1)			
 		elif is_walking:
-			animation.play_backwards("combat walk")
+			animation.play_backwards("combat walk", 0.25)
 		elif tackle:
-			animation.play("tackle")		
+			animation.play("tackle",0.1)		
 		else: 
 			animation.play("combat idle", 0.25)
-	if is_in_combat and is_aiming:
+			
+	if is_guarding and is_aiming:
+		if  Input.is_action_pressed("forward"):
+			animation.play_backwards("barehanded guard walk",0.3)
+		elif  Input.is_action_pressed("backward"):
+			animation.play("barehanded guard walk",0.3)
+		elif Input.is_action_pressed("left"):
+			animation.play_backwards("barehanded guard strafe",0.3)
+		elif Input.is_action_pressed("right"):
+			animation.play("barehanded guard strafe",0.3)	
+		else:
+			animation.play("guard",0.1)			
+			
+	if is_in_combat and is_aiming and !is_guarding and not Input.is_action_pressed("guard"):
 		if backstep:
 			animation.play("backstep",0.25)
 		elif leftstep:
@@ -597,7 +625,9 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 		elif rightstep:
 			animation.play_backwards("leftstep",0.25)	
 		elif frontstep:
-			animation.play("frontstep",0.2)		
+			animation.play("frontstep",0.2)			
+		elif is_guarding:
+			animation.play("guard",0.3)			
 		elif is_attacking:
 			animation.play("combo punch",0.25)			
 		elif Input.is_action_pressed("forward"):
@@ -607,7 +637,7 @@ func animationOrder():#I'm human, not a robot so i prefer words over node trees
 		elif Input.is_action_pressed("right"):
 			animation.play("combat strafe")		
 		elif Input.is_action_pressed("left"):
-			animation.play_backwards("combat strafe")							
+			animation.play_backwards("combat strafe")
 		else:
 			animation.play("combat idle")
 

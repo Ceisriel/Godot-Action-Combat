@@ -14,6 +14,7 @@ onready var camera = $Camroot/Camera_holder/Camera
 onready var animation = $Girlz/AnimationPlayer
 onready var hook = $Camroot/Camera_holder/Camera/Hook
 onready var collision_torso = $CollisonTorso
+onready var hitbox = $Hitbox
 var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -64,6 +65,7 @@ var is_aiming = bool()
 var is_crouching = bool()
 var is_attacking = bool()
 var is_climbing = false
+var speaking = false
 var mousemode = bool()
 var staggered = false
 var blocking = false
@@ -112,15 +114,130 @@ var strength = 1.0
 var intelligence = 1.0
 var accuracy = 1.0
 var agility = 1.0
+var impact = 80
 #Energy regeneration 
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
 var regenerationTimer = 0
 var floatingtext = preload("res://UI/floatingtext.tscn")
 
+
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
-	
+func movement(delta):
+	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
+	movement_speed = 0
+	angular_acceleration = 10
+	acceleration = 15
+
+	if (Input.is_action_just_pressed("RunOFFON")):
+		runToggle = !runToggle		
+	if (Input.is_action_just_pressed("SprintOFFON")):
+		sprintToggle = !sprintToggle
+
+# Movement and strafe
+	if Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
+		direction = Vector3(Input.get_action_strength("left") - Input.get_action_strength("right"),
+					0,
+					Input.get_action_strength("forward") - Input.get_action_strength("backward"))
+		direction = direction.rotated(Vector3.UP, h_rot).normalized()
+		is_walking = true
+		speaking = false
+
+		# Movement States
+		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
+			movement_speed = run_speed
+			is_running = true
+			enabled_climbing = false
+			is_crouching = false
+			is_in_combat = false
+		elif Input.is_action_pressed("crouch") and is_walking and not is_climbing and not blocking and not is_swimming:
+			movement_speed = crouch_speed
+			is_running = false
+			enabled_climbing = false
+			is_crouching = true
+			is_in_combat = false
+		#Mobile
+		elif runToggle and not is_climbing and not blocking and not is_swimming and energy >= 0:
+			movement_speed = run_speed
+			is_running = true
+			is_sprinting = false
+			enabled_climbing = false
+			is_in_combat = false	
+		#Computer	
+		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
+				movement_speed = sprint_speed
+				is_sprinting = true
+				enabled_climbing = false
+				is_crouching = false	
+				is_in_combat = false
+		#Mobile	
+		elif sprintToggle  and not is_climbing and not blocking and energy >= 0:
+			movement_speed = sprint_speed
+			is_sprinting = true
+			is_running= false
+			enabled_climbing = false	
+			is_in_combat = false
+			
+		else:  # Walk State and speed
+			movement_speed = walk_speed
+			is_sprinting = false
+			is_crouching = false
+			enabled_climbing = true
+			is_crouching = false
+	else:
+		is_walking = false
+		is_running = false
+		is_sprinting = false
+		is_crouching = false
+		is_crouching = false
+	# Strafe and normal movement
+	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
+		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
+		is_aiming = true
+	else:
+		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
+		is_aiming = false
+
+	if Input.is_action_pressed("crouch") and is_swimming:
+		vertical_velocity += Vector3.DOWN * 15 * delta
+		collision_torso.disabled = true
+	else: 
+		collision_torso.disabled = false
+	if 	Input.is_action_pressed("crouch") and not is_swimming:
+		collision_torso.disabled = true
+	else: 
+		collision_torso.disabled = false	
+
+	movement.z = horizontal_velocity.z + vertical_velocity.z
+	movement.x = horizontal_velocity.x + vertical_velocity.x
+	movement.y = vertical_velocity.y
+	move_and_slide(movement, Vector3.UP)
+func gravityAndJumping(delta):
+# Gravity and stop sliding on floors
+	if not is_on_floor() and not is_swimming:
+		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
+		is_falling = true
+		is_swimming = false
+	else:
+		vertical_velocity = -get_floor_normal() * gravity / 2.5
+		is_falling = false
+# Jump
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		vertical_velocity = Vector3.UP * jump_force
+	if Input.is_action_pressed("jump") and is_swimming:
+		vertical_velocity = Vector3.UP * 15 * delta
+func attack():
+	var enemies = hitbox.get_overlapping_bodies()
+	for enemy in enemies:
+		if enemy.has_method("onhit"):
+			if randf() <= criticalChance:
+				var criticalDamage = damage * criticalMultiplier
+				enemy.onhit(criticalDamage)
+			else: 	
+				enemy.onhit(damage)
+		if energy < maxenergy: 
+			energy += 0.5		
 func combopunch():
 	if is_in_combat:
 		if Input.is_action_pressed("attack"):
@@ -129,6 +246,7 @@ func combopunch():
 		else:
 			is_attacking = false	
 func onhitP(damage):#Getting damaged
+	is_in_combat = true
 	if not blocking: 
 	# Apply critical defense chance
 		if randf() <= criticalDefenseChance:
@@ -141,24 +259,29 @@ func onhitP(damage):#Getting damaged
 	else:
 		staggered = false	
 func onhitKnockback(impact):#Getting knocked back
-	# Calculate the angle between the player's forward direction and the camera's forward direction
+	#Calculate the angle between the player's forward direction and the camera's forward direction
 	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
-	# Check if the player is facing the camera
+	#Check if the player is facing the camera
 	if angle_to_camera < 0.5:
 		horizontal_velocity = direction.normalized() * impact
-	# Check if the player is showing their back to the camera
+	#Check if the player is showing their back to the camera
 	elif angle_to_camera > 0.51:
 		horizontal_velocity = -direction.normalized() * impact
 	else:
 		pass
-		#horizontal_velocity = -direction.normalized() * impact
-func _input(event):  # All major mouse and button input events
-	# Get mouse input for camera rotation
+		#Horizontal_velocity = -direction.normalized() * impact
+func knockback(): 
+	var enemies = hitbox.get_overlapping_bodies()
+	for enemy in enemies:
+		if enemy.is_in_group("Player"):
+			enemy.onhitKnockback(impact)		
+func _input(event):#All major mouse and button input events
+	#Get mouse input for camera rotation
 	if event is InputEventMouseMotion and (mousemode == false):
 		rotate_y(deg2rad(-event.relative.x * mouse_sense))
 		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
 		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
-func dodgeBack(delta):
+func dodgeBack(delta):#Doddge when in strafe mode
 	if is_aiming:
 		if dash_countback > 0:
 			dash_timerback += delta
@@ -181,7 +304,7 @@ func dodgeBack(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			backstep = false
-func dodgeFront(delta):		
+func dodgeFront(delta):#Dodge when in strafe mode
 	if is_aiming:
 		if dash_countforward > 0:
 			dash_timerforward += delta
@@ -204,7 +327,7 @@ func dodgeFront(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			frontstep = false
-func dodgeLeft(delta):
+func dodgeLeft(delta):#Dodge when in strafe mode
 	if is_aiming: 
 		if dash_countleft > 0:
 			dash_timerleft += delta
@@ -228,7 +351,7 @@ func dodgeLeft(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			leftstep = false
-func dodgeRight(delta):	
+func dodgeRight(delta):#Dodge when in strafe mode
 	if is_aiming:	
 		if dash_countright > 0:
 			dash_timerright += delta
@@ -251,7 +374,7 @@ func dodgeRight(delta):
 			collision_torso.disabled = false
 			enabled_climbing = true
 			rightstep = false
-func slide(delta):		
+func slide(delta):#Slide to dodge 
 	if not is_aiming:
 		if dash_count1 > 0:
 			dash_timer1 += delta
@@ -286,7 +409,7 @@ func slide(delta):
 			dodge = false
 			collision_torso.disabled = false
 			enabled_climbing = true
-func tackle(delta):
+func tackle(delta):#Jump and tackle, works as a dodge and as an attack
 	if Input.is_action_pressed("tackle") and energy >= 0:
 		horizontal_velocity = direction * dash_power / 5
 		energy -= 0.5 * delta
@@ -329,6 +452,10 @@ func climbing(delta):
 func combatStanceBarehanded():
 	if  Input.is_action_just_pressed("Combat"):
 		is_in_combat = !is_in_combat
+func speak():
+	if !is_in_combat or !is_walking:
+		if  Input.is_action_just_pressed("attack"):
+			speaking = !speaking		
 func consumeEnergy(delta):
 	if is_sprinting:
 		energy -= 0.005
@@ -389,8 +516,10 @@ func updateinternface():
 	$GUI/H.text = healthText
 	$GUI/E.text = energyText	
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
-func _physics_process(delta: float):	
+func _physics_process(delta: float):#this calls every function 	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
+	movement(delta)
+	gravityAndJumping(delta)
 	combopunch()
 	tackle(delta/1.5)
 	dodgeRight(delta/1.5)
@@ -398,7 +527,7 @@ func _physics_process(delta: float):
 	dodgeFront(delta/1.5)
 	dodgeLeft(delta/1.5)
 	slide(delta/1.5)
-	animationOrderNoCombat()
+	animationOrder()
 	updateattributes()
 	updateinternface()
 	mouseMode()
@@ -407,115 +536,8 @@ func _physics_process(delta: float):
 	consumeEnergy(delta)
 	regeneration(delta)
 	combatStanceBarehanded()
-	
-	
-# State control for jumping/falling/landing
-	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
-	movement_speed = 0
-	angular_acceleration = 10
-	acceleration = 15
-
-# Gravity and stop sliding on floors
-	if not is_on_floor() and not is_swimming:
-		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
-		is_falling = true
-		is_swimming = false
-	else:
-		vertical_velocity = -get_floor_normal() * gravity / 2.5
-		is_falling = false
-
-# Jump
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		vertical_velocity = Vector3.UP * jump_force
-	if Input.is_action_pressed("jump") and is_swimming:
-		vertical_velocity = Vector3.UP * 15 * delta
-		
-			
-	if (Input.is_action_just_pressed("RunOFFON")):
-		runToggle = !runToggle		
-	if (Input.is_action_just_pressed("SprintOFFON")):
-		sprintToggle = !sprintToggle
-
-# Movement and strafe
-	if Input.is_action_pressed("forward") or Input.is_action_pressed("backward") or Input.is_action_pressed("left") or Input.is_action_pressed("right"):
-		direction = Vector3(Input.get_action_strength("left") - Input.get_action_strength("right"),
-					0,
-					Input.get_action_strength("forward") - Input.get_action_strength("backward"))
-		direction = direction.rotated(Vector3.UP, h_rot).normalized()
-		is_walking = true
-
-		# Movement States
-		if Input.is_action_pressed("run") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
-			movement_speed = run_speed
-			is_running = true
-			enabled_climbing = false
-			is_crouching = false
-			is_in_combat = false
-		elif Input.is_action_pressed("crouch") and is_walking and not is_climbing and not blocking and not is_swimming:
-			movement_speed = crouch_speed
-			is_running = false
-			enabled_climbing = false
-			is_crouching = true
-			is_in_combat = false
-		#Mobile
-		elif runToggle and not is_climbing and not blocking and not is_swimming and energy >= 0:
-			movement_speed = run_speed
-			is_running = true
-			is_sprinting = false
-			enabled_climbing = false
-			is_in_combat = false	
-		#Computer	
-		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
-				movement_speed = sprint_speed
-				is_sprinting = true
-				enabled_climbing = false
-				is_crouching = false	
-				is_in_combat = false
-		#Mobile	
-		elif sprintToggle  and not is_climbing and not blocking and energy >= 0:
-			movement_speed = sprint_speed
-			is_sprinting = true
-			is_running= false
-			enabled_climbing = false	
-			is_in_combat = false
-			
-		else:  # Walk State and speed
-			movement_speed = walk_speed
-
-			is_sprinting = false
-			is_crouching = false
-			enabled_climbing = true
-			is_crouching = false
-	else:
-		is_walking = false
-		is_running = false
-		is_sprinting = false
-		is_crouching = false
-		is_crouching = false
-	# Strafe and normal movement
-	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
-		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
-		is_aiming = true
-	else:
-		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
-		is_aiming = false
-
-	if Input.is_action_pressed("crouch") and is_swimming:
-		vertical_velocity += Vector3.DOWN * 15 * delta
-		collision_torso.disabled = true
-	else: 
-		collision_torso.disabled = false
-	if 	Input.is_action_pressed("crouch") and not is_swimming:
-		collision_torso.disabled = true
-	else: 
-		collision_torso.disabled = false	
-
-	movement.z = horizontal_velocity.z + vertical_velocity.z
-	movement.x = horizontal_velocity.x + vertical_velocity.x
-	movement.y = vertical_velocity.y
-	move_and_slide(movement, Vector3.UP)
-
-func animationOrderNoCombat():#I'm human, not a robot so i prefer words over node trees
+	speak()
+func animationOrder():#I'm human, not a robot so i prefer words over node trees
 	if not is_in_combat:
 		if is_sprinting and not dodge and not is_swimming:
 			animation.play("sprint")
@@ -547,17 +569,18 @@ func animationOrderNoCombat():#I'm human, not a robot so i prefer words over nod
 			animation.play("frontstep",0.2)	
 		elif is_walking and is_on_floor():
 			animation.play("walk",0.2)	
+		elif speaking:
+			animation.play("speak")	
 		else:
 			animation.play("idle", 0.25)
-			
-			
+
 	if is_in_combat and not is_aiming:
-		if is_attacking:
+		if dash_count2 == 2 or dash_count1 == 2: 
+			animation.play("slide")				
+		elif is_attacking:
 			animation.play("combo punch",0.25)
 		elif is_walking:
 			animation.play_backwards("combat walk")
-		elif dash_count2 == 2 or dash_count1 == 2: 
-			animation.play("slide")				
 		elif tackle:
 			animation.play("tackle")		
 		else: 
@@ -581,9 +604,7 @@ func animationOrderNoCombat():#I'm human, not a robot so i prefer words over nod
 			animation.play("frontstep",0.2)					
 		else:
 			animation.play("combat idle")
-			
-			
-				
+
 func get_save_stats():#saving data
 	return {
 		'filename': get_filename(),

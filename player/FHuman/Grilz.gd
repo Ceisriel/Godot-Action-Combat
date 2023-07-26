@@ -77,6 +77,7 @@ var rightstep =bool()
 var dodge = bool()
 var tackle = bool()
 var can_tackle = true
+var inventorymode = bool()
 #combat stance 
 var is_in_combat = false
 # Mobile 
@@ -492,6 +493,11 @@ func regeneration(delta):
 					energy = maxenergy
 					regenerateEnergy = false	
 func mouseMode():	
+	if Input.is_action_just_pressed("inventory"):
+		inventorymode = true
+	else:
+		inventorymode = false
+	
 	# Toggle mouse mode
 	if Input.is_action_just_pressed("ESC"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -530,26 +536,29 @@ func updateinternface():
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
 func _physics_process(delta: float):#this calls every function 	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
-	movement(delta)
+	if !inventorymode:
+		movement(delta)
+		teleport()	
+		tackle(delta/1.5)
+		dodgeRight(delta/1.5)
+		dodgeBack(delta/1.5)
+		dodgeFront(delta/1.5)
+		dodgeLeft(delta/1.5)
+		slide(delta/1.5)
+		combatStanceBarehanded()
+		comboPunch()
+		guardingStance()
+		animationOrder()
+		speak()
+		
 	gravityAndJumping(delta)
-	comboPunch()
-	guardingStance()
-	tackle(delta/1.5)
-	dodgeRight(delta/1.5)
-	dodgeBack(delta/1.5)
-	dodgeFront(delta/1.5)
-	dodgeLeft(delta/1.5)
-	slide(delta/1.5)
-	animationOrder()
 	updateattributes()
 	updateinternface()
 	mouseMode()
-	teleport()
 	climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
-	combatStanceBarehanded()
-	speak()
+
 func animationOrder():#I'm human, not a robot I understand words not nodes
 	if dash_count1 ==2 or dash_count2 ==2:
 		animation.play("slide")
@@ -666,7 +675,7 @@ func get_save_stats():#saving data
 		}
 	}
 func load_save_stats(stats):#loading saved data
-	global_transform.origin = Vector3(stats.x_pos, stats.y_pos, stats.z_pos)
+	self.global_transform.origin = Vector3(stats.x_pos, stats.y_pos, stats.z_pos)
 	health = stats.stats.health
 	energy = stats.stats.energy
 	vitality = stats.stats.vitality
@@ -726,3 +735,11 @@ func _on_WaterDetector_area_entered(area):
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false
+
+
+func _on_LineEdit_mouse_entered():
+	inventorymode = true 
+
+
+func _on_LineEdit_mouse_exited():
+	inventorymode = false

@@ -102,8 +102,8 @@ export var maxenergy = 25
 export var energy = 25
 export var defense = 0.95 #the lower, the higher the defense, 0 is 100% protection
 export var barehanded_block = 0.9 #the lower, the higher the defense, 0 is 100% protection
-const basedamage = 2
-export var damage = 2
+const basedamage = 1
+export var damage = 1
 export var criticalDefenseChance = 0.50
 export var criticalDefenseMultiplier = 2
 export var criticalChance = 0.01
@@ -233,12 +233,12 @@ func gravityAndJumping(delta):
 func dealDamage():
 	var enemies = hitbox.get_overlapping_bodies()
 	for enemy in enemies:
-		if enemy.has_method("onhit"):
+		if enemy.is_in_group("Enemy"):
 			if randf() <= criticalChance:
 				var criticalDamage = damage * criticalMultiplier
-				enemy.onhit(criticalDamage)
+				enemy.takeDamage(criticalDamage)
 			else: 	
-				enemy.onhit(damage)
+				enemy.takeDamage(damage)
 		if energy < maxenergy: 
 			energy += 0.5
 func takeDamage(damage):#Getting damaged
@@ -551,19 +551,23 @@ func _physics_process(delta: float):#this calls every function
 	combatStanceBarehanded()
 	speak()
 func animationOrder():#I'm human, not a robot I understand words not nodes
+	if dash_count1 ==2 or dash_count2 ==2:
+		animation.play("slide")
 	if not is_in_combat:
 		if is_sprinting and not dodge and not is_swimming:
 			animation.play("sprint")
-		elif dash_count2 == 2 or dash_count1 == 2: 
-			animation.play("slide")	
+		elif is_walking and is_on_floor() and !is_aiming:
+			animation.play("walk",0.2)		
 		elif tackle:
 			animation.play("tackle")
 		elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
 			animation.play_backwards("strafe right front", 0.25)		
 		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
 			animation.play_backwards("strafe left front", 0.25)	
-		elif Input.is_action_pressed("backward") and is_on_floor() and Input.is_action_pressed("aim") and !is_swimming :
-			animation.play_backwards("walk")	
+		elif Input.is_action_pressed("backward") and is_on_floor() and is_aiming and !is_swimming :
+			animation.play_backwards("walk")
+		elif Input.is_action_pressed("forward") and is_on_floor() and is_aiming and !is_swimming :
+			animation.play("walk")				
 		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("forward") :
 			animation.play("strafe right front", 0.25)
 		elif is_aiming  and Input.is_action_pressed("left") and Input.is_action_pressed("forward") :
@@ -580,8 +584,6 @@ func animationOrder():#I'm human, not a robot I understand words not nodes
 			animation.play_backwards("leftstep",0.25)	
 		elif frontstep:
 			animation.play("frontstep",0.2)	
-		elif is_walking and is_on_floor():
-			animation.play("walk",0.2)	
 		elif speaking:
 			animation.play("speak")	
 		elif Input.is_action_pressed("guard"):

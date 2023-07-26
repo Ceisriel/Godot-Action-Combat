@@ -25,10 +25,10 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 export var gravity = 9.8
 export var jump_force = 7
 export var crouch_speed = 2.75
-export var walk_speed = 4
-export var run_speed = 7.7
-const basesprint = 15
-export var sprint_speed = 15
+export var walk_speed = 3
+export var run_speed = 6
+const basesprint = 9
+export var sprint_speed = 9
 export var teleport_distance = 35
 const basedash = 25
 export var dash_power = 25
@@ -59,6 +59,7 @@ var mousemode = bool()
 var staggered = false
 var blocking = false
 var dodge = bool()
+
 # Mobile 
 var runToggle := false
 var sprintToggle := false
@@ -343,9 +344,10 @@ func _physics_process(delta: float):
 
 
 	# Attacking while moving
-	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming:
+	if Input.is_action_pressed("attack") && (Input.is_action_pressed("slide")) and not is_swimming and not is_swimming and not is_crouching and not is_running and not is_sprinting:
 		horizontal_velocity = direction * 12
-	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming:
+
+	elif Input.is_action_pressed("attack") and dash_count2 == 0 and is_on_floor() and not mousemode and not dodge and not is_swimming and not is_running and not is_sprinting:
 		horizontal_velocity = direction * 0.70
 	else:
 		horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)

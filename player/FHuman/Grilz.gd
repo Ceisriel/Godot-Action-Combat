@@ -11,7 +11,7 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-onready var animation = $Girlz/AnimationPlayer
+onready var animation = $FemaleHuman/AnimationPlayer
 onready var hook = $Camroot/Camera_holder/Camera/Hook
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
@@ -21,8 +21,8 @@ export (NodePath) var PlayerCharacterMesh
 export onready var player_mesh = get_node(PlayerCharacterMesh)
 # movement variables
 export var gravity = 9.8
-export var jump_force = 7
-export var crouch_speed = 2.75
+export var jump_force = 5
+export var crouch_speed = 1
 export var walk_speed = 3
 export var run_speed = 6
 const basesprint = 9
@@ -154,12 +154,15 @@ func movement(delta):
 			enabled_climbing = false
 			is_crouching = false
 			is_in_combat = false
-		elif Input.is_action_pressed("crouch") and is_walking and not is_climbing and not blocking and not is_swimming:
+			is_aiming = false
+		elif Input.is_action_pressed("crouch") and is_walking and !is_climbing and !is_swimming:
 			movement_speed = crouch_speed
 			is_running = false
 			enabled_climbing = false
 			is_crouching = true
 			is_in_combat = false
+			is_aiming = false
+			
 		#Mobile
 		elif runToggle and not is_climbing and not blocking and not is_swimming and energy >= 0:
 			movement_speed = run_speed
@@ -167,6 +170,7 @@ func movement(delta):
 			is_sprinting = false
 			enabled_climbing = false
 			is_in_combat = false	
+			is_aiming = false
 		#Computer	
 		elif Input.is_action_pressed("sprint") and is_walking and not is_climbing and not blocking and not is_swimming and energy >= 0:
 				movement_speed = sprint_speed
@@ -174,6 +178,7 @@ func movement(delta):
 				enabled_climbing = false
 				is_crouching = false	
 				is_in_combat = false
+				is_aiming = false
 		#Mobile	
 		elif sprintToggle  and not is_climbing and not blocking and energy >= 0:
 			movement_speed = sprint_speed
@@ -181,6 +186,7 @@ func movement(delta):
 			is_running= false
 			enabled_climbing = false	
 			is_in_combat = false
+			is_aiming = false
 			
 		else:  # Walk State and speed
 			movement_speed = walk_speed
@@ -196,12 +202,11 @@ func movement(delta):
 		is_crouching = false
 		
 	# Strafe and normal movement
-	if Input.is_action_pressed("aim") and not is_running and not is_sprinting:  # Aim/Strafe input and mechanics
+	if is_aiming and !is_running and !is_sprinting:  # Aim/Strafe input and mechanics
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, $Camroot/Camera_holder.rotation.y, delta * angular_acceleration)
-		is_aiming = true
 	else:
 		player_mesh.rotation.y = lerp_angle(player_mesh.rotation.y, atan2(direction.x, direction.z) - rotation.y, delta * angular_acceleration)
-		is_aiming = false
+
 
 	if Input.is_action_pressed("crouch") and is_swimming:
 		vertical_velocity += Vector3.DOWN * 15 * delta
@@ -217,20 +222,6 @@ func movement(delta):
 	movement.x = horizontal_velocity.x + vertical_velocity.x
 	movement.y = vertical_velocity.y
 	move_and_slide(movement, Vector3.UP)
-func gravityAndJumping(delta):
-# Gravity and stop sliding on floors
-	if not is_on_floor() and not is_swimming:
-		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
-		is_falling = true
-		is_swimming = false
-	else:
-		vertical_velocity = -get_floor_normal() * gravity / 2.5
-		is_falling = false
-# Jump
-	if Input.is_action_just_pressed("jump") and is_on_floor():
-		vertical_velocity = Vector3.UP * jump_force
-	if Input.is_action_pressed("jump") and is_swimming:
-		vertical_velocity = Vector3.UP * 15 * delta
 func dealDamage():
 	var enemies = hitbox.get_overlapping_bodies()
 	for enemy in enemies:
@@ -260,10 +251,10 @@ func takeDamage(damage):#Getting damaged
 func combatStanceBarehanded():#barehanded combat stace
 	if  Input.is_action_just_pressed("Combat"):
 		is_in_combat = !is_in_combat			
+
 func comboPunch():#Barehanded base attack
 	if is_in_combat:
 		if Input.is_action_pressed("attack"):
-			horizontal_velocity = direction * walk_speed/1.5
 			is_attacking = true 
 		else:
 			is_attacking = false	
@@ -452,7 +443,7 @@ func climbing(delta):
 			is_climbing = true
 		else:
 			is_climbing = false
-	if is_on_wall() or is_on_floor() or is_on_ceiling() or ray_cast:
+	if is_on_wall() or is_on_ceiling() or ray_cast:
 		if  Input.is_action_pressed("jump") and enabled_climbing:
 			if strength >= 1:
 				vertical_velocity = Vector3.UP * climb_speed 
@@ -497,7 +488,8 @@ func mouseMode():
 		inventorymode = true
 	else:
 		inventorymode = false
-	
+	if Input.is_action_just_pressed("aim"):
+		is_aiming = !is_aiming
 	# Toggle mouse mode
 	if Input.is_action_just_pressed("ESC"):
 		if Input.get_mouse_mode() == Input.MOUSE_MODE_CAPTURED:
@@ -548,110 +540,208 @@ func _physics_process(delta: float):#this calls every function
 		combatStanceBarehanded()
 		comboPunch()
 		guardingStance()
-		animationOrder()
-		speak()
-		
-	gravityAndJumping(delta)
+		if !is_swimming:
+			if is_climbing:
+				if Input.is_action_pressed("jump"):
+					animationOrderClimbing()
+				else:
+					if !is_on_floor():
+						animation.play("idle")	
+			if !is_aiming:
+				if !is_in_combat:
+					animationOrderOutOfCombat()
+					speak()	
+				elif is_in_combat:
+					animatiOnorderInCombat()
+				elif is_crouching:
+					animationOrderCrouch()	
+			elif is_aiming:
+				if is_in_combat:
+					animationOrderCombatStrafe()
+				elif !is_in_combat:
+					animationOrderStrafe()		
+		elif is_swimming:
+			animationOrderInWater()		
+	
 	updateattributes()
 	updateinternface()
 	mouseMode()
 	climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
+	
+	# Gravity and stop sliding on floors
+	if not is_on_floor() and not is_swimming:
+		vertical_velocity += Vector3.DOWN * gravity * 2 * delta
+		is_falling = true
+		is_swimming = false
+	else:
+		vertical_velocity = -get_floor_normal() * gravity / 2.5
+		is_falling = false
+	# Jump
+	if Input.is_action_just_pressed("jump") and is_on_floor():
+		vertical_velocity = Vector3.UP * jump_force
+	if Input.is_action_pressed("jump") and is_swimming:
+		vertical_velocity = Vector3.UP * 15 * delta
 
-func animationOrder():#I'm human, not a robot I understand words not nodes
+
+func animationOrderOutOfCombat(): #normal
 	if dash_count1 ==2 or dash_count2 ==2:
-		animation.play("slide")
-	if not is_in_combat:
-		if is_sprinting and not dodge and not is_swimming:
-			animation.play("sprint")
-		elif is_walking and is_on_floor() and !is_aiming:
-			animation.play("walk",0.2)		
+		animation.play("slide",0.05)	
+#out of combat normal movement		
+	if !is_in_combat and !is_swimming and is_on_floor() and !is_aiming:
+		if is_sprinting:
+			animation.play("sprint cycle")
+		elif is_walking and Input.is_action_pressed("crouch"):
+			animation.play("crouch walk cycle",0.25)				
+		elif is_walking:
+			animation.play("walk cycle",0.2)
 		elif tackle:
-			animation.play("tackle")
-		elif is_aiming and Input.is_action_pressed("left") and Input.is_action_pressed("backward"):
-			animation.play_backwards("strafe right front", 0.25)		
-		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("backward"):
-			animation.play_backwards("strafe left front", 0.25)	
-		elif Input.is_action_pressed("backward") and is_on_floor() and is_aiming and !is_swimming :
-			animation.play_backwards("walk")
-		elif Input.is_action_pressed("forward") and is_on_floor() and is_aiming and !is_swimming :
-			animation.play("walk")				
-		elif is_aiming and Input.is_action_pressed("right") and Input.is_action_pressed("forward") :
-			animation.play("strafe right front", 0.25)
-		elif is_aiming  and Input.is_action_pressed("left") and Input.is_action_pressed("forward") :
-			animation.play("strafe left front", 0.25)	
-		elif is_aiming  and Input.is_action_pressed("left"):
-			animation.play("strafe left", 0.25)
-		elif is_aiming  and Input.is_action_pressed("right"):
-			animation.play("strafe right", 0.25)					
-		elif backstep:
-			animation.play("backstep",0.25)
-		elif leftstep:
-			animation.play("leftstep",0.25)	
-		elif rightstep:
-			animation.play_backwards("leftstep",0.25)	
-		elif frontstep:
-			animation.play("frontstep",0.2)	
+			animation.play("tackle")			
 		elif speaking:
 			animation.play("speak")	
 		elif Input.is_action_pressed("guard"):
 			animation.play("wave")
+		elif Input.is_action_pressed("crouch"):
+			animation.play("crouch idle",0.45)	
 		else:
 			animation.play("idle", 0.25)
-
-	if is_in_combat and !is_aiming:
-		if dash_count2 == 2 or dash_count1 == 2: 
-			animation.play("slide")				
-		elif is_attacking:
-			animation.play("combo punch",0.25)
-		elif is_guarding and is_walking:
-			animation.play_backwards("barehanded guard walk",0.3)			
-		elif is_guarding:
-			animation.play("guard",0.1)			
-		elif is_walking:
-			animation.play_backwards("combat walk", 0.25)
-		elif tackle:
-			animation.play("tackle",0.1)		
-		else: 
-			animation.play("combat idle", 0.25)
-			
-	if is_guarding and is_aiming:
-		if  Input.is_action_pressed("forward"):
-			animation.play_backwards("barehanded guard walk",0.3)
-		elif  Input.is_action_pressed("backward"):
-			animation.play("barehanded guard walk",0.3)
-		elif Input.is_action_pressed("left"):
-			animation.play_backwards("barehanded guard strafe",0.3)
-		elif Input.is_action_pressed("right"):
-			animation.play("barehanded guard strafe",0.3)	
-		else:
-			animation.play("guard",0.1)			
-			
-	if is_in_combat and is_aiming and !is_guarding and not Input.is_action_pressed("guard"):
-		if backstep:
+func animationOrderStrafe(): #strafe
+	#dodge section is prioritized
+		if dash_countback ==2:
 			animation.play("backstep",0.25)
-		elif leftstep:
+		elif dash_countleft ==2:
 			animation.play("leftstep",0.25)	
-		elif rightstep:
+		elif dash_countright ==2:
 			animation.play_backwards("leftstep",0.25)	
-		elif frontstep:
-			animation.play("frontstep",0.2)			
-		elif is_guarding:
-			animation.play("guard",0.3)			
-		elif is_attacking:
-			animation.play("combo punch",0.25)			
-		elif Input.is_action_pressed("forward"):
-			animation.play_backwards("combat walk")	
+		elif dash_countforward ==2:
+			animation.play("frontstep",0.2)		
+	
+	
+		elif Input.is_action_pressed("forward") and Input.is_action_pressed("left"):
+			animation.play("strafe left front",0.25) 				
+		elif Input.is_action_pressed("backward") and Input.is_action_pressed("left"):
+			animation.play_backwards("strafe right front",0.25)	
+		elif Input.is_action_pressed("backward") and Input.is_action_pressed("right"):
+			animation.play_backwards("strafe left front",0.25)				
+		elif Input.is_action_pressed("forward") and Input.is_action_pressed("right"):
+			animation.play("strafe right front",0.25)			
 		elif Input.is_action_pressed("backward"):
-			animation.play("combat walk")		
-		elif Input.is_action_pressed("right"):
-			animation.play("combat strafe")		
+			animation.play_backwards("walk cycle",0.25)
 		elif Input.is_action_pressed("left"):
-			animation.play_backwards("combat strafe")
+			animation.play("strafe left",0.25)	
+		elif Input.is_action_pressed("right"):
+			animation.play("strafe right",0.25)
+		elif Input.is_action_pressed("forward"):
+			animation.play("walk cycle",0.25)		
+	#crouching section 
+		elif Input.is_action_pressed("crouch"):
+			if Input.is_action_pressed("forward"):
+				animation.play("crouch walk cycle",0.25)	
+			elif Input.is_action_pressed("backward"):
+				animation.play_backwards("crouch walk cycle",0.25)
+			elif Input.is_action_pressed("left"):
+				animation.play_backwards("crouch walk cycle",0.25)	
+			elif Input.is_action_pressed("right"):
+				animation.play_backwards("crouch walk cycle",0.25)
+			else:
+				animation.play("crouch",0.25)
+	#input section		
+		elif tackle:
+			animation.play("tackle")			
+		elif Input.is_action_pressed("attack"):
+			animation.play("speak")	
+		elif Input.is_action_pressed("guard"):
+			animation.play("wave")		
 		else:
-			animation.play("combat idle")
+			animation.play("idle",0.25)		
+			
+func animatiOnorderInCombat(): #barehanded combat stance
+		if dash_count1 ==2 or dash_count2 ==2:
+			animation.play("slide",0.05)
+		elif is_on_floor():
+			if is_guarding and is_walking and !is_aiming:
+				animation.play("barehanded guard walk cycle",0.2)
+			elif is_guarding and Input.is_action_pressed("forward") and is_aiming:
+				animation.play("barehanded guard walk cycle",0.2)			
+			elif is_guarding and Input.is_action_pressed("left") and is_aiming:
+				animation.play_backwards("barehanded guard strafe cycle",0.2)	
+			elif is_guarding and Input.is_action_pressed("right") and is_aiming:
+				animation.play("barehanded guard strafe cycle",0.2)
+			elif is_guarding and Input.is_action_pressed("backward") and is_aiming:
+				animation.play_backwards("barehanded guard walk cycle",0.2)
+			elif is_attacking and is_walking:
+				animation.play("barehanded base attack walking cycle",0.2,1.42)
+			elif is_guarding and !is_walking:
+				animation.play("barehanded guard idle",0.3)	
+			elif is_attacking and !is_walking:
+				animation.play("barehanded base attack still",0.2)
+			elif is_walking:
+				animation.play("barehanded walk cycle",0.2)
+			elif tackle:
+				animation.play("tackle",0.15)
+			else:
+				animation.play("barehanded idle",0.2)
+func animationOrderCombatStrafe(): #barehanded combat stance strafe
+	#dodge section is prioritized
+		if dash_countback ==2:
+			animation.play("backstep",0.25)
+		elif dash_countleft ==2:
+			animation.play("leftstep",0.25)	
+		elif dash_countright ==2:
+			animation.play_backwards("leftstep",0.25)	
+		elif dash_countforward ==2:
+			animation.play("frontstep",0.2)			
+	#everything else
+		elif is_guarding and Input.is_action_pressed("forward"):
+			animation.play("barehanded guard walk cycle",0.2)
+		elif is_guarding and Input.is_action_pressed("backward"):
+			animation.play_backwards("barehanded guard walk cycle",0.2)			
+		elif is_guarding and Input.is_action_pressed("left"):
+			animation.play_backwards("barehanded guard strafe cycle",0.2)	
+		elif is_guarding and Input.is_action_pressed("right"):
+			animation.play("barehanded guard strafe cycle",0.2)
+		elif is_guarding:
+			animation.play("barehanded guard idle",0.2)
+		elif is_attacking and Input.is_action_pressed("forward"):
+				animation.play("barehanded base attack walking cycle",0.2,1.42)
+		elif is_attacking and Input.is_action_pressed("backward"):#placeholder
+			animation.play_backwards("barehanded base attack walking cycle",0.2)
+		elif is_attacking and Input.is_action_pressed("left"):#placeholder
+			animation.play_backwards("Rest",0.2)
+		elif is_attacking and Input.is_action_pressed("right"):#placeholder
+			animation.play_backwards("fall cycle",0.2)	
+		elif is_attacking:
+			animation.play("barehanded base attack still",0.2)
+		elif Input.is_action_pressed("forward"):
+			animation.play("barehanded walk cycle",0.2)
+		elif Input.is_action_pressed("backward"):
+			animation.play("barehanded walk cycle",0.2)
+		elif Input.is_action_pressed("right"):
+			animation.play("barehanded strafe",0.2)
+		elif Input.is_action_pressed("left"):
+			animation.play_backwards("barehanded strafe",0.2)	
+		elif tackle:
+			animation.play("tackle",0.15)			
+		else:
+			animation.play("barehanded idle",0.2)	
 
+func animationOrderCrouch():
+	if is_walking:
+		animation.play("crouch walk cycle",0.25)
+	else:
+		animation.play("crouch idle",0.25)				
+
+func animationOrderInWater():
+	if is_walking:
+		animation.play("swim cycle",0.25)
+	else:
+		animation.play("treading water cycle",0.25)	
+
+func animationOrderClimbing():
+	if is_on_wall():
+		if is_climbing:
+			animation.play("climb cycle",0.2)
 
 func get_save_stats():#saving data
 	return {
@@ -735,11 +825,7 @@ func _on_WaterDetector_area_entered(area):
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false
-
-
 func _on_LineEdit_mouse_entered():
 	inventorymode = true 
-
-
 func _on_LineEdit_mouse_exited():
 	inventorymode = false

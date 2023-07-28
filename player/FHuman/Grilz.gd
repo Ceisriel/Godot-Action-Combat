@@ -12,7 +12,6 @@ onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
 onready var animation = $FHuman/AnimationPlayer
-onready var hook = $Camroot/Camera_holder/Camera/Hook
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
 var velocity := Vector3()
@@ -55,6 +54,11 @@ var dash_count2 : int = 0
 var dash_timer2 : float = 0.0
 # Condition States
 var enabled_climbing = true
+var exercise = bool()
+var Usquat = bool()
+var squat = bool()
+var pressing = bool()
+var situp = bool()
 var is_falling = bool()
 var is_swimming =bool()
 var is_rolling = bool()
@@ -250,8 +254,7 @@ func takeDamage(damage):#Getting damaged
 		add_child(text)
 func combatStanceBarehanded():#barehanded combat stace
 	if  Input.is_action_just_pressed("Combat"):
-		is_in_combat = !is_in_combat			
-
+		is_in_combat = !is_in_combat
 func comboPunch():#Barehanded base attack
 	if is_in_combat:
 		if Input.is_action_pressed("attack"):
@@ -498,6 +501,27 @@ func mouseMode():
 		else:
 			Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 			mousemode = false
+	if 	Input.is_action_just_pressed("exercise"):
+		if !is_in_combat:
+			exercise = !exercise
+	if exercise:
+		if 	Input.is_action_just_pressed("guard"):	
+			squat = !squat	
+			situp = false
+			pressing = false
+		elif Input.is_action_just_pressed("attack"):	
+			pressing = !pressing
+			situp = false
+			squat = false
+		elif Input.is_action_just_pressed("jump"):
+			squat = false
+			pressing = false
+			situp = !situp
+		elif Input.is_action_just_pressed("Q"):
+			squat = false
+			pressing = false
+			situp = false
+			Usquat = !Usquat
 func updateattributes():
 	# Update attribute and stats 
 	climb_speed = base_climb_speed * strength
@@ -507,7 +531,6 @@ func updateattributes():
 	damage = basedamage * strength
 	maxhealth = basemaxhealth * vitality
 	maxenergy = basemaxenergy * intelligence
-	
 	criticallabel.text =  "%.3f" % criticalChance
 	agillabel.text = "%.3f" % agility
 	acclabel.text = "%.3f" % accuracy
@@ -529,39 +552,19 @@ func updateinternface():
 func _physics_process(delta: float):#this calls every function 	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	if !inventorymode:
-		movement(delta)
-		teleport()	
-		tackle(delta/1.5)
-		dodgeRight(delta/1.5)
-		dodgeBack(delta/1.5)
-		dodgeFront(delta/1.5)
-		dodgeLeft(delta/1.5)
-		slide(delta/1.5)
+		if !exercise:
+			movement(delta)
+			teleport()	
+			tackle(delta/1.5)
+			dodgeRight(delta/1.5)
+			dodgeBack(delta/1.5)
+			dodgeFront(delta/1.5)
+			dodgeLeft(delta/1.5)
+			slide(delta/1.5)
+			comboPunch()
+			guardingStance()
 		combatStanceBarehanded()
-		comboPunch()
-		guardingStance()
-		if !is_swimming:
-			if is_climbing:
-				if Input.is_action_pressed("jump"):
-					animationOrderClimbing()
-				else:
-					if !is_on_floor():
-						animation.play("idle")	
-			if !is_aiming:
-				if !is_in_combat:
-					animationOrderOutOfCombat()
-					speak()	
-				elif is_in_combat:
-					animatiOnorderInCombat()
-				elif is_crouching:
-					animationOrderCrouch()	
-			elif is_aiming:
-				if is_in_combat:
-					animationOrderCombatStrafe()
-				elif !is_in_combat:
-					animationOrderStrafe()		
-		elif is_swimming:
-			animationOrderInWater()		
+		animations()
 	
 	updateattributes()
 	updateinternface()
@@ -583,8 +586,43 @@ func _physics_process(delta: float):#this calls every function
 		vertical_velocity = Vector3.UP * jump_force
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
-
-
+func animations():
+	if !exercise:
+		if !is_swimming:
+			if is_climbing:
+				if Input.is_action_pressed("jump"):
+					animationOrderClimbing()
+				else:
+					if !is_on_floor():
+						animation.play("idle")	
+			if !is_aiming:
+				if !is_in_combat:
+					animationOrderOutOfCombat()
+					speak()	
+				elif is_in_combat:
+					animatiOnorderInCombat()
+				elif is_crouching:
+					animationOrderCrouch()	
+			elif is_aiming:
+				if is_in_combat:
+					animationOrderCombatStrafe()
+				elif !is_in_combat:
+					animationOrderStrafe()
+		elif is_swimming:
+			animationOrderInWater()
+	else:
+		animationOrderExercise()
+func animationOrderExercise():
+	if squat:
+		animation.play("squat",0.25,0.95)
+	elif pressing:
+		animation.play("push up",0.45)	
+	elif situp:
+		animation.play("sit up",0.75)
+	elif Usquat:
+		animation.play("unilateral squat",0.75)	
+	else:
+		animation.play("warm up",0.25)	
 func animationOrderOutOfCombat(): #normal
 	if dash_count1 ==2 or dash_count2 ==2:
 		animation.play("slide",0.05)	
@@ -655,7 +693,6 @@ func animationOrderStrafe(): #strafe
 			animation.play("wave")		
 		else:
 			animation.play("idle",0.25)		
-			
 func animatiOnorderInCombat(): #barehanded combat stance
 		if dash_count1 ==2 or dash_count2 ==2:
 			animation.play("slide",0.05)
@@ -725,24 +762,20 @@ func animationOrderCombatStrafe(): #barehanded combat stance strafe
 			animation.play("tackle",0.15)			
 		else:
 			animation.play("barehanded idle",0.2)	
-
 func animationOrderCrouch():
 	if is_walking:
 		animation.play("crouch walk cycle",0.25)
 	else:
 		animation.play("crouch idle",0.25)				
-
 func animationOrderInWater():
 	if is_walking:
 		animation.play("swim cycle",0.25)
 	else:
 		animation.play("treading water cycle",0.25)	
-
 func animationOrderClimbing():
 	if is_on_wall():
 		if is_climbing:
 			animation.play("climb cycle",0.2)
-
 func get_save_stats():#saving data
 	return {
 		'filename': get_filename(),

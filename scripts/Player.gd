@@ -59,6 +59,8 @@ var Usquat = bool()
 var squat = bool()
 var pressing = bool()
 var situp = bool()
+var dance1 = bool()
+var dance2 = bool()
 var is_falling = bool()
 var is_swimming =bool()
 var is_rolling = bool()
@@ -132,6 +134,11 @@ var floatingtext = preload("res://UI/floatingtext.tscn")
 
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
+func cameramove(delta):
+	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
+	movement_speed = 0
+	angular_acceleration = 10
+	acceleration = 15
 func movement(delta):
 	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
 	movement_speed = 0
@@ -511,19 +518,45 @@ func mouseMode():
 			squat = !squat	
 			situp = false
 			pressing = false
+			dance1 = false
+			dance2 = false
+			Usquat = false
 		elif Input.is_action_just_pressed("attack"):	
 			pressing = !pressing
+			Usquat = false
+			dance1 = false
+			dance2 = false
 			situp = false
 			squat = false
 		elif Input.is_action_just_pressed("jump"):
 			squat = false
 			pressing = false
+			dance1 = false
+			dance2 = false
+			Usquat = false
 			situp = !situp
 		elif Input.is_action_just_pressed("Q"):
 			squat = false
 			pressing = false
 			situp = false
+			dance1 = false
+			dance2 = false
 			Usquat = !Usquat
+		elif Input.is_action_just_pressed("1"):
+			squat = false
+			pressing = false
+			situp = false
+			Usquat = false
+			dance1 = !dance1
+		elif Input.is_action_just_pressed("2"):
+			squat = false
+			pressing = false
+			situp = false
+			Usquat = false
+			dance1 = false
+			dance2 = !dance2
+					
+		
 func updateattributes():
 	# Update attribute and stats 
 	climb_speed = base_climb_speed * strength
@@ -626,7 +659,11 @@ func animationOrderExercise():
 	elif situp:
 		animation.play("sit up",0.75)
 	elif Usquat:
-		animation.play("unilateral squat",0.75)	
+		animation.play("unilateral squat",0.75)
+	elif dance1:
+		animation.play("dance uprock",0.75)
+	elif dance2:
+		animation.play("dance bellydance",0.75)	
 	else:
 		animation.play("warm up",0.25)	
 func animationOrderOutOfCombat(): #normal

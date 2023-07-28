@@ -2,26 +2,34 @@
 
 [sub_resource type="ProceduralSky" id=1]
 radiance_size = 4
-sky_horizon_color = Color( 0.976471, 0.639216, 0, 1 )
-ground_bottom_color = Color( 0.0156863, 0.121569, 0.223529, 1 )
+sky_top_color = Color( 0.568627, 0.956863, 0.984314, 1 )
+sky_horizon_color = Color( 0, 0.992157, 0.945098, 1 )
+sky_curve = 0.206766
+ground_bottom_color = Color( 0.0235294, 0.235294, 0.439216, 1 )
 ground_horizon_color = Color( 0.00392157, 0.00784314, 0.368627, 1 )
-sun_color = Color( 0.980392, 0.882353, 0.729412, 1 )
-texture_size = 1
+ground_curve = 0.196983
+sun_color = Color( 0.196078, 0.717647, 0.717647, 1 )
+sun_angle_min = 8.0
+sun_angle_max = 180.0
+sun_curve = 0.0901251
+sun_energy = 5.0
 
 [resource]
 background_mode = 2
 background_sky = SubResource( 1 )
-ambient_light_color = Color( 0.988235, 0.607843, 0, 1 )
-dof_blur_far_enabled = true
-dof_blur_far_distance = 95.0
+background_color = Color( 0.639216, 0.764706, 0.964706, 1 )
+ambient_light_color = Color( 0.403922, 0.372549, 0.964706, 1 )
+fog_color = Color( 0.156863, 0.321569, 0.490196, 1 )
+fog_sun_color = Color( 0, 0.0901961, 1, 1 )
+fog_sun_amount = 0.49
+fog_depth_end = 1689.7
+dof_blur_far_distance = 8192.0
 dof_blur_far_amount = 0.08
 dof_blur_far_quality = 0
-dof_blur_near_enabled = true
 dof_blur_near_distance = 0.16
 dof_blur_near_transition = 0.29
 dof_blur_near_quality = 0
 glow_enabled = true
-glow_intensity = 0.08
 glow_strength = 0.0
 glow_bloom = 1.0
 glow_blend_mode = 0

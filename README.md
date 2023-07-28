@@ -24,3 +24,5 @@ it has:
 -Optional strafing
 
 -Melee combat with a crossair instead of lock on or tab target
+
+-Exercise mode for fitness games and dancing 

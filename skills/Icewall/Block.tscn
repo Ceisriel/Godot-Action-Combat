@@ -1,4 +1,4 @@
-[gd_scene load_steps=37 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://skills/Icewall/textures/blockFade.png" type="Texture" id=1]
 [ext_resource path="res://skills/Icewall/textures/blockNorm.png" type="Texture" id=2]
@@ -57,64 +57,6 @@ shader_param/intensity = 0.0
 shader_param/cutoff = 10.0
 shader_param/color = Color( 0, 1, 0.933333, 1 )
 shader_param/proximity_fade_dist = 2.0
-
-[sub_resource type="Curve" id=12]
-min_value = -360.0
-max_value = 360.0
-_data = [ Vector2( 0, 360 ), 0.0, -621.465, 0, 0, Vector2( 1, 85.5352 ), 0.0, 0.0, 0, 0 ]
-
-[sub_resource type="CurveTexture" id=35]
-curve = SubResource( 12 )
-
-[sub_resource type="Curve" id=14]
-_data = [ Vector2( 0, 1 ), 0.0, -0.363999, 0, 0, Vector2( 1, 0.322454 ), -0.336253, 0.0, 0, 0 ]
-
-[sub_resource type="CurveTexture" id=36]
-curve = SubResource( 14 )
-
-[sub_resource type="ParticlesMaterial" id=16]
-emission_shape = 2
-emission_box_extents = Vector3( 8, 1, 2 )
-direction = Vector3( 0, 1, 0 )
-spread = 30.0
-gravity = Vector3( 0, -2, 0 )
-initial_velocity = 2.0
-angular_velocity = 100.0
-angular_velocity_random = 0.39
-angular_velocity_curve = SubResource( 35 )
-damping = 0.5
-damping_random = 0.36
-angle = 360.0
-angle_random = 1.0
-scale = 0.05
-scale_random = 0.86
-scale_curve = SubResource( 36 )
-
-[sub_resource type="SpatialMaterial" id=17]
-params_billboard_mode = 3
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
-emission_enabled = true
-emission = Color( 0, 0, 0, 1 )
-emission_energy = 1.0
-emission_operator = 0
-emission_on_uv2 = false
-
-[sub_resource type="ArrayMesh" id=18]
-resource_name = "iceBlock_shard"
-surfaces/0 = {
-"aabb": AABB( -0.651644, -0.332775, -1.3916, 1.54309, 1.02934, 2.45622 ),
-"array_data": PoolByteArray( 46, 75, 164, 190, 199, 184, 129, 60, 162, 82, 149, 62, 154, 251, 150, 7, 34, 44, 220, 55, 46, 75, 164, 190, 199, 184, 129, 60, 162, 82, 149, 62, 173, 222, 149, 1, 34, 44, 220, 55, 46, 75, 164, 190, 199, 184, 129, 60, 162, 82, 149, 62, 198, 218, 156, 11, 34, 44, 220, 55, 46, 75, 164, 190, 199, 184, 129, 60, 162, 82, 149, 62, 210, 193, 151, 2, 34, 44, 220, 55, 172, 148, 94, 190, 10, 124, 195, 62, 128, 26, 120, 63, 154, 251, 150, 7, 150, 41, 241, 55, 172, 148, 94, 190, 10, 124, 195, 62, 128, 26, 120, 63, 198, 218, 156, 11, 150, 41, 241, 55, 172, 148, 94, 190, 10, 124, 195, 62, 128, 26, 120, 63, 229, 94, 135, 17, 150, 41, 241, 55, 172, 148, 94, 190, 10, 124, 195, 62, 128, 26, 120, 63, 240, 4, 82, 48, 211, 46, 7, 56, 172, 148, 94, 190, 10, 124, 195, 62, 128, 26, 120, 63, 12, 94, 150, 110, 150, 41, 241, 55, 210, 56, 163, 190, 91, 185, 164, 190, 112, 49, 129, 191, 173, 222, 149, 1, 9, 46, 210, 55, 210, 56, 163, 190, 91, 185, 164, 190, 112, 49, 129, 191, 210, 193, 151, 2, 9, 46, 210, 55, 210, 56, 163, 190, 91, 185, 164, 190, 112, 49, 129, 191, 255, 139, 118, 2, 9, 46, 210, 55, 210, 56, 163, 190, 91, 185, 164, 190, 112, 49, 129, 191, 174, 130, 71, 106, 9, 46, 210, 55, 34, 210, 38, 191, 156, 163, 196, 62, 14, 32, 178, 191, 154, 251, 150, 7, 211, 46, 18, 56, 34, 210, 38, 191, 156, 163, 196, 62, 14, 32, 178, 191, 173, 222, 149, 1, 211, 46, 18, 56, 34, 210, 38, 191, 156, 163, 196, 62, 14, 32, 178, 191, 229, 94, 135, 17, 211, 46, 18, 56, 34, 210, 38, 191, 156, 163, 196, 62, 14, 32, 178, 191, 174, 130, 71, 106, 211, 46, 18, 56, 34, 210, 38, 191, 156, 163, 196, 62, 14, 32, 178, 191, 108, 98, 203, 13, 25, 48, 27, 56, 166, 84, 74, 62, 234, 160, 45, 190, 142, 35, 135, 63, 198, 218, 156, 11, 161, 41, 151, 55, 166, 84, 74, 62, 234, 160, 45, 190, 142, 35, 135, 63, 210, 193, 151, 2, 161, 41, 151, 55, 166, 84, 74, 62, 234, 160, 45, 190, 142, 35, 135, 63, 240, 4, 82, 48, 208, 47, 27, 56, 166, 84, 74, 62, 234, 160, 45, 190, 142, 35, 135, 63, 255, 139, 118, 2, 161, 41, 151, 55, 166, 84, 74, 62, 234, 160, 45, 190, 142, 35, 135, 63, 73, 229, 102, 10, 161, 41, 151, 55, 38, 62, 186, 62, 132, 181, 146, 62, 60, 69, 136, 63, 240, 4, 82, 48, 208, 47, 1, 56, 38, 62, 186, 62, 132, 181, 146, 62, 60, 69, 136, 63, 12, 94, 150, 110, 113, 40, 19, 56, 38, 62, 186, 62, 132, 181, 146, 62, 60, 69, 136, 63, 73, 229, 102, 10, 66, 41, 94, 55, 38, 62, 186, 62, 132, 181, 146, 62, 60, 69, 136, 63, 83, 31, 180, 122, 113, 40, 19, 56, 160, 53, 100, 63, 109, 97, 170, 190, 210, 10, 129, 191, 255, 139, 118, 2, 211, 46, 92, 55, 160, 53, 100, 63, 109, 97, 170, 190, 210, 10, 129, 191, 174, 130, 71, 106, 211, 46, 92, 55, 160, 53, 100, 63, 109, 97, 170, 190, 210, 10, 129, 191, 108, 98, 203, 13, 25, 48, 121, 56, 160, 53, 100, 63, 109, 97, 170, 190, 210, 10, 129, 191, 73, 229, 102, 10, 211, 46, 92, 55, 160, 53, 100, 63, 109, 97, 170, 190, 210, 10, 129, 191, 83, 31, 180, 122, 83, 44, 121, 56, 153, 178, 253, 62, 72, 82, 50, 63, 8, 76, 105, 191, 229, 94, 135, 17, 80, 45, 69, 56, 153, 178, 253, 62, 72, 82, 50, 63, 8, 76, 105, 191, 12, 94, 150, 110, 80, 45, 69, 56, 153, 178, 253, 62, 72, 82, 50, 63, 8, 76, 105, 191, 108, 98, 203, 13, 211, 46, 81, 56, 153, 178, 253, 62, 72, 82, 50, 63, 8, 76, 105, 191, 83, 31, 180, 122, 80, 45, 69, 56 ),
-"array_index_data": PoolByteArray( 0, 0, 13, 0, 4, 0, 12, 0, 28, 0, 16, 0, 30, 0, 22, 0, 25, 0, 18, 0, 2, 0, 5, 0, 11, 0, 21, 0, 27, 0, 32, 0, 6, 0, 15, 0, 29, 0, 34, 0, 17, 0, 7, 0, 23, 0, 20, 0, 14, 0, 1, 0, 9, 0, 8, 0, 33, 0, 24, 0, 26, 0, 35, 0, 31, 0, 19, 0, 10, 0, 3, 0 ),
-"blend_shape_data": [  ],
-"format": 2194711,
-"index_count": 36,
-"material": SubResource( 17 ),
-"primitive": 4,
-"skeleton_aabb": [  ],
-"vertex_count": 36
-}
 
 [sub_resource type="ArrayMesh" id=3]
 resource_name = "iceBlock_block1"
@@ -239,83 +181,6 @@ shader_param/color_1 = Color( 0, 1, 0.666667, 1 )
 shader_param/color_2 = Color( 0, 1, 0.933333, 1 )
 shader_param/proximity_fade_dist = 0.25
 
-[sub_resource type="Gradient" id=19]
-offsets = PoolRealArray( 0, 0.0962963, 0.703704, 1 )
-colors = PoolColorArray( 0.290196, 0.290196, 0.290196, 0, 1, 1, 1, 1, 0.564706, 1, 0.854902, 0.784314, 0.792157, 1, 0.933333, 0 )
-
-[sub_resource type="GradientTexture" id=20]
-gradient = SubResource( 19 )
-
-[sub_resource type="Curve" id=21]
-_data = [ Vector2( 0, 0.834204 ), 0.0, 1.78539, 0, 0, Vector2( 1, 0.306788 ), 0.182784, 0.0, 0, 0 ]
-
-[sub_resource type="CurveTexture" id=22]
-curve = SubResource( 21 )
-
-[sub_resource type="ParticlesMaterial" id=23]
-emission_shape = 2
-emission_box_extents = Vector3( 10, 1, 5 )
-direction = Vector3( 0, 1, 0 )
-spread = 30.0
-gravity = Vector3( 0, 0, 0 )
-initial_velocity = 2.0
-initial_velocity_random = 0.24
-damping = 1.0
-damping_random = 0.49
-scale_curve = SubResource( 22 )
-color_ramp = SubResource( 20 )
-
-[sub_resource type="SpatialMaterial" id=24]
-flags_transparent = true
-flags_unshaded = true
-vertex_color_use_as_albedo = true
-params_blend_mode = 1
-params_billboard_mode = 3
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
-albedo_color = Color( 0, 1, 0.933333, 1 )
-
-[sub_resource type="QuadMesh" id=25]
-material = SubResource( 24 )
-size = Vector2( 0.24, 0.25 )
-
-[sub_resource type="Gradient" id=33]
-offsets = PoolRealArray( 0, 0.133333, 0.703704, 1 )
-colors = PoolColorArray( 0.290196, 0.290196, 0.290196, 0, 1, 1, 1, 0.392157, 0.564706, 1, 0.854902, 0.392157, 0.792157, 1, 0.933333, 0 )
-
-[sub_resource type="GradientTexture" id=34]
-gradient = SubResource( 33 )
-
-[sub_resource type="ParticlesMaterial" id=32]
-emission_shape = 2
-emission_box_extents = Vector3( 7, 0.2, 3 )
-direction = Vector3( 0, 1, 0 )
-spread = 30.0
-gravity = Vector3( 0, -1, 0 )
-radial_accel = 3.0
-radial_accel_random = 0.32
-damping = 1.0
-damping_random = 0.56
-scale = 2.5
-color_ramp = SubResource( 34 )
-
-[sub_resource type="SpatialMaterial" id=30]
-flags_transparent = true
-flags_unshaded = true
-vertex_color_use_as_albedo = true
-params_blend_mode = 1
-params_billboard_mode = 3
-particles_anim_h_frames = 1
-particles_anim_v_frames = 1
-particles_anim_loop = false
-albedo_color = Color( 0, 1, 0.933333, 1 )
-proximity_fade_enable = true
-proximity_fade_distance = 1.0
-
-[sub_resource type="QuadMesh" id=31]
-material = SubResource( 30 )
-
 [sub_resource type="Animation" id=26]
 length = 0.001
 tracks/0/type = "value"
@@ -379,7 +244,7 @@ tracks/4/keys = {
 "values": [ 0.0 ]
 }
 tracks/5/type = "value"
-tracks/5/path = NodePath("Sparkles:emitting")
+tracks/5/path = NodePath("BlockOuter:material/0:shader_param/emission_strength")
 tracks/5/interp = 1
 tracks/5/loop_wrap = true
 tracks/5/imported = false
@@ -388,10 +253,10 @@ tracks/5/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ false ]
+"values": [ 1.0 ]
 }
 tracks/6/type = "value"
-tracks/6/path = NodePath("BlockOuter:material/0:shader_param/emission_strength")
+tracks/6/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/intensity")
 tracks/6/interp = 1
 tracks/6/loop_wrap = true
 tracks/6/imported = false
@@ -400,10 +265,10 @@ tracks/6/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ 1.0 ]
+"values": [ 0.0 ]
 }
 tracks/7/type = "value"
-tracks/7/path = NodePath("KinematicBody/Shards:emitting")
+tracks/7/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/cutoff")
 tracks/7/interp = 1
 tracks/7/loop_wrap = true
 tracks/7/imported = false
@@ -412,43 +277,7 @@ tracks/7/keys = {
 "times": PoolRealArray( 0 ),
 "transitions": PoolRealArray( 1 ),
 "update": 0,
-"values": [ false ]
-}
-tracks/8/type = "value"
-tracks/8/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/intensity")
-tracks/8/interp = 1
-tracks/8/loop_wrap = true
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ 0.0 ]
-}
-tracks/9/type = "value"
-tracks/9/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/cutoff")
-tracks/9/interp = 1
-tracks/9/loop_wrap = true
-tracks/9/imported = false
-tracks/9/enabled = true
-tracks/9/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
 "values": [ 10.0 ]
-}
-tracks/10/type = "value"
-tracks/10/path = NodePath("Fog:emitting")
-tracks/10/interp = 1
-tracks/10/loop_wrap = true
-tracks/10/imported = false
-tracks/10/enabled = true
-tracks/10/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 0,
-"values": [ false ]
 }
 
 [sub_resource type="Animation" id=27]
@@ -515,76 +344,40 @@ tracks/4/keys = {
 "values": [ 0.0, 1.0 ]
 }
 tracks/5/type = "value"
-tracks/5/path = NodePath("Sparkles:emitting")
+tracks/5/path = NodePath("BlockOuter:material/0:shader_param/emission_strength")
 tracks/5/interp = 1
 tracks/5/loop_wrap = false
 tracks/5/imported = false
 tracks/5/enabled = true
 tracks/5/keys = {
-"times": PoolRealArray( 0.2, 0.7 ),
-"transitions": PoolRealArray( 1, 1 ),
-"update": 1,
-"values": [ true, false ]
-}
-tracks/6/type = "value"
-tracks/6/path = NodePath("BlockOuter:material/0:shader_param/emission_strength")
-tracks/6/interp = 1
-tracks/6/loop_wrap = false
-tracks/6/imported = false
-tracks/6/enabled = true
-tracks/6/keys = {
 "times": PoolRealArray( 2, 2.5 ),
 "transitions": PoolRealArray( 1, 1 ),
 "update": 0,
 "values": [ 1.0, 0.0 ]
 }
-tracks/7/type = "value"
-tracks/7/path = NodePath("KinematicBody/Shards:emitting")
-tracks/7/interp = 1
-tracks/7/loop_wrap = false
-tracks/7/imported = false
-tracks/7/enabled = true
-tracks/7/keys = {
-"times": PoolRealArray( 0.2, 1.3 ),
-"transitions": PoolRealArray( 1, 1 ),
-"update": 1,
-"values": [ false, true ]
-}
-tracks/8/type = "value"
-tracks/8/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/intensity")
-tracks/8/interp = 1
-tracks/8/loop_wrap = false
-tracks/8/imported = false
-tracks/8/enabled = true
-tracks/8/keys = {
+tracks/6/type = "value"
+tracks/6/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/intensity")
+tracks/6/interp = 1
+tracks/6/loop_wrap = false
+tracks/6/imported = false
+tracks/6/enabled = true
+tracks/6/keys = {
 "times": PoolRealArray( 0.2, 0.4, 1.7, 2.2 ),
 "transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 0,
 "values": [ 0.0, 1.0, 1.0, 0.0 ]
 }
-tracks/9/type = "value"
-tracks/9/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/cutoff")
-tracks/9/interp = 1
-tracks/9/loop_wrap = false
-tracks/9/imported = false
-tracks/9/enabled = true
-tracks/9/keys = {
+tracks/7/type = "value"
+tracks/7/path = NodePath("KinematicBody/MeshInstance:material/0:shader_param/cutoff")
+tracks/7/interp = 1
+tracks/7/loop_wrap = false
+tracks/7/imported = false
+tracks/7/enabled = true
+tracks/7/keys = {
 "times": PoolRealArray( 0.2, 0.7, 1.7, 2.2 ),
 "transitions": PoolRealArray( 1, 1, 1, 1 ),
 "update": 0,
 "values": [ 10.0, 1.0, 1.0, 10.0 ]
-}
-tracks/10/type = "value"
-tracks/10/path = NodePath("Fog:emitting")
-tracks/10/interp = 1
-tracks/10/loop_wrap = false
-tracks/10/imported = false
-tracks/10/enabled = true
-tracks/10/keys = {
-"times": PoolRealArray( 0 ),
-"transitions": PoolRealArray( 1 ),
-"update": 1,
-"values": [ true ]
 }
 
 [node name="Block" type="Spatial"]
@@ -602,16 +395,6 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -4, 0 )
 mesh = SubResource( 6 )
 skeleton = NodePath("../CollisionShape")
 material/0 = SubResource( 8 )
-
-[node name="Shards" type="Particles" parent="KinematicBody"]
-amount = 16
-lifetime = 0.5
-one_shot = true
-explosiveness = 0.8
-randomness = 0.75
-visibility_aabb = AABB( -8, -2, -2, 16, 4, 4 )
-process_material = SubResource( 16 )
-draw_pass_1 = SubResource( 18 )
 
 [node name="BlockOuter" type="MeshInstance" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -6, 0, 0 )
@@ -636,24 +419,6 @@ material/0 = SubResource( 5 )
 [node name="Base" type="MeshInstance" parent="."]
 mesh = SubResource( 9 )
 material/0 = SubResource( 11 )
-
-[node name="Sparkles" type="Particles" parent="."]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0 )
-amount = 48
-explosiveness = 0.5
-randomness = 0.39
-visibility_aabb = AABB( -8, -2, -2, 16, 4, 4 )
-process_material = SubResource( 23 )
-draw_pass_1 = SubResource( 25 )
-
-[node name="Fog" type="Particles" parent="."]
-amount = 128
-one_shot = true
-explosiveness = 0.95
-randomness = 0.68
-visibility_aabb = AABB( -8, -2, -2, 16, 4, 4 )
-process_material = SubResource( 32 )
-draw_pass_1 = SubResource( 31 )
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="."]
 autoplay = "Rise"

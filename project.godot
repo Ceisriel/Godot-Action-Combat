@@ -9,18 +9,12 @@
 config_version=4
 
 _global_script_classes=[ {
-"base": "Object",
-"class": "Fray",
-"language": "GDScript",
-"path": "res://addons/fray/_namespace.gd"
-}, {
 "base": "Node",
 "class": "Global",
 "language": "GDScript",
 "path": "res://scripts/Global.gd"
 } ]
 _global_script_class_icons={
-"Fray": "",
 "Global": ""
 }
 

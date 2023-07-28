@@ -11,7 +11,7 @@ onready var head = $Camroot
 onready var head_pos = head.transform
 onready var campivot = $Camroot/Camera_holder
 onready var camera = $Camroot/Camera_holder/Camera
-onready var animation = $FemaleHuman/AnimationPlayer
+onready var animation = $FHuman/AnimationPlayer
 onready var hook = $Camroot/Camera_holder/Camera/Hook
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
@@ -705,18 +705,18 @@ func animationOrderCombatStrafe(): #barehanded combat stance strafe
 			animation.play("barehanded guard idle",0.2)
 		elif is_attacking and Input.is_action_pressed("forward"):
 				animation.play("barehanded base attack walking cycle",0.2,1.42)
-		elif is_attacking and Input.is_action_pressed("backward"):#placeholder
-			animation.play_backwards("barehanded base attack walking cycle",0.2)
-		elif is_attacking and Input.is_action_pressed("left"):#placeholder
-			animation.play_backwards("Rest",0.2)
-		elif is_attacking and Input.is_action_pressed("right"):#placeholder
-			animation.play_backwards("fall cycle",0.2)	
+		elif is_attacking and Input.is_action_pressed("backward"):
+			animation.play("barehanded base attack backpedal cycle",0.2,1.42)
+		elif is_attacking and Input.is_action_pressed("left"):
+			animation.play("barehanded base attack left cycle",0.2)
+		elif is_attacking and Input.is_action_pressed("right"):
+			animation.play("barehanded base attack right cycle",0.2)	
 		elif is_attacking:
 			animation.play("barehanded base attack still",0.2)
 		elif Input.is_action_pressed("forward"):
 			animation.play("barehanded walk cycle",0.2)
 		elif Input.is_action_pressed("backward"):
-			animation.play("barehanded walk cycle",0.2)
+			animation.play_backwards("barehanded walk cycle",0.2)#fix the name of this
 		elif Input.is_action_pressed("right"):
 			animation.play("barehanded strafe",0.2)
 		elif Input.is_action_pressed("left"):

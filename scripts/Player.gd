@@ -82,6 +82,7 @@ var dodge = bool()
 var tackle = bool()
 var can_tackle = true
 var inventorymode = bool()
+var alive = true
 #combat stance 
 var is_in_combat = false
 # Mobile 
@@ -286,10 +287,11 @@ func knockback():
 			enemy.onhitKnockback(impact)		
 func _input(event):#All major mouse and button input events
 	#Get mouse input for camera rotation
-	if event is InputEventMouseMotion and (mousemode == false):
-		rotate_y(deg2rad(-event.relative.x * mouse_sense))
-		head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
-		head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
+	if alive:
+		if event is InputEventMouseMotion and (mousemode == false):
+			rotate_y(deg2rad(-event.relative.x * mouse_sense))
+			head.rotate_x(deg2rad(+event.relative.y * mouse_sense))
+			head.rotation.x = clamp(head.rotation.x, deg2rad(-60), deg2rad(90))
 func dodgeBack(delta):#Doddge when in strafe mode
 	if is_aiming:
 		if dash_countback > 0:
@@ -552,20 +554,21 @@ func updateinternface():
 func _physics_process(delta: float):#this calls every function 	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	if !inventorymode:
-		if !exercise:
-			movement(delta)
-			teleport()	
-			tackle(delta/1.5)
-			dodgeRight(delta/1.5)
-			dodgeBack(delta/1.5)
-			dodgeFront(delta/1.5)
-			dodgeLeft(delta/1.5)
-			slide(delta/1.5)
-			comboPunch()
-			guardingStance()
-		combatStanceBarehanded()
+		if alive:
+			if !exercise:
+				movement(delta)
+				teleport()	
+				tackle(delta/1.5)
+				dodgeRight(delta/1.5)
+				dodgeBack(delta/1.5)
+				dodgeFront(delta/1.5)
+				dodgeLeft(delta/1.5)
+				slide(delta/1.5)
+				comboPunch()
+				guardingStance()
+			combatStanceBarehanded()
 		animations()
-	
+	updateAliveOrDead()
 	updateattributes()
 	updateinternface()
 	mouseMode()
@@ -587,31 +590,34 @@ func _physics_process(delta: float):#this calls every function
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
 func animations():
-	if !exercise:
-		if !is_swimming:
-			if is_climbing:
-				if Input.is_action_pressed("jump"):
-					animationOrderClimbing()
-				else:
-					if !is_on_floor():
-						animation.play("idle")	
-			if !is_aiming:
-				if !is_in_combat:
-					animationOrderOutOfCombat()
-					speak()	
-				elif is_in_combat:
-					animatiOnorderInCombat()
-				elif is_crouching:
-					animationOrderCrouch()	
-			elif is_aiming:
-				if is_in_combat:
-					animationOrderCombatStrafe()
-				elif !is_in_combat:
-					animationOrderStrafe()
-		elif is_swimming:
-			animationOrderInWater()
+	if alive:
+		if !exercise:
+			if !is_swimming:
+				if is_climbing:
+					if Input.is_action_pressed("jump"):
+						animationOrderClimbing()
+					else:
+						if !is_on_floor():
+							animation.play("idle")	
+				if !is_aiming:
+					if !is_in_combat:
+						animationOrderOutOfCombat()
+						speak()	
+					elif is_in_combat:
+						animatiOnorderInCombat()
+					elif is_crouching:
+						animationOrderCrouch()	
+				elif is_aiming:
+					if is_in_combat:
+						animationOrderCombatStrafe()
+					elif !is_in_combat:
+						animationOrderStrafe()
+			elif is_swimming:
+				animationOrderInWater()
+		else:
+			animationOrderExercise()
 	else:
-		animationOrderExercise()
+		animation.play("dead",0.85)		
 func animationOrderExercise():
 	if squat:
 		animation.play("squat",0.25,0.95)
@@ -699,14 +705,7 @@ func animatiOnorderInCombat(): #barehanded combat stance
 		elif is_on_floor():
 			if is_guarding and is_walking and !is_aiming:
 				animation.play("barehanded guard walk cycle",0.2)
-			elif is_guarding and Input.is_action_pressed("forward") and is_aiming:
-				animation.play("barehanded guard walk cycle",0.2)			
-			elif is_guarding and Input.is_action_pressed("left") and is_aiming:
-				animation.play_backwards("barehanded guard strafe cycle",0.2)	
-			elif is_guarding and Input.is_action_pressed("right") and is_aiming:
-				animation.play("barehanded guard strafe cycle",0.2)
-			elif is_guarding and Input.is_action_pressed("backward") and is_aiming:
-				animation.play_backwards("barehanded guard walk cycle",0.2)
+
 			elif is_attacking and is_walking:
 				animation.play("barehanded base attack walking cycle",0.2,1.42)
 			elif is_guarding and !is_walking:
@@ -717,6 +716,10 @@ func animatiOnorderInCombat(): #barehanded combat stance
 				animation.play("barehanded walk cycle",0.2)
 			elif tackle:
 				animation.play("tackle",0.15)
+			elif Input.is_action_pressed("E"):
+				animation.play("kick")
+			elif Input.is_action_pressed("Q"):
+				animation.play("fake kick",0.15)
 			else:
 				animation.play("barehanded idle",0.2)
 func animationOrderCombatStrafe(): #barehanded combat stance strafe
@@ -759,7 +762,11 @@ func animationOrderCombatStrafe(): #barehanded combat stance strafe
 		elif Input.is_action_pressed("left"):
 			animation.play_backwards("barehanded strafe",0.2)	
 		elif tackle:
-			animation.play("tackle",0.15)			
+			animation.play("tackle",0.15)
+		elif Input.is_action_pressed("E"):
+			animation.play("kick",0.15)
+		elif Input.is_action_pressed("Q"):
+			animation.play("fake kick",0.15)
 		else:
 			animation.play("barehanded idle",0.2)	
 func animationOrderCrouch():
@@ -776,6 +783,9 @@ func animationOrderClimbing():
 	if is_on_wall():
 		if is_climbing:
 			animation.play("climb cycle",0.2)
+func updateAliveOrDead():
+	if health <= 0:
+		alive = false
 func get_save_stats():#saving data
 	return {
 		'filename': get_filename(),

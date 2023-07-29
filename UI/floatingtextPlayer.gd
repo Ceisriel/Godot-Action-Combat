@@ -2,7 +2,6 @@ extends Position2D
 
 onready var label = $TextureRect/Label
 onready var tween = $TextureRect/Label/Tween
-
 var amount = 0
 
 func _ready():

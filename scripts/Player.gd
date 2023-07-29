@@ -1,5 +1,6 @@
 extends KinematicBody
 #imports
+var floatingtext = preload("res://UI/Spritefloatingtext.tscn")
 onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
@@ -14,6 +15,7 @@ onready var camera = $Camroot/Camera_holder/Camera
 onready var animation = $FHuman/AnimationPlayer
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
+onready var takedamagesprite = $Takedamage/DamageView
 var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -129,16 +131,10 @@ var impact = 80
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
 var regenerationTimer = 0
-var floatingtext = preload("res://UI/floatingtext.tscn")
 
 
 func _ready(): 
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
-func cameramove(delta):
-	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
-	movement_speed = 0
-	angular_acceleration = 10
-	acceleration = 15
 func movement(delta):
 	var h_rot = $Camroot/Camera_holder.global_transform.basis.get_euler().y
 	movement_speed = 0
@@ -245,21 +241,28 @@ func dealDamage():
 				enemy.takeDamage(damage)
 		if energy < maxenergy: 
 			energy += 0.5
-func takeDamage(damage):#Getting damaged
+func takeDamage(damage):
+	# Getting damaged
 	is_in_combat = true
+
 	if is_guarding: 
 		health -= ((damage * barehanded_block) * defense)
 		staggered = true
 		var text = floatingtext.instance()
-		text.amount = float(damage * barehanded_block)
-		add_child(text)
+		text.amount = round_to_two_decimals(damage * barehanded_block)
+		takedamagesprite.add_child(text) 
 			
 	else:
 		health -= (damage * defense)
 		staggered = true
 		var text = floatingtext.instance()
-		text.amount = float(damage * defense)
-		add_child(text)
+		text.amount = round_to_two_decimals(damage * defense)
+		takedamagesprite.add_child(text) 
+func healing():
+	if health < maxhealth:  # Check if healing is needed
+		health += intelligence * 1.5
+		if health > maxhealth:  # Check for overhealing
+			health = maxhealth  # Limit health to maxhealth if overhealing occurs
 func combatStanceBarehanded():#barehanded combat stace
 	if  Input.is_action_just_pressed("Combat"):
 		is_in_combat = !is_in_combat
@@ -556,7 +559,8 @@ func mouseMode():
 			dance1 = false
 			dance2 = !dance2
 					
-		
+func round_to_two_decimals(number):
+	return round(number * 100.0) / 100.0
 func updateattributes():
 	# Update attribute and stats 
 	climb_speed = base_climb_speed * strength
@@ -757,6 +761,10 @@ func animatiOnorderInCombat(): #barehanded combat stance
 				animation.play("kick")
 			elif Input.is_action_pressed("Q"):
 				animation.play("fake kick",0.15)
+			elif Input.is_action_pressed("1"):
+				animation.play("heal",0.75)	
+			elif Input.is_action_pressed("2"):
+				animation.play("heal light",0.75)	
 			else:
 				animation.play("barehanded idle",0.2)
 func animationOrderCombatStrafe(): #barehanded combat stance strafe
@@ -804,6 +812,10 @@ func animationOrderCombatStrafe(): #barehanded combat stance strafe
 			animation.play("kick",0.15)
 		elif Input.is_action_pressed("Q"):
 			animation.play("fake kick",0.15)
+		elif Input.is_action_pressed("1"):
+			animation.play("heal",0.75)	
+		elif Input.is_action_pressed("2"):
+			animation.play("heal light",0.75)				
 		else:
 			animation.play("barehanded idle",0.2)	
 func animationOrderCrouch():

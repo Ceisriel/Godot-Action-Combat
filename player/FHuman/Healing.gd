@@ -1,6 +1,7 @@
 extends Node
 
 var floatingtext_heal = preload("res://UI/Spritefloatingtextheal.tscn")
+var floatingtext_mana = preload("res://UI/Spritefloatingtextmana.tscn")
 onready var sprite = $"../Takedamage/DamageView"
 const HEAL_AMOUNT = 1
 const HEAL_INTERVAL = 1.0
@@ -62,3 +63,28 @@ func INSThealing():
 
 	# Update the player's health
 	parent.health = health
+
+func INSTEnergy():
+	var parent = get_parent()
+	var energy = parent.energy
+	var maxenergy = parent.maxenergy
+	var intelligence = parent.intelligence
+	var inst_heal = intelligence * 1.55
+	
+
+
+	# Create the healing text instance
+	var text = floatingtext_mana.instance()
+
+	if energy < maxenergy:  # Check if healing is needed
+		energy += inst_heal
+		text.amount = parent.round_to_two_decimals(inst_heal)
+	else:  # For overhealing or when already at max health
+		energy = maxenergy  # Limit health to maxhealth if overhealing occurs
+		text.amount = parent.round_to_two_decimals(inst_heal)
+
+	# Show the healing text regardless of healing or overhealing
+	sprite.add_child(text)
+
+	# Update the player's health
+	parent.energy = energy

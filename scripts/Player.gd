@@ -1,6 +1,8 @@
 extends KinematicBody
 #imports
-var floatingtext = preload("res://UI/Spritefloatingtext.tscn")
+var floatingtext_damage = preload("res://UI/Spritefloatingtext.tscn")
+var floatingtext_heal = preload("res://UI/Spritefloatingtextheal.tscn")
+
 onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
@@ -104,9 +106,9 @@ var acceleration = int()
 var wall_normal
 #player stats 
 export var initial_maxhealth = 10
-const basemaxhealth = 10
-export var maxhealth = 10.0
-export var health = 10.0
+const basemaxhealth = 100
+export var maxhealth = 100.0
+export var health = 100
 const basemaxenergy = 25
 export var maxenergy = 25
 export var energy = 25
@@ -248,21 +250,26 @@ func takeDamage(damage):
 	if is_guarding: 
 		health -= ((damage * barehanded_block) * defense)
 		staggered = true
-		var text = floatingtext.instance()
+		var text = floatingtext_damage.instance()
 		text.amount = round_to_two_decimals(damage * barehanded_block)
 		takedamagesprite.add_child(text) 
 			
 	else:
 		health -= (damage * defense)
 		staggered = true
-		var text = floatingtext.instance()
+		var text = floatingtext_damage.instance()
 		text.amount = round_to_two_decimals(damage * defense)
 		takedamagesprite.add_child(text) 
 func healing():
 	if health < maxhealth:  # Check if healing is needed
 		health += intelligence * 1.5
+		var text = floatingtext_heal.instance()
+		text.amount = round_to_two_decimals(intelligence * 1.5)
+		takedamagesprite.add_child(text) 	
 		if health > maxhealth:  # Check for overhealing
 			health = maxhealth  # Limit health to maxhealth if overhealing occurs
+			text.amount = round_to_two_decimals(intelligence * 1.5)
+			takedamagesprite.add_child(text) 	
 func combatStanceBarehanded():#barehanded combat stace
 	if  Input.is_action_just_pressed("Combat"):
 		is_in_combat = !is_in_combat

@@ -71,8 +71,6 @@ func INSTEnergy():
 	var intelligence = parent.intelligence
 	var inst_heal = intelligence * 1.55
 	
-
-
 	# Create the healing text instance
 	var text = floatingtext_mana.instance()
 
@@ -85,6 +83,8 @@ func INSTEnergy():
 
 	# Show the healing text regardless of healing or overhealing
 	sprite.add_child(text)
-
 	# Update the player's health
 	parent.energy = energy
+
+
+

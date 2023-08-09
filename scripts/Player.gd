@@ -2,7 +2,8 @@ extends KinematicBody
 #imports
 var floatingtext_damage = preload("res://UI/Spritefloatingtext.tscn")
 var floatingtext_heal = preload("res://UI/Spritefloatingtextheal.tscn")
-
+var potion = preload("res://test2/potion.fbx")
+var potion_instance = null
 onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
@@ -18,6 +19,9 @@ onready var animation = $FHuman/AnimationPlayer
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
 onready var takedamagesprite = $Takedamage/DamageView
+onready var warlocktorso = $FHuman/Armature/Skeleton/body1
+onready var nakedtorso = $FHuman/Armature/Skeleton/body0
+onready var potion_attachment =$FHuman/Armature/Skeleton/potionAttachment
 var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -133,6 +137,12 @@ var impact = 80
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
 var regenerationTimer = 0
+
+#Armors 
+var torso2 : bool
+var torso0 : bool
+#Potions
+var potion_ammount = 0
 
 
 func _ready(): 
@@ -610,6 +620,7 @@ func _physics_process(delta: float):#this calls every function
 				slide(delta/1.5)
 				comboPunch()
 				guardingStance()
+				drinkPotion()
 			combatStanceBarehanded()
 		animations()
 	updateAliveOrDead()
@@ -684,6 +695,8 @@ func animationOrderOutOfCombat(): #normal
 	if !is_in_combat and !is_swimming and is_on_floor() and !is_aiming:
 		if is_sprinting:
 			animation.play("sprint cycle")
+		elif is_running:
+			animation.play("run cycle")
 		elif is_walking and Input.is_action_pressed("crouch"):
 			animation.play("crouch walk cycle",0.25)				
 		elif is_walking:
@@ -921,6 +934,7 @@ func _on_MinusAGI_pressed():
 func _on_WaterDetector_area_entered(area):
 	if area.is_in_group("Water"):
 		is_swimming = true
+	
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false
@@ -928,3 +942,34 @@ func _on_LineEdit_mouse_entered():
 	inventorymode = true 
 func _on_LineEdit_mouse_exited():
 	inventorymode = false
+
+
+
+
+
+
+func _on_ItemDetector_area_entered(area):
+	if area.is_in_group("item"):
+		warlocktorso.visible = true
+		nakedtorso.visible = false
+		
+		if potion_instance == null:
+			# Create an instance of the potion scene
+			potion_instance = potion.instance()
+			potion_attachment.add_child(potion_instance)
+		
+		potion_ammount += 1
+		
+func drinkPotion():
+	if potion_ammount > 0:
+		if Input.is_action_just_pressed("Drink"):
+			potion_ammount -= 1
+			energy += 100
+			health += 100
+
+			# Check if potion_instance exists before freeing
+			if potion_instance:
+				potion_instance.queue_free()
+				potion_instance = null  # Reset potion_instance
+	else:
+		pass

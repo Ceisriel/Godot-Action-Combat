@@ -23,7 +23,7 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
-[ext_resource path="res://scripts/CharacterEditorFace.gd" type="Script" id=25]
+[ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
 [ext_resource path="res://player/FHuman/Mesh/Eye_002.material" type="Material" id=28]
@@ -1928,6 +1928,10 @@ bone_name = "mixamorig_Head"
 transform = Transform( 1, 0, 0, 0, 5.58794e-08, 0.999999, 0, -0.999999, 5.58794e-08, 0.152896, 0.13563, -135.475 )
 bone_name = "mixamorig_Head"
 
+[node name="TorsoAttachment3" type="BoneAttachment" parent="FHuman/Armature/Skeleton"]
+transform = Transform( 1, 0, 0, 0, 0, 1, 0, -1, 0, 0.152896, -1.2453, -90.8193 )
+bone_name = "mixamorig_Hips"
+
 [node name="AnimationPlayer" type="AnimationPlayer" parent="FHuman"]
 anims/Rest = SubResource( 24 )
 "anims/walk cycle" = SubResource( 25 )
@@ -1953,6 +1957,7 @@ transform = Transform( 1, -3.55271e-15, 1.42109e-14, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 follow_viewport_enable = true
 
 [node name="H" type="Label" parent="GUI"]
+visible = false
 modulate = Color( 0, 0, 0, 1 )
 self_modulate = Color( 0, 0, 0, 1 )
 anchor_top = 1.0
@@ -1968,6 +1973,7 @@ custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 text = "test"
 
 [node name="E" type="Label" parent="GUI" groups=["Entity"]]
+visible = false
 modulate = Color( 0, 0, 0, 1 )
 self_modulate = Color( 0, 0, 0, 1 )
 anchor_top = 1.0
@@ -1983,6 +1989,7 @@ custom_colors/font_color_shadow = Color( 0, 0, 0, 1 )
 text = "test"
 
 [node name="FPS" type="Label" parent="GUI" groups=["Entity"]]
+visible = false
 modulate = Color( 0, 0, 0, 1 )
 self_modulate = Color( 0, 0, 0, 1 )
 anchor_left = 1.0
@@ -2012,6 +2019,7 @@ texture = ExtResource( 12 )
 stretch_mode = 4
 
 [node name="HealthBarBackground" type="TextureProgress" parent="GUI"]
+visible = false
 self_modulate = Color( 0, 0, 0, 1 )
 anchor_left = 1.0
 anchor_right = 1.0
@@ -2027,6 +2035,7 @@ tint_progress = Color( 0.490196, 0, 0, 1 )
 nine_patch_stretch = true
 
 [node name="HealthBar" type="TextureProgress" parent="GUI"]
+visible = false
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -193.0
@@ -2042,6 +2051,7 @@ tint_progress = Color( 0.490196, 0, 0, 1 )
 nine_patch_stretch = true
 
 [node name="EnergyBar" type="TextureProgress" parent="GUI"]
+visible = false
 anchor_left = 1.0
 anchor_right = 1.0
 margin_left = -179.0
@@ -2588,6 +2598,7 @@ rect_scale = Vector2( 5.61409, 2.46998 )
 text = "Name"
 
 [node name="Save" type="Button" parent="GUI"]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2600,6 +2611,7 @@ icon = ExtResource( 13 )
 script = ExtResource( 6 )
 
 [node name="Load" type="Button" parent="GUI"]
+visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
@@ -2702,6 +2714,14 @@ margin_right = 99.9995
 margin_bottom = 98.9737
 rect_scale = Vector2( 0.919389, 0.888756 )
 text = "hair 4"
+
+[node name="hair5" type="Button" parent="GUI/Edit_Character/EditorHair"]
+margin_left = -0.000510216
+margin_top = 97.7566
+margin_right = 99.9995
+margin_bottom = 117.757
+rect_scale = Vector2( 0.919389, 0.888756 )
+text = "hair 5"
 
 [node name="EditorFace" type="Control" parent="GUI/Edit_Character"]
 margin_left = -215.955
@@ -2818,6 +2838,7 @@ script = ExtResource( 23 )
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair2" to="GUI/Edit_Character/EditorHair" method="_on_hair2_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair3" to="GUI/Edit_Character/EditorHair" method="_on_hair3_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair4" to="GUI/Edit_Character/EditorHair" method="_on_hair4_pressed"]
+[connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair5" to="GUI/Edit_Character/EditorHair" method="_on_hair5_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face0" to="GUI/Edit_Character/EditorFace" method="_on_face0_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face1" to="GUI/Edit_Character/EditorFace" method="_on_face1_pressed"]
 [connection signal="area_entered" from="WaterDetector" to="." method="_on_WaterDetector_area_entered"]

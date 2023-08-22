@@ -2,7 +2,7 @@ extends KinematicBody
 #imports
 var floatingtext_damage = preload("res://UI/Spritefloatingtext.tscn")
 var floatingtext_heal = preload("res://UI/Spritefloatingtextheal.tscn")
-var potion = preload("res://test2/potion.fbx")
+#var potion = preload("res://test2/potion.fbx")
 var potion_instance = null
 onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI

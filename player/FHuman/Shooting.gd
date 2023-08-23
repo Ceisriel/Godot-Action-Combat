@@ -31,7 +31,7 @@ func _ready():
 
 func shoot():
 	if parent.has_Rcrossbow and (!parent.is_sprinting or !parent.is_running):
-		if Input.is_action_pressed("attack"):
+		if Input.is_action_pressed("attack") or Input.is_action_just_pressed("attack"):
 			parent.is_aiming = true	
 			if !shotgun_mode:				
 				if aim.is_colliding():
@@ -48,7 +48,7 @@ func shoot():
 			
 func shootShotgun(): 
 	if parent.has_Rcrossbow and (!parent.is_sprinting or !parent.is_running):
-		if Input.is_action_just_pressed("attack"):
+		if Input.is_action_just_pressed("attack") or Input.is_action_pressed("attack"):
 			parent.is_aiming = true
 			for i in range(bullets_per_shotgun):
 					if aim.is_colliding():
@@ -71,13 +71,12 @@ func shootShotgun():
 			current_recoil_angle = recoil_angle	
 
 func _on_Timer_timeout():
-	shoot()
-
-func _physics_process(delta):
-	switchFireMode()
 	if shotgun_mode: 
 		shootShotgun()
-		
+	else: 
+		shoot()	
+func _physics_process(delta):
+	switchFireMode()
 	if current_recoil_angle > 0:
 		# Interpolate the camera's rotation back to the original position
 		var interpolation_amount = recoil_speed * get_process_delta_time()
@@ -90,12 +89,12 @@ func switchFireMode():
 		shotgun_mode = !shotgun_mode	
 	if shotgun_mode:
 		damage = 1.75
-		recoil_angle = 2.5
-		recoil_speed = 3.2
-		firerate = 1
+		recoil_angle = 4
+		recoil_speed = 4
+		firerate = 2.5
 	else: 
 		damage = 12
 		recoil_angle = 1.95
-		recoil_speed = 3.1
+		recoil_speed = 10.1
 		firerate = 0.2	
 

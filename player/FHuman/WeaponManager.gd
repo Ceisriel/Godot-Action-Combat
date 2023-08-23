@@ -1,8 +1,9 @@
 extends Control
 
+onready var back_weapon_attachment = $"../../../FHuman/Armature/Skeleton/BackWeapon_attachment"
 onready var weapon_attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment"
 var repeating_crossbow: PackedScene = preload("res://RepeatingCrossbow.tscn")
-var sword: PackedScene = preload("res://sword.tscn")
+var spear: PackedScene = preload("res://player/Weapons/Spear/spear.glb")
 onready var player = $"../../.."
 
 var currentWeaponInstance: Node = null
@@ -22,7 +23,7 @@ func instance_weapon(weaponIndex):
 	if weaponIndex == 0:
 		return repeating_crossbow.instance()
 	elif weaponIndex == 1:
-		return sword.instance()
+		return spear.instance()
 
 func update_player_crossbow(selectedWeapon):
 	player.has_Rcrossbow = selectedWeapon == 0
@@ -49,6 +50,7 @@ func dropWeapon():
 		var smallerScale = Vector3(0.01, 0.01, 0.01)
 
 		weapon_attachment.remove_child(currentWeaponInstance)
+		back_weapon_attachment.remove_child(currentWeaponInstance)  # Remove from back attachment too
 		get_tree().root.add_child(currentWeaponInstance)
 		
 		if currentWeaponInstance.get_parent() == weapon_attachment:
@@ -62,7 +64,7 @@ func dropWeapon():
 func _on_weapon0_pressed():
 	if weapon_attachment:
 		if currentWeaponInstance:
-			currentWeaponInstance.queue_free()
+			dropWeapon()  # Drop the old weapon first
 
 		currentWeaponInstance = instance_weapon(0)
 		weapon_attachment.add_child(currentWeaponInstance)
@@ -72,7 +74,7 @@ func _on_weapon0_pressed():
 func _on_weapon1_pressed():
 	if weapon_attachment:
 		if currentWeaponInstance:
-			currentWeaponInstance.queue_free()
+			dropWeapon()  # Drop the old weapon first
 
 		currentWeaponInstance = instance_weapon(1)
 		weapon_attachment.add_child(currentWeaponInstance)
@@ -84,3 +86,14 @@ func _physics_process(delta):
 		dropWeapon()
 	# Continuously update has_Rcrossbow based on the currently held weapon
 	update_player_crossbow(load_selected_weapon())
+
+
+func pickupCrossbow():
+	if weapon_attachment:
+		if currentWeaponInstance:
+			currentWeaponInstance.queue_free()  # Delete the old crossbow
+		currentWeaponInstance = instance_weapon(0)
+		weapon_attachment.add_child(currentWeaponInstance)
+		save_selected_weapon(0)
+		update_player_crossbow(0)
+		

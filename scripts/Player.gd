@@ -30,10 +30,10 @@ export onready var player_mesh = get_node(PlayerCharacterMesh)
 export var gravity = 9.8
 export var jump_force = 5
 export var crouch_speed = 1
-export var walk_speed = 3
-export var run_speed = 6
+export var walk_speed = 7
+export var run_speed = 9
 const basesprint = 9
-export var sprint_speed = 9
+export var sprint_speed = 14
 export var teleport_distance = 35
 const basedash = 25
 export var dash_power = 100
@@ -93,6 +93,7 @@ var tackle = bool()
 var can_tackle = true
 var inventorymode = bool()
 var alive = true
+var has_Rcrossbow = bool()
 #combat stance 
 var is_in_combat = false
 # Mobile 
@@ -298,17 +299,17 @@ func guardingStance():#Barehanded base attack
 			is_guarding = true
 		else:
 			is_guarding = false
-func getKnockedBack(impact):#Getting knocked back
+#func getKnockedBack(impact):#Getting knocked back
 	#Calculate the angle between the player's forward direction and the camera's forward direction
-	var angle_to_camera = direction.angle_to(Vector3.FORWARD)
+	#var angle_to_camera = direction.angle_to(Vector3.FORWARD)
 	#Check if the player is facing the camera
-	if angle_to_camera < 0.5:
-		horizontal_velocity = direction.normalized() * impact
+	#if angle_to_camera < 0.5:
+	#	horizontal_velocity = direction.normalized() * impact
 	#Check if the player is showing their back to the camera
-	elif angle_to_camera > 0.51:
-		horizontal_velocity = -direction.normalized() * impact
-	else:
-		pass
+	#elif angle_to_camera > 0.51:
+	#	horizontal_velocity = -direction.normalized() * impact
+	#else:
+	#	pass
 		#Horizontal_velocity = -direction.normalized() * impact
 func knockback(): 
 	var enemies = hitbox.get_overlapping_bodies()
@@ -635,7 +636,6 @@ func _physics_process(delta: float):#this calls every function
 	consumeEnergy(delta)
 	regeneration(delta)
 
-	
 	# Gravity and stop sliding on floors
 	if not is_on_floor() and not is_swimming:
 		vertical_velocity += Vector3.DOWN * gravity * 2 * delta

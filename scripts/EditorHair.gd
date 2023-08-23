@@ -1,6 +1,6 @@
 extends Control
 
-onready var hair_attachment = $"../../../FHuman/Armature/Skeleton/HairAttachment"
+onready var hair_attachment = $"../../../FHuman/Armature/Skeleton/hair_attachment"
 var hair0: PackedScene = preload("res://player/FHuman/Hair/Hair0.glb")
 var hair1: PackedScene = preload("res://player/FHuman/Hair/Hair1.glb")
 var hair2: PackedScene = preload("res://player/FHuman/Hair/Hair2.glb")

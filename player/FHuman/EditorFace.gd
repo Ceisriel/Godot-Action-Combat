@@ -1,6 +1,7 @@
 extends Control
 
-onready var hair_attachment = $"../../../FHuman/Armature/Skeleton/FaceAttachment2"
+onready var face_attachment = $"../../../FHuman/Armature/Skeleton/face_attachment"
+onready var parent = $"../../.."
 var face0: PackedScene = preload("res://player/FHuman/Face/face0.glb")
 var face1: PackedScene = preload("res://player/FHuman/Face/FaceFHuman1.glb")
 
@@ -9,10 +10,10 @@ var currentFaceAnimation: AnimationPlayer = null
 var persistenceFilePath: String = "user://selected_face.txt"
 
 func _ready():
-	if hair_attachment:
+	if face_attachment:
 		var selectedFace = load_selected_face()
 		currentFaceInstance = instance_face(selectedFace)
-		hair_attachment.add_child(currentFaceInstance)
+		face_attachment.add_child(currentFaceInstance)
 		currentFaceAnimation = get_animation_player(currentFaceInstance)
 
 func instance_face(faceIndex):
@@ -48,22 +49,22 @@ func get_animation_player(node: Node) -> AnimationPlayer:
 		return null
 
 func _on_face0_pressed():
-	if hair_attachment:
+	if face_attachment:
 		if currentFaceInstance:
 			currentFaceInstance.queue_free()
 
 		currentFaceInstance = instance_face(0)
-		hair_attachment.add_child(currentFaceInstance)
+		face_attachment.add_child(currentFaceInstance)
 		currentFaceAnimation = get_animation_player(currentFaceInstance)
 		save_selected_face(0)
 
 func _on_face1_pressed():
-	if hair_attachment:
+	if face_attachment:
 		if currentFaceInstance:
 			currentFaceInstance.queue_free()
 
 		currentFaceInstance = instance_face(1)
-		hair_attachment.add_child(currentFaceInstance)
+		face_attachment.add_child(currentFaceInstance)
 		currentFaceAnimation = get_animation_player(currentFaceInstance)
 
 		save_selected_face(1)

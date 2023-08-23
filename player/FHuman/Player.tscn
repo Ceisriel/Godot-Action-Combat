@@ -23,13 +23,13 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
-[ext_resource path="res://player/FHuman/Weapons.gd" type="Script" id=24]
 [ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
 [ext_resource path="res://player/FHuman/Mesh/Eye_002.material" type="Material" id=28]
 [ext_resource path="res://player/FHuman/EditorFace.gd" type="Script" id=29]
 [ext_resource path="res://player/FHuman/Shooting.gd" type="Script" id=30]
+[ext_resource path="res://player/FHuman/WeaponManager.gd" type="Script" id=31]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "FHuman_body005"
@@ -2769,6 +2769,26 @@ margin_bottom = 40.0636
 rect_scale = Vector2( 0.919389, 0.888756 )
 text = "face 1"
 
+[node name="WeaponManager" type="Control" parent="GUI/Edit_Character"]
+margin_left = -307.984
+margin_top = -29.8818
+margin_right = -267.984
+margin_bottom = 10.1182
+script = ExtResource( 31 )
+
+[node name="weapon0" type="Button" parent="GUI/Edit_Character/WeaponManager"]
+margin_right = 100.0
+margin_bottom = 20.0
+rect_scale = Vector2( 0.919389, 0.888756 )
+text = "Crossbow"
+
+[node name="weapon1" type="Button" parent="GUI/Edit_Character/WeaponManager"]
+margin_top = 20.0636
+margin_right = 100.0
+margin_bottom = 40.0636
+rect_scale = Vector2( 0.919389, 0.888756 )
+text = "Sword"
+
 [node name="WaterDetector" type="Area" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.19921, 0 )
 
@@ -2842,9 +2862,6 @@ shape = SubResource( 69 )
 [node name="Armors" type="Node" parent="."]
 script = ExtResource( 23 )
 
-[node name="Weapons" type="Node" parent="."]
-script = ExtResource( 24 )
-
 [node name="Shooting" type="Node" parent="."]
 script = ExtResource( 30 )
 
@@ -2875,11 +2892,12 @@ script = ExtResource( 30 )
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair5" to="GUI/Edit_Character/EditorHair" method="_on_hair5_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face0" to="GUI/Edit_Character/EditorFace" method="_on_face0_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face1" to="GUI/Edit_Character/EditorFace" method="_on_face1_pressed"]
+[connection signal="pressed" from="GUI/Edit_Character/WeaponManager/weapon0" to="GUI/Edit_Character/WeaponManager" method="_on_weapon0_pressed"]
+[connection signal="pressed" from="GUI/Edit_Character/WeaponManager/weapon1" to="GUI/Edit_Character/WeaponManager" method="_on_weapon1_pressed"]
 [connection signal="area_entered" from="WaterDetector" to="." method="_on_WaterDetector_area_entered"]
 [connection signal="area_exited" from="WaterDetector" to="." method="_on_WaterDetector_area_exited"]
 [connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
 [connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
-[connection signal="body_entered" from="ItemDetector" to="Weapons" method="_on_ItemDetector_body_entered"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

@@ -18,6 +18,7 @@ onready var aim4 = $"../Camroot/Camera_holder/Camera/Aim4"
 onready var aim5 = $"../Camroot/Camera_holder/Camera/Aim5"
 onready var aim6 = $"../Camroot/Camera_holder/Camera/Aim6"
 onready var camera = $"../Camroot/Camera_holder/Camera"
+var RepeatingCrossbow = preload("res://RepeatingCrossbow.tscn")
 
 onready var firerate_controller = $Timer
 var firerate = 0.25
@@ -65,7 +66,7 @@ func shootShotgun():
 					if aim4.is_colliding():
 						var body = aim4.get_collider()
 						if body.is_in_group("Enemy"):
-							body.takeDamage(damage)			
+							body.takeDamage(damage)
 			camera.rotation_degrees.x += recoil_angle
 			current_recoil_angle = recoil_angle	
 
@@ -89,11 +90,12 @@ func switchFireMode():
 		shotgun_mode = !shotgun_mode	
 	if shotgun_mode:
 		damage = 1.75
-		recoil_angle = 5
-		recoil_speed = 0.75
+		recoil_angle = 2.5
+		recoil_speed = 3.2
 		firerate = 1
 	else: 
 		damage = 12
-		recoil_angle = 3.5
-		recoil_speed = 0.5
+		recoil_angle = 1.95
+		recoil_speed = 3.1
 		firerate = 0.2	
+

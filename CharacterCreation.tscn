@@ -1,0 +1,32 @@
+[gd_scene load_steps=2 format=2]
+
+[ext_resource path="res://CharacterCreation.gd" type="Script" id=1]
+
+[node name="CharacterCreation" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+
+[node name="Button" type="Button" parent="."]
+margin_left = 605.0
+margin_top = 699.0
+margin_right = 693.0
+margin_bottom = 719.0
+rect_scale = Vector2( 2.54475, 3.468 )
+text = "Enter game "
+
+[node name="Button2" type="Button" parent="."]
+margin_left = 103.0
+margin_top = 561.0
+margin_right = 191.0
+margin_bottom = 581.0
+rect_scale = Vector2( 2.54475, 3.468 )
+text = "Hair 1"
+
+[node name="Button3" type="Button" parent="."]
+margin_left = 106.0
+margin_top = 644.0
+margin_right = 194.0
+margin_bottom = 664.0
+rect_scale = Vector2( 2.54475, 3.468 )
+text = "Hair 2"

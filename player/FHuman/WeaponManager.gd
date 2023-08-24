@@ -59,7 +59,15 @@ func dropWeapon():
 		else:
 			currentWeaponInstance.scale = smallerScale
 
-		currentWeaponInstance.global_transform.origin = player.global_transform.origin + Vector3(0, 1, 4)  # Adjust the position offset as needed
+		var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
+		var camera_transform = camera.global_transform
+		var camera_backward = -camera_transform.basis.z.normalized()
+
+		# Adjust the drop distance and position as needed
+		var drop_distance = 3  # Distance from the camera
+		var drop_position = camera_transform.origin + camera_backward * drop_distance
+
+		currentWeaponInstance.global_transform.origin = drop_position
 		currentWeaponInstance = null  # Reset the current weapon instance
 
 func _on_weapon0_pressed():

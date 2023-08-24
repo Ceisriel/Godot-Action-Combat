@@ -2099,23 +2099,22 @@ tint_progress = Color( 0.0431373, 0.25098, 0.219608, 1 )
 nine_patch_stretch = true
 
 [node name="Character" type="Control" parent="GUI"]
-visible = false
 anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-margin_left = -914.0
-margin_top = -462.0
-margin_right = -874.0
-margin_bottom = -422.0
+margin_left = -206.0
+margin_top = -464.0
+margin_right = -166.0
+margin_bottom = -424.0
 rect_scale = Vector2( 0.553936, 0.547658 )
 script = ExtResource( 7 )
 
 [node name="CharacterBackground" type="TextureRect" parent="GUI/Character"]
-margin_left = 423.0
-margin_top = 129.0
-margin_right = 1328.0
-margin_bottom = 750.0
+margin_left = 453.121
+margin_top = 135.121
+margin_right = 1358.12
+margin_bottom = 756.121
 rect_scale = Vector2( 1.27265, 1.26651 )
 texture = ExtResource( 15 )
 expand = true

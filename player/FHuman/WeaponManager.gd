@@ -8,6 +8,7 @@ onready var player = $"../../.."
 
 var currentWeaponInstance: Node = null
 var persistenceFilePath: String = "user://selected_weapon.txt"
+var noWeaponIndex: int = -2  # Index representing no weapon
 
 func _ready():
 	if weapon_attachment:
@@ -16,7 +17,7 @@ func _ready():
 		weapon_attachment.add_child(currentWeaponInstance)
 		update_player_crossbow(selectedWeapon)
 		
-		if selectedWeapon != 0:
+		if selectedWeapon != noWeaponIndex:
 			player.has_Rcrossbow = false  # If not holding a repeating crossbow initially
 
 func instance_weapon(weaponIndex):
@@ -36,7 +37,7 @@ func load_selected_weapon():
 		file.close()
 		return selectedWeapon
 	else:
-		return 0
+		return noWeaponIndex
 
 func save_selected_weapon(weaponIndex):
 	var file = File.new()
@@ -83,9 +84,10 @@ func _on_weapon1_pressed():
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("drop"):
+		# Set the weapon index to represent no weapon
+		save_selected_weapon(noWeaponIndex)
 		dropWeapon()
-	# Continuously update has_Rcrossbow based on the currently held weapon
-	update_player_crossbow(load_selected_weapon())
+		update_player_crossbow(noWeaponIndex)  # Update player state to indicate no weapon
 
 
 func pickupCrossbow():
@@ -96,4 +98,3 @@ func pickupCrossbow():
 		weapon_attachment.add_child(currentWeaponInstance)
 		save_selected_weapon(0)
 		update_player_crossbow(0)
-		

@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=2]
+[gd_scene load_steps=63 format=2]
 
 [ext_resource path="res://scripts/Healing.gd" type="Script" id=1]
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=2]
@@ -23,7 +23,6 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
-[ext_resource path="res://player/FHuman/Savedata.gd" type="Script" id=24]
 [ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
@@ -1960,18 +1959,6 @@ collision_mask = 0
 [node name="CursorHolder" type="Spatial" parent="Camroot/Camera_holder/Camera"]
 transform = Transform( 1, -3.55271e-15, 1.42109e-14, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 
-[node name="Crossair" type="TextureRect" parent="Camroot/Camera_holder/Camera/CursorHolder"]
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-margin_left = -20.0
-margin_top = -20.0
-margin_right = 20.0
-margin_bottom = 20.0
-texture = ExtResource( 12 )
-stretch_mode = 4
-
 [node name="IcePower" parent="Camroot/Camera_holder/Camera" instance=ExtResource( 4 )]
 transform = Transform( 1, -3.55271e-15, 1.42109e-14, 0, 1, 0, 0, 0, 1, 0, 0, 0 )
 
@@ -1999,6 +1986,18 @@ cast_to = Vector3( 0, 0, -50 )
 transform = Transform( 0.992347, 0.0316924, -0.119343, -0.0408238, 0.996358, -0.0748638, 0.116535, 0.079163, 0.990026, -4.16884e-09, 0, 0 )
 enabled = true
 cast_to = Vector3( 0, 0, -50 )
+
+[node name="Crossair" type="TextureRect" parent="Camroot/Camera_holder/Camera"]
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+margin_left = -20.0
+margin_top = -20.0
+margin_right = 20.0
+margin_bottom = 20.0
+texture = ExtResource( 12 )
+stretch_mode = 4
 
 [node name="GUI" type="CanvasLayer" parent="."]
 follow_viewport_enable = true
@@ -2855,10 +2854,6 @@ shape = SubResource( 69 )
 
 [node name="Timer" type="Timer" parent="."]
 
-[node name="SaveDataTimer" type="Timer" parent="."]
-wait_time = 25.0
-autostart = true
-
 [node name="Armors" type="Node" parent="."]
 script = ExtResource( 23 )
 
@@ -2866,9 +2861,6 @@ script = ExtResource( 23 )
 script = ExtResource( 30 )
 
 [node name="Timer" type="Timer" parent="Shooting"]
-
-[node name="Node" type="Node" parent="."]
-script = ExtResource( 24 )
 
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="GUI/Character/Attributes" method="_on_PlusSTR_pressed"]
@@ -2900,7 +2892,6 @@ script = ExtResource( 24 )
 [connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
 [connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
 [connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManager" method="_on_ItemDetector_body_entered"]
-[connection signal="timeout" from="SaveDataTimer" to="Node" method="_on_SaveDataTimer_timeout"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

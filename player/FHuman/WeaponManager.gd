@@ -1,108 +1,127 @@
 extends Control
 
-onready var back_weapon_attachment = $"../../../FHuman/Armature/Skeleton/BackWeapon_attachment"
-onready var weapon_attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment"
-var repeating_crossbow: PackedScene = preload("res://RepeatingCrossbow.tscn")
-var spear: PackedScene = preload("res://player/Weapons/Spear/spear.glb")
-onready var player = $"../../.."
-
+onready var player = $"../../.."  # Adjust the path based on your scene structure
+onready var attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment"
+var weapon1: PackedScene = preload("res://RepeatingCrossbow.tscn")
+var weapon2: PackedScene = preload("res://player/Weapons/Spear/Spear.tscn")
+var droppedWeapon: Node = null
 var currentWeaponInstance: Node = null
 var persistenceFilePath: String = "user://selected_weapon.txt"
-var noWeaponIndex: int = -2  # Index representing no weapon
 
 func _ready():
-	if weapon_attachment:
-		var selectedWeapon = load_selected_weapon()
-		currentWeaponInstance = instance_weapon(selectedWeapon)
-		weapon_attachment.add_child(currentWeaponInstance)
-		update_player_crossbow(selectedWeapon)
-		
-		if selectedWeapon != noWeaponIndex:
-			player.has_Rcrossbow = false  # If not holding a repeating crossbow initially
+	loadSelectedWeapon()
 
-func instance_weapon(weaponIndex):
-	if weaponIndex == 0:
-		return repeating_crossbow.instance()
-	elif weaponIndex == 1:
-		return spear.instance()
+	if currentWeaponInstance:
+		attachment.add_child(currentWeaponInstance)
 
-func update_player_crossbow(selectedWeapon):
-	player.has_Rcrossbow = selectedWeapon == 0
+func instanceWeapon(weaponIndex):
+	if weaponIndex == 1:
+		return weapon1.instance()
+	elif weaponIndex == 2:
+		return weapon2.instance()
+	else:
+		return null  # No weapon instance
 
-func load_selected_weapon():
+func loadSelectedWeapon():
 	var file = File.new()
 	if file.file_exists(persistenceFilePath):
 		file.open(persistenceFilePath, File.READ)
-		var selectedWeapon = file.get_var()
+		var selectedWeaponIndex = file.get_var()
 		file.close()
-		return selectedWeapon
+		currentWeaponInstance = instanceWeapon(selectedWeaponIndex)
+		updatePlayerWeaponStatus(selectedWeaponIndex)
 	else:
-		return noWeaponIndex
+		currentWeaponInstance = null
+		updatePlayerWeaponStatus(0)  # Empty-handed
 
-func save_selected_weapon(weaponIndex):
+func saveSelectedWeapon(weaponIndex):
 	var file = File.new()
 	file.open(persistenceFilePath, File.WRITE)
 	file.store_var(weaponIndex)
 	file.close()
 
-func dropWeapon():
-	if weapon_attachment and currentWeaponInstance:
-		var originalScale = Vector3(1, 1, 1)
-		var smallerScale = Vector3(0.01, 0.01, 0.01)
+func updatePlayerWeaponStatus(weaponIndex):
+	player.has_Rcrossbow = (weaponIndex == 1)
+	player.has_Spear = (weaponIndex == 2)
 
-		weapon_attachment.remove_child(currentWeaponInstance)
-		back_weapon_attachment.remove_child(currentWeaponInstance)  # Remove from back attachment too
-		get_tree().root.add_child(currentWeaponInstance)
+func _on_ItemDetector_body_entered(body):
+	if body.is_in_group("Weapon1"):
+		if Input.is_action_pressed("E"):
+			var newWeapon1 = weapon1.instance() as Node
 		
-		if currentWeaponInstance.get_parent() == weapon_attachment:
-			currentWeaponInstance.scale = originalScale
-		else:
-			currentWeaponInstance.scale = smallerScale
+			if !attachment.has_node(newWeapon1.name):
+				if attachment.get_child_count() > 0:
+					droppedWeapon = attachment.get_child(0)
+					droppedWeapon.queue_free()
+					spawnDroppedWeapon(droppedWeapon.global_transform.origin)
+			
+				attachment.add_child(newWeapon1)
+				body.queue_free()
+				print("Player has a repeating crossbow")
+				saveSelectedWeapon(1)
+				updatePlayerWeaponStatus(1)
 
-		var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
-		var camera_transform = camera.global_transform
-		var camera_backward = -camera_transform.basis.z.normalized()
+	elif body.is_in_group("Weapon2"):
+		if Input.is_action_pressed("E"):
+			var newWeapon2 = weapon2.instance() as Node
+		
+			if !attachment.has_node(newWeapon2.name):
+				if attachment.get_child_count() > 0:
+					droppedWeapon = attachment.get_child(0)
+					droppedWeapon.queue_free()
+					spawnDroppedWeapon(droppedWeapon.global_transform.origin)
+			
+				attachment.add_child(newWeapon2)
+				body.queue_free()
+				print("Player has a spear")
+				saveSelectedWeapon(2)
+				updatePlayerWeaponStatus(2)
 
-		# Adjust the drop distance and position as needed
-		var drop_distance = 3  # Distance from the camera
-		var drop_position = camera_transform.origin + camera_backward * drop_distance
-
-		currentWeaponInstance.global_transform.origin = drop_position
-		currentWeaponInstance = null  # Reset the current weapon instance
-
-func _on_weapon0_pressed():
-	if weapon_attachment:
-		if currentWeaponInstance:
-			dropWeapon()  # Drop the old weapon first
-
-		currentWeaponInstance = instance_weapon(0)
-		weapon_attachment.add_child(currentWeaponInstance)
-		save_selected_weapon(0)
-		update_player_crossbow(0)
-
-func _on_weapon1_pressed():
-	if weapon_attachment:
-		if currentWeaponInstance:
-			dropWeapon()  # Drop the old weapon first
-
-		currentWeaponInstance = instance_weapon(1)
-		weapon_attachment.add_child(currentWeaponInstance)
-		save_selected_weapon(1)
-		update_player_crossbow(1)
+func dropWeapon():
+	if attachment.get_child_count() > 0:
+		droppedWeapon = attachment.get_child(0)
+		droppedWeapon.queue_free()
+		print("Weapon dropped")
+		droppedWeapon = null
+		currentWeaponInstance = null
+		updatePlayerWeaponStatus(0)  # Empty-handed
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("drop"):
-		# Set the weapon index to represent no weapon
-		save_selected_weapon(noWeaponIndex)
 		dropWeapon()
-		update_player_crossbow(noWeaponIndex)  # Update player state to indicate no weapon
+		spawnWeapon()
 
+func spawnWeapon():
+	var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
+	var camera_transform = camera.global_transform
+	var camera_forward = -camera_transform.basis.z.normalized()
 
-func pickupCrossbow():
-	if weapon_attachment:
-		if currentWeaponInstance:
-			currentWeaponInstance.queue_free()  # Delete the old crossbow
-		currentWeaponInstance = instance_weapon(0)
-		weapon_attachment.add_child(currentWeaponInstance)
-		save_selected_weapon(0)
-		update_player_crossbow(0)
+	var spawn_distance = 6.0  # Distance from the camera
+	var spawn_position = camera_transform.origin + camera_forward * spawn_distance
+
+	var newWeaponInstance: Node = null
+
+	if player.has_Rcrossbow:
+		newWeaponInstance = weapon1.instance() as Node
+	elif player.has_Spear:
+		newWeaponInstance = weapon2.instance() as Node
+
+	if newWeaponInstance:
+		newWeaponInstance.global_transform.origin = spawn_position
+		newWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)
+		currentWeaponInstance = newWeaponInstance
+		get_tree().root.add_child(newWeaponInstance)
+		print("Weapon spawned on the floor")
+	else:
+		print("No weapon to spawn")
+
+func spawnDroppedWeapon(position: Vector3):
+	if droppedWeapon:
+		var droppedWeaponInstance = droppedWeapon.duplicate()
+		var player_forward = +player.global_transform.basis.z.normalized()
+		var spawn_distance = 6.0  # Distance from the player
+		var spawn_position = position + player_forward * spawn_distance
+		droppedWeaponInstance.global_transform.origin = spawn_position
+		droppedWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)
+		get_tree().root.add_child(droppedWeaponInstance)
+		print("Dropped weapon spawned on the floor")

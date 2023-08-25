@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=2]
+[gd_scene load_steps=63 format=2]
 
 [ext_resource path="res://scripts/Healing.gd" type="Script" id=1]
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=2]
@@ -23,7 +23,6 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
-[ext_resource path="res://player/FHuman/Weapons.gd" type="Script" id=24]
 [ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
@@ -1513,7 +1512,7 @@ bones/2/name = "mixamorig_Spine1"
 bones/2/parent = 1
 bones/2/rest = Transform( 1, 0, 0, 0, 1, 2.04891e-08, 0, -2.04891e-08, 1, 0, 9.19647, -7.45058e-08 )
 bones/2/enabled = true
-bones/2/bound_children = [  ]
+bones/2/bound_children = [ NodePath("BackWeapon_attachment") ]
 bones/3/name = "mixamorig_Spine2"
 bones/3/parent = 2
 bones/3/rest = Transform( 1, 0, 0, 0, 1, 2.42144e-08, 0, -2.42144e-08, 1, 0, 10.5103, 1.3411e-07 )
@@ -1528,7 +1527,7 @@ bones/5/name = "mixamorig_Head"
 bones/5/parent = 4
 bones/5/rest = Transform( 1, 0, 0, 0, 1, -1.42109e-14, 0, 1.42109e-14, 1, 1.49012e-08, 5.24786, 2.01532 )
 bones/5/enabled = true
-bones/5/bound_children = [  ]
+bones/5/bound_children = [ NodePath("hair_attachment"), NodePath("face_attachment") ]
 bones/6/name = "mixamorig_HeadTop_End"
 bones/6/parent = 5
 bones/6/rest = Transform( 1, 0, 0, 0, 1, 1.42109e-14, 0, -1.42109e-14, 1, 0, 13.4575, 5.16802 )
@@ -1673,7 +1672,7 @@ bones/34/name = "mixamorig_RightHand"
 bones/34/parent = 33
 bones/34/rest = Transform( 0.998878, -0.00271575, -0.0472844, 0.00186846, 0.999837, -0.0179541, 0.0473254, 0.0178456, 0.99872, -5.96046e-08, 23.5759, 4.20958e-06 )
 bones/34/enabled = true
-bones/34/bound_children = [  ]
+bones/34/bound_children = [ NodePath("Weapon_attachment") ]
 bones/35/name = "mixamorig_RightHandThumb1"
 bones/35/parent = 34
 bones/35/rest = Transform( 0.908143, 0.39131, -0.148837, -0.41866, 0.848817, -0.322852, -2.23517e-07, 0.355508, 0.934673, 1.64651, 3.11686, 1.33881 )
@@ -2780,19 +2779,6 @@ margin_right = -267.984
 margin_bottom = 10.1182
 script = ExtResource( 31 )
 
-[node name="weapon0" type="Button" parent="GUI/Edit_Character/WeaponManager"]
-margin_right = 100.0
-margin_bottom = 20.0
-rect_scale = Vector2( 0.919389, 0.888756 )
-text = "Crossbow"
-
-[node name="weapon1" type="Button" parent="GUI/Edit_Character/WeaponManager"]
-margin_top = 20.0636
-margin_right = 100.0
-margin_bottom = 40.0636
-rect_scale = Vector2( 0.919389, 0.888756 )
-text = "Sword"
-
 [node name="WaterDetector" type="Area" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.19921, 0 )
 
@@ -2867,9 +2853,6 @@ shape = SubResource( 69 )
 [node name="Armors" type="Node" parent="."]
 script = ExtResource( 23 )
 
-[node name="Weapons" type="Node" parent="."]
-script = ExtResource( 24 )
-
 [node name="Shooting" type="Node" parent="."]
 script = ExtResource( 30 )
 
@@ -2900,14 +2883,11 @@ script = ExtResource( 30 )
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair5" to="GUI/Edit_Character/EditorHair" method="_on_hair5_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face0" to="GUI/Edit_Character/EditorFace" method="_on_face0_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face1" to="GUI/Edit_Character/EditorFace" method="_on_face1_pressed"]
-[connection signal="pressed" from="GUI/Edit_Character/WeaponManager/weapon0" to="GUI/Edit_Character/WeaponManager" method="_on_weapon0_pressed"]
-[connection signal="pressed" from="GUI/Edit_Character/WeaponManager/weapon1" to="GUI/Edit_Character/WeaponManager" method="_on_weapon1_pressed"]
 [connection signal="area_entered" from="WaterDetector" to="." method="_on_WaterDetector_area_entered"]
 [connection signal="area_exited" from="WaterDetector" to="." method="_on_WaterDetector_area_exited"]
 [connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
 [connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
 [connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManager" method="_on_ItemDetector_body_entered"]
-[connection signal="body_entered" from="ItemDetector" to="Weapons" method="_on_ItemDetector_body_entered"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

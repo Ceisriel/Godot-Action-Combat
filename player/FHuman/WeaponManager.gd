@@ -11,7 +11,6 @@ var persistenceFilePath: String = "user://SaveData.txt"
 
 
 func _on_ItemDetector_body_entered(body):
-	# Change this function so if I pick up weapon 1 but I already hold weapon, it will spawn the previous weapon on the floor
 	if body.is_in_group("Weapon1"):
 		if Input.is_action_pressed("E"):
 			var newWeapon1 = weapon1.instance() as Node

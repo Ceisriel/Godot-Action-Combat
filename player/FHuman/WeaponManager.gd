@@ -125,3 +125,4 @@ func spawnDroppedWeapon(position: Vector3):
 		droppedWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)
 		get_tree().root.add_child(droppedWeaponInstance)
 		print("Dropped weapon spawned on the floor")
+

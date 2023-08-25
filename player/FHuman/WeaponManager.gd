@@ -5,46 +5,13 @@ onready var attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment"
 var weapon1: PackedScene = preload("res://RepeatingCrossbow.tscn")
 var weapon2: PackedScene = preload("res://player/Weapons/Spear/Spear.tscn")
 var droppedWeapon: Node = null
-var currentWeaponInstance: Node = null
-var persistenceFilePath: String = "user://selected_weapon.txt"
+var currentWeaponInstance: Node = null  # Add this line
+var persistenceFilePath: String = "user://SaveData.txt"
 
-func _ready():
-	loadSelectedWeapon()
 
-	if currentWeaponInstance:
-		attachment.add_child(currentWeaponInstance)
-
-func instanceWeapon(weaponIndex):
-	if weaponIndex == 1:
-		return weapon1.instance()
-	elif weaponIndex == 2:
-		return weapon2.instance()
-	else:
-		return null  # No weapon instance
-
-func loadSelectedWeapon():
-	var file = File.new()
-	if file.file_exists(persistenceFilePath):
-		file.open(persistenceFilePath, File.READ)
-		var selectedWeaponIndex = file.get_var()
-		file.close()
-		currentWeaponInstance = instanceWeapon(selectedWeaponIndex)
-		updatePlayerWeaponStatus(selectedWeaponIndex)
-	else:
-		currentWeaponInstance = null
-		updatePlayerWeaponStatus(0)  # Empty-handed
-
-func saveSelectedWeapon(weaponIndex):
-	var file = File.new()
-	file.open(persistenceFilePath, File.WRITE)
-	file.store_var(weaponIndex)
-	file.close()
-
-func updatePlayerWeaponStatus(weaponIndex):
-	player.has_Rcrossbow = (weaponIndex == 1)
-	player.has_Spear = (weaponIndex == 2)
 
 func _on_ItemDetector_body_entered(body):
+	# Change this function so if I pick up weapon 1 but I already hold weapon, it will spawn the previous weapon on the floor
 	if body.is_in_group("Weapon1"):
 		if Input.is_action_pressed("E"):
 			var newWeapon1 = weapon1.instance() as Node
@@ -53,13 +20,14 @@ func _on_ItemDetector_body_entered(body):
 				if attachment.get_child_count() > 0:
 					droppedWeapon = attachment.get_child(0)
 					droppedWeapon.queue_free()
-					spawnDroppedWeapon(droppedWeapon.global_transform.origin)
+					spawnDroppedWeapon(droppedWeapon.global_transform.origin)  # Spawn the dropped weapon on the floor
 			
 				attachment.add_child(newWeapon1)
+				player.has_Rcrossbow = true
+				player.has_Spear = false
 				body.queue_free()
 				print("Player has a repeating crossbow")
-				saveSelectedWeapon(1)
-				updatePlayerWeaponStatus(1)
+
 
 	elif body.is_in_group("Weapon2"):
 		if Input.is_action_pressed("E"):
@@ -69,27 +37,28 @@ func _on_ItemDetector_body_entered(body):
 				if attachment.get_child_count() > 0:
 					droppedWeapon = attachment.get_child(0)
 					droppedWeapon.queue_free()
-					spawnDroppedWeapon(droppedWeapon.global_transform.origin)
+					spawnDroppedWeapon(droppedWeapon.global_transform.origin)  # Spawn the dropped weapon on the floor
 			
 				attachment.add_child(newWeapon2)
+				player.has_Spear = true
+				player.has_Rcrossbow = false
 				body.queue_free()
 				print("Player has a spear")
-				saveSelectedWeapon(2)
-				updatePlayerWeaponStatus(2)
 
 func dropWeapon():
 	if attachment.get_child_count() > 0:
 		droppedWeapon = attachment.get_child(0)
 		droppedWeapon.queue_free()
 		print("Weapon dropped")
-		droppedWeapon = null
-		currentWeaponInstance = null
-		updatePlayerWeaponStatus(0)  # Empty-handed
+		droppedWeapon = null  # Reset droppedWeapon variable
+		currentWeaponInstance = null  # Reset currentWeaponInstance
 
 func _physics_process(delta):
 	if Input.is_action_just_pressed("drop"):
 		dropWeapon()
 		spawnWeapon()
+		player.has_Rcrossbow = false
+		player.has_Spear = false
 
 func spawnWeapon():
 	var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
@@ -108,9 +77,8 @@ func spawnWeapon():
 
 	if newWeaponInstance:
 		newWeaponInstance.global_transform.origin = spawn_position
-		newWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)
-		currentWeaponInstance = newWeaponInstance
-		get_tree().root.add_child(newWeaponInstance)
+		newWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)  # Set the scale to 0.01
+		get_tree().root.add_child(newWeaponInstance)  # Add to the root node of the scene
 		print("Weapon spawned on the floor")
 	else:
 		print("No weapon to spawn")
@@ -125,4 +93,3 @@ func spawnDroppedWeapon(position: Vector3):
 		droppedWeaponInstance.scale = Vector3(0.01, 0.01, 0.01)
 		get_tree().root.add_child(droppedWeaponInstance)
 		print("Dropped weapon spawned on the floor")
-

@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=2]
+
+[sub_resource type="Animation" id=2]
+resource_name = "RepeatingCrossbow"
+length = 5.70833
+
+[sub_resource type="BoxShape" id=3]
+extents = Vector3( 1, 1, 0.998728 )
+
+[sub_resource type="CubeMesh" id=4]
+
+[node name="spear" type="RigidBody" groups=["Weapon", "Weapon3"]]
+transform = Transform( 0.8, 0, 0, 0, 0.8, 0, 0, 0, 0.8, 0, 0, 0 )
+
+[node name="AnimationPlayer" type="AnimationPlayer" parent="."]
+anims/RepeatingCrossbow = SubResource( 2 )
+
+[node name="CollisionShape" type="CollisionShape" parent="." groups=["Spear"]]
+transform = Transform( 4.04372, 0, 0, 0, -1.6474e-06, -108.033, 0, 6.18772, -7.75311e-07, 0, 50.5501, 1.05721 )
+shape = SubResource( 3 )
+
+[node name="MeshInstance" type="MeshInstance" parent="CollisionShape"]
+mesh = SubResource( 4 )

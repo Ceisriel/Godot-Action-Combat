@@ -27,9 +27,9 @@
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
 [ext_resource path="res://player/FHuman/Mesh/Eye_002.material" type="Material" id=28]
-[ext_resource path="res://player/FHuman/EditorFace.gd" type="Script" id=29]
-[ext_resource path="res://player/FHuman/Shooting.gd" type="Script" id=30]
-[ext_resource path="res://player/FHuman/WeaponManager.gd" type="Script" id=31]
+[ext_resource path="res://scripts/EditorFace.gd" type="Script" id=29]
+[ext_resource path="res://scripts/Shooting.gd" type="Script" id=30]
+[ext_resource path="res://scripts/WeaponManager.gd" type="Script" id=31]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "FHuman_body005"

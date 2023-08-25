@@ -95,7 +95,9 @@ var inventorymode = bool()
 var alive = true
 var has_Rcrossbow = bool()
 var has_Spear = bool()
-var agilityModifierApplied = bool()
+var has_Sword = bool()
+var agilityModifierApplied0 = bool()
+var agilityModifierApplied1 = bool()
 #combat stance
 var is_in_combat = false
 # Mobile
@@ -136,6 +138,9 @@ var intelligence = 1.0
 var accuracy = 1.0
 var agility = 1.0
 var impact = 80
+#player attributes but stored, must have to update attributes with weapons and armors
+var original_agility = agility  # Store the original agility value
+var original_walk_speed = walk_speed  # Store the original walk speed value
 #Energy regeneration
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
@@ -584,20 +589,35 @@ func mouseMode():
 func round_to_two_decimals(number):
 	return round(number * 100.0) / 100.0
 func updateattributes():
-	# Update attribute and stats
+	
+	if not has_Rcrossbow or not has_Spear:
+		agility = original_agility		
+	# Update attributes and stats for has_Rcrossbow
 	if has_Rcrossbow:
-		if !agilityModifierApplied:
-			agility *= 0.5
-			walk_speed *= 0.75
-			agilityModifierApplied = true
-		# No need to apply agility *= 1 here
+		if !agilityModifierApplied0:
+			agility = original_agility * 0.9
+			walk_speed = original_walk_speed * 0.9
+			agilityModifierApplied0 = true
 	else:
-		if agilityModifierApplied:
-			agility *= 2  # Change back to the original value (assuming it's doubled)
-			walk_speed *= 1.25
-			agilityModifierApplied = false
-
+		if agilityModifierApplied0:
+			agility = original_agility  # Reset to the original agility value
+			walk_speed = original_walk_speed  # Reset to the original walk speed value
+			agilityModifierApplied0 = false
 			
+	# Update attributes and stats for has_Spear
+	if has_Spear:
+		if !agilityModifierApplied1:
+			agility = original_agility * 0.9
+			walk_speed = original_walk_speed * 0.9
+			agilityModifierApplied1 = true
+	else:
+		if agilityModifierApplied1:
+			agility = original_agility  # Reset to the original agility value
+			walk_speed = original_walk_speed  # Reset to the original walk speed value
+			agilityModifierApplied1 = false
+	
+
+		
 	climb_speed = base_climb_speed * strength
 	dash_power = basedash * agility
 	sprint_speed = basesprint * agility
@@ -624,6 +644,13 @@ func updateinternface():
 	$GUI/E.text = energyText
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
 func _physics_process(delta: float):#this calls every function
+	if Input.is_action_just_pressed("Q"):
+		has_Rcrossbow = true
+	if Input.is_action_just_pressed("reset"):
+		has_Spear = true
+	if Input.is_action_just_pressed("tackle"):
+		has_Sword = true	
+	
 	horizontal_velocity = horizontal_velocity.linear_interpolate(direction.normalized() * movement_speed, acceleration * delta)
 	if !inventorymode:
 		if alive:

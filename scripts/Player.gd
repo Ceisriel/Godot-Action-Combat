@@ -96,6 +96,8 @@ var alive = true
 var has_Rcrossbow = bool()
 var has_Spear = bool()
 var has_Sword = bool()
+var has_Sword_Off = bool()
+var has_Shield = bool()
 var agilityModifierApplied0 = bool()
 var agilityModifierApplied1 = bool()
 #combat stance

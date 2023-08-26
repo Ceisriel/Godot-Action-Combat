@@ -1,15 +1,18 @@
-[gd_scene load_steps=7 format=2]
+[gd_scene load_steps=9 format=2]
 
-[ext_resource path="res://player/FHuman/Player.tscn" type="PackedScene" id=1]
+[ext_resource path="res://player/Weapons/Sword/Shield.tscn" type="PackedScene" id=1]
 [ext_resource path="res://env/landscape test.tscn" type="PackedScene" id=2]
-[ext_resource path="res://RepeatingCrossbow.tscn" type="PackedScene" id=3]
+[ext_resource path="res://player/Weapons/RepeatingCrossbow/RepeatingCrossbow.tscn" type="PackedScene" id=3]
 [ext_resource path="res://player/Weapons/Spear/Spear.tscn" type="PackedScene" id=4]
 [ext_resource path="res://env/bkg/blue/sky.glb" type="PackedScene" id=5]
+[ext_resource path="res://player/Weapons/Sword/Sword.tscn" type="PackedScene" id=6]
+[ext_resource path="res://scripts/World.gd" type="Script" id=7]
 
 [sub_resource type="BoxShape" id=1]
 extents = Vector3( 4.17424, 7.33728, 6.10486 )
 
 [node name="World" type="Spatial"]
+script = ExtResource( 7 )
 
 [node name="Area" type="Area" parent="." groups=["Water", "item"]]
 transform = Transform( 3.19727, 0, 0, 0, 1, 0, 0, 0, 1.87105, 5.10926, -12.7999, 25.7951 )
@@ -23,9 +26,6 @@ visible = false
 
 [node name="Sphere" parent="sky" index="0"]
 transform = Transform( 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0 )
-
-[node name="Player2" parent="." instance=ExtResource( 1 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 2.58289, -9.40561 )
 
 [node name="landscape test" parent="." instance=ExtResource( 2 )]
 transform = Transform( 200, 0, 0, 0, 20, 0, 0, 0, 200, 0, -6.39721, 0 )
@@ -53,5 +53,48 @@ transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, -5.69281, 1.30447, 0 
 
 [node name="spear6" parent="." instance=ExtResource( 4 )]
 transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, -4.4748, 1.30447, 0 )
+
+[node name="spear7" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 0, 0, -1.99983 )
+
+[node name="spear8" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, -1.94086, 1.4833, -1.99983 )
+
+[node name="spear9" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 1.56908, 1.4833, -1.99983 )
+
+[node name="spear10" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 1.56908, 1.4833, 3.30576 )
+
+[node name="spear11" parent="." instance=ExtResource( 6 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.01, 2.93777, 1.4833, 3.30576 )
+
+[node name="Play" type="Button" parent="."]
+margin_left = 470.0
+margin_top = 294.0
+margin_right = 508.0
+margin_bottom = 314.0
+rect_scale = Vector2( 11.0991, 8.56247 )
+text = "Play"
+
+[node name="Shield" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, 0, 1.27702, 0 )
+
+[node name="Shield2" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, 0, 1.27702, 0.816934 )
+
+[node name="Shield3" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, 0, 1.27702, -0.629487 )
+
+[node name="Shield4" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, -1.32549, 1.9449, 0 )
+
+[node name="Shield5" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, -1.32549, 1.9449, 0.816934 )
+
+[node name="Shield6" parent="." instance=ExtResource( 1 )]
+transform = Transform( 0.01, 0, 0, 0, 0.01, 0, 0, 0, 0.005, -1.32549, 1.9449, -0.629487 )
+
+[connection signal="pressed" from="Play" to="." method="_on_Play_pressed"]
 
 [editable path="sky"]

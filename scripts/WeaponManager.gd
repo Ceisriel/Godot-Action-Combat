@@ -2,7 +2,7 @@ extends Control
 
 onready var player = $"../../.." 
 onready var attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment"
-var weapon1: PackedScene = preload("res://RepeatingCrossbow.tscn")
+var weapon1: PackedScene = preload("res://player/Weapons/RepeatingCrossbow/RepeatingCrossbow.tscn")
 var weapon2: PackedScene = preload("res://player/Weapons/Spear/Spear.tscn")
 var weapon3: PackedScene = preload("res://player/Weapons/Sword/Sword.tscn")
 
@@ -11,7 +11,7 @@ var currentWeaponInstance: Node = null
 
 
 func _on_ItemDetector_body_entered(body):
-	# Change this function so if I pick up weapon 1 but I already hold weapon, it will spawn the previous weapon on the floor
+
 	if body.is_in_group("Weapon1"):
 		if Input.is_action_pressed("E"):
 			var newWeapon1 = weapon1.instance() as Node
@@ -60,6 +60,8 @@ func _on_ItemDetector_body_entered(body):
 				player.has_Rcrossbow = false
 				player.has_Sword = true
 				body.queue_free()
+				if player.has_Sword:
+					player.has_Sword_Off = true 
 				print("Player has a sword")	
 
 func dropWeapon():
@@ -81,7 +83,8 @@ func _physics_process(delta):
 	if player.has_Rcrossbow:
 		instanceCrossbow()
 		player.has_Spear = false
-		player.has_Sword = false		
+		player.has_Sword = false	
+		player.has_Shield= false	
 	if player.has_Spear:
 		instanceSpear()
 		player.has_Rcrossbow = false

@@ -3,13 +3,13 @@ extends Node
 const SAVE_DIR = "user://saves/"
 var save_path = SAVE_DIR + "save.dat"
 
-onready var player = $".."  # Replace with the actual path to your player node
+onready var player = $".."  
+onready var camera = $"../Camroot/Camera_holder/Camera"
+
 
 func _ready():
 	loadPlayerData()
 
-func _exit_tree():
-	savePlayerData()
 
 func savePlayerData():
 	var data = {
@@ -26,8 +26,9 @@ func savePlayerData():
 		"agilityModifierApplied1": player.agilityModifierApplied1,
 		"agilityModifierApplied0": player.agilityModifierApplied0,
 		"agility": player.agility,
-		"accuracy": player.accuracy  # Save the player's agility
-	}
+		"accuracy": player.accuracy,
+		"camera_rotation": camera.rotation_degrees  # Save the camera's rotation
+		}
 
 	var dir = Directory.new()
 	if !dir.dir_exists(SAVE_DIR):
@@ -74,6 +75,9 @@ func loadPlayerData():
 				player.agility = player_data["agility"]  # Set the player's agility
 			if "accuracy" in player_data:
 				player.accuracy = player_data["accuracy"]
+			if "camera_rotation" in player_data:
+				camera.rotation_degrees = player_data["camera_rotation"]  # Set the camera's rotation
+
 func resetSavedData():
 	var dir = Directory.new()
 	if dir.file_exists(save_path):
@@ -88,3 +92,7 @@ func _input(event):
 func console_write(value):
 	print(str(value))
 
+
+
+func _on_SaveDataTimer_timeout():
+	savePlayerData()

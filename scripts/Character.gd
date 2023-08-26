@@ -2,7 +2,7 @@ extends Control
 
 var playerName = ""
 func _physics_process(delta):
-	if Input.is_action_just_pressed("inventory"):
+	if Input.is_action_just_pressed("inv"):
 		self.visible = !self.visible
 
 
@@ -48,3 +48,7 @@ func _on_Save_pressed():
 	savePlayerNameToFile()
 
 
+
+
+func _on_inventory_pressed():
+	self.visible = !self.visible

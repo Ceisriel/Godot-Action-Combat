@@ -2784,6 +2784,13 @@ margin_right = -267.984
 margin_bottom = 10.1182
 script = ExtResource( 31 )
 
+[node name="inventory" type="Button" parent="GUI"]
+margin_left = 1285.0
+margin_top = 759.0
+margin_right = 1357.0
+margin_bottom = 779.0
+text = "inventory"
+
 [node name="WaterDetector" type="Area" parent="."]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.19921, 0 )
 
@@ -2855,10 +2862,6 @@ shape = SubResource( 69 )
 
 [node name="Timer" type="Timer" parent="."]
 
-[node name="SaveDataTimer" type="Timer" parent="."]
-wait_time = 4.745
-autostart = true
-
 [node name="Armors" type="Node" parent="."]
 script = ExtResource( 23 )
 
@@ -2867,10 +2870,12 @@ script = ExtResource( 30 )
 
 [node name="Timer" type="Timer" parent="Shooting"]
 
-[node name="SaveData1" type="Node" parent="."]
-
-[node name="SaveData2" type="Node" parent="."]
+[node name="SaveData" type="Node" parent="."]
 script = ExtResource( 32 )
+
+[node name="SaveDataTimer" type="Timer" parent="SaveData"]
+wait_time = 4.745
+autostart = true
 
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="GUI/Character/Attributes" method="_on_PlusSTR_pressed"]
@@ -2897,13 +2902,14 @@ script = ExtResource( 32 )
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair5" to="GUI/Edit_Character/EditorHair" method="_on_hair5_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face0" to="GUI/Edit_Character/EditorFace" method="_on_face0_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face1" to="GUI/Edit_Character/EditorFace" method="_on_face1_pressed"]
+[connection signal="pressed" from="GUI/inventory" to="GUI/Character" method="_on_inventory_pressed"]
 [connection signal="area_entered" from="WaterDetector" to="." method="_on_WaterDetector_area_entered"]
 [connection signal="area_exited" from="WaterDetector" to="." method="_on_WaterDetector_area_exited"]
 [connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
 [connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
 [connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManager" method="_on_ItemDetector_body_entered"]
-[connection signal="timeout" from="SaveDataTimer" to="SaveData2" method="_on_SaveDataTimer_timeout"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Shooting/Timer" to="SaveData2" method="_on_Timer_timeout"]
+[connection signal="timeout" from="Shooting/Timer" to="SaveData" method="_on_Timer_timeout"]
+[connection signal="timeout" from="SaveData/SaveDataTimer" to="SaveData" method="_on_SaveDataTimer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

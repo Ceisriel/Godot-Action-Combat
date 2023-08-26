@@ -16,7 +16,6 @@ onready var aim2 = $"../Camroot/Camera_holder/Camera/Aim2"
 onready var aim3 = $"../Camroot/Camera_holder/Camera/Aim3"
 onready var aim4 = $"../Camroot/Camera_holder/Camera/Aim4"
 onready var aim5 = $"../Camroot/Camera_holder/Camera/Aim5"
-onready var aim6 = $"../Camroot/Camera_holder/Camera/Aim6"
 onready var camera = $"../Camroot/Camera_holder/Camera"
 
 var RepeatingCrossbow = preload("res://RepeatingCrossbow.tscn")

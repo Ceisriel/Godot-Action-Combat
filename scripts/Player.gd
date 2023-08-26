@@ -19,9 +19,9 @@ onready var animation = $FHuman/AnimationPlayer
 onready var collision_torso = $CollisonTorso
 onready var hitbox = $Hitbox
 onready var takedamagesprite = $Takedamage/DamageView
-onready var warlocktorso = $FHuman/Armature/Skeleton/body1
-onready var nakedtorso = $FHuman/Armature/Skeleton/body0
-onready var potion_attachment =$FHuman/Armature/Skeleton/potionAttachment
+onready var warlocktorso = $FHuman/Armature/Skeleton/TorsoSemiPlate
+onready var nakedtorso = $FHuman/Armature/Skeleton/TorsoNaked
+
 var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -527,10 +527,6 @@ func regeneration(delta):
 					energy = maxenergy
 					regenerateEnergy = false
 func mouseMode():
-	if Input.is_action_just_pressed("inventory"):
-		inventorymode = true
-	else:
-		inventorymode = false
 	if Input.is_action_just_pressed("aim"):
 		is_aiming = !is_aiming
 	# Toggle mouse mode

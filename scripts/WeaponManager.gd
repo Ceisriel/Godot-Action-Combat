@@ -9,28 +9,6 @@ var weapon3: PackedScene = preload("res://player/Weapons/Sword/Sword.tscn")
 var droppedWeapon: Node = null
 var currentWeaponInstance: Node = null  
 
-var persistenceFilePath: String = "user://SaveData.txt"
-
-func _ready():
-	loadSavedData()
-
-func saveData():
-	var file = File.new()
-	file.open(persistenceFilePath, File.WRITE)
-	file.store_var(player.has_Rcrossbow)
-	file.store_var(player.has_Spear)
-	file.store_var(player.has_Sword)
-	file.close()
-
-func loadSavedData():
-	var file = File.new()
-	if file.file_exists(persistenceFilePath):
-		file.open(persistenceFilePath, File.READ)
-		player.has_Rcrossbow = file.get_var()
-		player.has_Spear = file.get_var()
-		player.has_Sword = file.get_var()
-		file.close()
-
 
 func _on_ItemDetector_body_entered(body):
 	# Change this function so if I pick up weapon 1 but I already hold weapon, it will spawn the previous weapon on the floor
@@ -93,7 +71,7 @@ func dropWeapon():
 		currentWeaponInstance = null  # Reset currentWeaponInstance
 
 func _physics_process(delta):
-	saveData()
+
 	if Input.is_action_just_pressed("drop"):
 		dropWeapon()
 		spawnWeapon()

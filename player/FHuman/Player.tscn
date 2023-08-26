@@ -23,7 +23,6 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
-[ext_resource path="res://player/FHuman/Savedata.gd" type="Script" id=24]
 [ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
@@ -31,6 +30,7 @@
 [ext_resource path="res://scripts/EditorFace.gd" type="Script" id=29]
 [ext_resource path="res://scripts/Shooting.gd" type="Script" id=30]
 [ext_resource path="res://scripts/WeaponManager.gd" type="Script" id=31]
+[ext_resource path="res://player/FHuman/SaveData2.gd" type="Script" id=32]
 
 [sub_resource type="ArrayMesh" id=1]
 resource_name = "FHuman_body005"
@@ -2856,7 +2856,7 @@ shape = SubResource( 69 )
 [node name="Timer" type="Timer" parent="."]
 
 [node name="SaveDataTimer" type="Timer" parent="."]
-wait_time = 25.0
+wait_time = 4.745
 autostart = true
 
 [node name="Armors" type="Node" parent="."]
@@ -2867,8 +2867,10 @@ script = ExtResource( 30 )
 
 [node name="Timer" type="Timer" parent="Shooting"]
 
-[node name="Node" type="Node" parent="."]
-script = ExtResource( 24 )
+[node name="SaveData1" type="Node" parent="."]
+
+[node name="SaveData2" type="Node" parent="."]
+script = ExtResource( 32 )
 
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="." method="_on_PlusSTR_pressed"]
 [connection signal="pressed" from="GUI/Character/Attributes/STR/PlusSTR" to="GUI/Character/Attributes" method="_on_PlusSTR_pressed"]
@@ -2900,7 +2902,8 @@ script = ExtResource( 24 )
 [connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
 [connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
 [connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManager" method="_on_ItemDetector_body_entered"]
-[connection signal="timeout" from="SaveDataTimer" to="Node" method="_on_SaveDataTimer_timeout"]
+[connection signal="timeout" from="SaveDataTimer" to="SaveData2" method="_on_SaveDataTimer_timeout"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
+[connection signal="timeout" from="Shooting/Timer" to="SaveData2" method="_on_Timer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

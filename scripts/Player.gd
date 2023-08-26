@@ -154,6 +154,7 @@ var drinking_duration = 3.0  # Duration in seconds
 
 
 func _ready():
+
 	direction = Vector3.BACK.rotated(Vector3.UP, $Camroot/Camera_holder.global_transform.basis.get_euler().y)
 	$Timer.connect("timeout", self, "_on_drinking_timer_timeout")
 
@@ -590,32 +591,6 @@ func round_to_two_decimals(number):
 	return round(number * 100.0) / 100.0
 func updateattributes():
 	
-	if not has_Rcrossbow or not has_Spear:
-		agility = original_agility		
-	# Update attributes and stats for has_Rcrossbow
-	if has_Rcrossbow:
-		if !agilityModifierApplied0:
-			agility = original_agility * 0.9
-			walk_speed = original_walk_speed * 0.9
-			agilityModifierApplied0 = true
-	else:
-		if agilityModifierApplied0:
-			agility = original_agility  # Reset to the original agility value
-			walk_speed = original_walk_speed  # Reset to the original walk speed value
-			agilityModifierApplied0 = false
-			
-	# Update attributes and stats for has_Spear
-	if has_Spear:
-		if !agilityModifierApplied1:
-			agility = original_agility * 0.9
-			walk_speed = original_walk_speed * 0.9
-			agilityModifierApplied1 = true
-	else:
-		if agilityModifierApplied1:
-			agility = original_agility  # Reset to the original agility value
-			walk_speed = original_walk_speed  # Reset to the original walk speed value
-			agilityModifierApplied1 = false
-	
 
 		
 	climb_speed = base_climb_speed * strength
@@ -903,40 +878,7 @@ func animationOrderClimbing():
 func updateAliveOrDead():
 	if health <= 0:
 		alive = false
-func get_save_stats():#saving data
-	return {
-		'filename': get_filename(),
-		'parent': get_parent().get_path(),
-		'x_pos': global_transform.origin.x,
-		'y_pos': global_transform.origin.y,
-		'z_pos': global_transform.origin.z,
-		'stats': {
-			'health': health,
-			'vitality': vitality,
-			'strength': strength,
-			'intelligence' : intelligence,
-			'basemaxhealth': basemaxhealth,
-			'accuracy': accuracy,
-			'energy': energy,
-			'maxhealth': maxhealth,
-			'maxenergy': maxenergy,
-			'attribute': attribute,
-			'agility': agility
-		}
-	}
-func load_save_stats(stats):#loading saved data
-	self.global_transform.origin = Vector3(stats.x_pos, stats.y_pos, stats.z_pos)
-	health = stats.stats.health
-	energy = stats.stats.energy
-	vitality = stats.stats.vitality
-	maxhealth = stats.stats.maxhealth
-	maxenergy = stats.stats.maxenergy
-	strength = stats.stats.strength
-	intelligence = stats.stats.intelligence
-	attribute = stats.stats.attribute
-	accuracy = stats.stats.accuracy
-	agility = stats.stats.agility
-#increasing / decreasing stats and attributes based on buttons
+
 func _on_PlusVIT_pressed():
 	if attribute > 0:
 		attribute -= 1

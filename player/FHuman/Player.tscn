@@ -1,4 +1,4 @@
-[gd_scene load_steps=64 format=2]
+[gd_scene load_steps=65 format=2]
 
 [ext_resource path="res://scripts/Healing.gd" type="Script" id=1]
 [ext_resource path="res://scripts/CameraTemplate.gd" type="Script" id=2]
@@ -23,6 +23,7 @@
 [ext_resource path="res://UI/UI assets/AttributeIcons/emp.png" type="Texture" id=21]
 [ext_resource path="res://UI/UI assets/-.png" type="Texture" id=22]
 [ext_resource path="res://scripts/Armors.gd" type="Script" id=23]
+[ext_resource path="res://scripts/WeaponManagerOffHand.gd" type="Script" id=24]
 [ext_resource path="res://scripts/EditorHair.gd" type="Script" id=25]
 [ext_resource path="res://player/FHuman/Mesh/iris_002.material" type="Material" id=26]
 [ext_resource path="res://player/FHuman/Mesh/Cloth.material" type="Material" id=27]
@@ -1935,9 +1936,9 @@ bone_name = "mixamorig_Head"
 transform = Transform( -0.0358801, -0.56968, 0.821083, 0.999175, -0.00485055, 0.0402972, -0.0189737, 0.821852, 0.569384, -36.4026, -0.672103, -88.6866 )
 bone_name = "mixamorig_RightHand"
 
-[node name="BackWeapon_attachment" type="BoneAttachment" parent="FHuman/Armature/Skeleton"]
-transform = Transform( 1, 0, 0, 0, -0.0160957, 0.99987, 0, -0.99987, -0.0160957, 0.152896, -1.5202, -107.896 )
-bone_name = "mixamorig_Spine1"
+[node name="Weapon_attachment_Off_Hand" type="BoneAttachment" parent="FHuman/Armature/Skeleton"]
+transform = Transform( -0.0512849, 0.547361, -0.835323, -0.998601, -0.0173499, 0.0499404, 0.0128428, 0.836717, 0.547485, 36.7084, -0.562639, -88.6865 )
+bone_name = "mixamorig_LeftHand"
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="FHuman"]
 anims/Rest = SubResource( 23 )
@@ -2784,7 +2785,18 @@ margin_right = -267.984
 margin_bottom = 10.1182
 script = ExtResource( 31 )
 
-[node name="inventory" type="Button" parent="GUI"]
+[node name="WeaponManagerOffHand" type="Control" parent="GUI/Edit_Character"]
+margin_left = -307.984
+margin_top = -29.8818
+margin_right = -267.984
+margin_bottom = 10.1182
+script = ExtResource( 24 )
+
+[node name="Panel" type="Panel" parent="GUI"]
+margin_right = 40.0
+margin_bottom = 40.0
+
+[node name="inventory" type="Button" parent="GUI/Panel"]
 margin_left = 1285.0
 margin_top = 759.0
 margin_right = 1357.0
@@ -2854,7 +2866,7 @@ texture = SubResource( 65 )
 script = ExtResource( 1 )
 
 [node name="ItemDetector" type="Area" parent="."]
-transform = Transform( 1.59637, 0, 0, 0, 1.68736, 0, 0, 0, 1.52399, 0, -0.55436, 0 )
+transform = Transform( 1.16529, 0, 0, 0, 0.844334, 0, 0, 0, 0.40679, 0, -0.109548, 0 )
 
 [node name="CollisionShape" type="CollisionShape" parent="ItemDetector"]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.839473, 0 )
@@ -2902,14 +2914,12 @@ autostart = true
 [connection signal="pressed" from="GUI/Edit_Character/EditorHair/hair5" to="GUI/Edit_Character/EditorHair" method="_on_hair5_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face0" to="GUI/Edit_Character/EditorFace" method="_on_face0_pressed"]
 [connection signal="pressed" from="GUI/Edit_Character/EditorFace/face1" to="GUI/Edit_Character/EditorFace" method="_on_face1_pressed"]
-[connection signal="pressed" from="GUI/inventory" to="GUI/Character" method="_on_inventory_pressed"]
+[connection signal="pressed" from="GUI/Panel/inventory" to="GUI/Character" method="_on_inventory_pressed"]
 [connection signal="area_entered" from="WaterDetector" to="." method="_on_WaterDetector_area_entered"]
 [connection signal="area_exited" from="WaterDetector" to="." method="_on_WaterDetector_area_exited"]
-[connection signal="area_entered" from="ItemDetector" to="." method="_on_ItemDetector_area_entered"]
-[connection signal="area_entered" from="ItemDetector" to="Armors" method="_on_ItemDetector_area_entered"]
 [connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManager" method="_on_ItemDetector_body_entered"]
+[connection signal="body_entered" from="ItemDetector" to="GUI/Edit_Character/WeaponManagerOffHand" method="_on_ItemDetector_body_entered"]
 [connection signal="timeout" from="Shooting/Timer" to="Shooting" method="_on_Timer_timeout"]
-[connection signal="timeout" from="Shooting/Timer" to="SaveData" method="_on_Timer_timeout"]
 [connection signal="timeout" from="SaveData/SaveDataTimer" to="SaveData" method="_on_SaveDataTimer_timeout"]
 
 [editable path="Camroot/Camera_holder/Camera/IcePower"]

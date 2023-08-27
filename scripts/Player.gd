@@ -619,6 +619,7 @@ func updateinternface():
 func _physics_process(delta: float):#this calls every function
 	if Input.is_action_just_pressed("Q"):
 		has_Rcrossbow = true
+
 	if Input.is_action_just_pressed("reset"):
 		has_Spear = true
 	if Input.is_action_just_pressed("tackle"):

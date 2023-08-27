@@ -26,6 +26,7 @@ func _on_ItemDetector_body_entered(body):
 				player.has_Rcrossbow = true
 				player.has_Spear = false
 				player.has_Sword = false
+				player.has_Sword_Off = false
 				body.queue_free()
 				print("Player has a repeating crossbow")
 
@@ -43,6 +44,7 @@ func _on_ItemDetector_body_entered(body):
 				player.has_Spear = true
 				player.has_Rcrossbow = false
 				player.has_Sword = false
+				player.has_Sword_Off = false
 				body.queue_free()
 				print("Player has a spear")
 	elif body.is_in_group("Weapon3"):
@@ -74,26 +76,28 @@ func dropWeapon():
 
 func _physics_process(delta):
 
+		
 	if Input.is_action_just_pressed("drop"):
 		dropWeapon()
 		spawnWeapon()
 		player.has_Rcrossbow = false
 		player.has_Spear = false
 		player.has_Sword = false
+
 	if player.has_Rcrossbow:
 		instanceCrossbow()
 		player.has_Spear = false
-		player.has_Sword = false	
-		player.has_Shield= false	
+		player.has_Sword = false
+		player.has_Sword_Off = false		
 	if player.has_Spear:
-		instanceSpear()
 		player.has_Rcrossbow = false
 		player.has_Sword = false
+		player.has_Sword_Off = false
+		instanceSpear()
 	if player.has_Sword:
-		instanceSword()
 		player.has_Rcrossbow = false
-		player.has_Spear = false			
-			
+		player.has_Spear = false
+		instanceSword()
 func spawnWeapon():
 	var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
 	var camera_transform = camera.global_transform

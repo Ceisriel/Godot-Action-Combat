@@ -2,7 +2,7 @@ extends Control
 
 onready var player = $"../../.." 
 onready var attachment = $"../../../FHuman/Armature/Skeleton/Weapon_attachment_Off_Hand"
-var weapon1 :  PackedScene = preload("res://player/Weapons/Sword/Shield.tscn")
+var weapon1 :  PackedScene = preload("res://player/Weapons/Shield/Shield.tscn")
 var weapon2: PackedScene = preload("res://player/Weapons/Sword/Sword.tscn")
 
 var droppedWeapon: Node = null
@@ -29,7 +29,7 @@ func _on_ItemDetector_body_entered(body):
 
 	elif body.is_in_group("Weapon3"):
 		if Input.is_action_pressed("E"):
-			if !player.has_Sword_Off:
+			if !player.has_Spear:
 				var newWeapon2 = weapon2.instance() as Node
 				if !attachment.has_node(newWeapon2.name):
 					if attachment.get_child_count() > 0:
@@ -68,7 +68,10 @@ func _physics_process(delta):
 	if player.has_Sword_Off and !player.has_Shield:
 		instanceSword()
 		player.has_Shield= false
-		
+		player.has_Spear = false
+		player.has_Rcrossbow = false
+	if player.has_Rcrossbow:
+		dropWeapon()
 			
 func spawnWeapon():
 	var camera = $"../../../Camroot/Camera_holder/Camera"  # Replace with your actual camera path
@@ -112,9 +115,9 @@ func instanceShield():
 		print("Shield instanced")
 
 func instanceSword():
-	if weapon2 and !attachment.has_node(weapon2.instance().name):
-		var newWeaponInstance = weapon2.instance() as Node
-		attachment.add_child(newWeaponInstance)
-		currentWeaponInstance = newWeaponInstance
-		print("Secondary sword instanced")
+		if weapon2 and !attachment.has_node(weapon2.instance().name):
+			var newWeaponInstance = weapon2.instance() as Node
+			attachment.add_child(newWeaponInstance)
+			currentWeaponInstance = newWeaponInstance
+			print("Secondary sword instanced")
 

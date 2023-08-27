@@ -5,6 +5,8 @@ it has:
 
 -Basic enemy ai with multiple type of attacks, random roaming and player chasing 
 
+-Pick up and drop down weapons in main hand and offhand 
+
 -3D terrain with shader for multiple textures based on height and angle 
 
 -Swimming

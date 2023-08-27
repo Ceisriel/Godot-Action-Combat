@@ -3,6 +3,8 @@ Trying to recreate The combat system from Tera online but with more indepth mech
 
 it has: 
 
+-Basic enemy ai with multiple type of attacks, random roaming and player chasing 
+
 -3D terrain with shader for multiple textures based on height and angle 
 
 -Swimming
@@ -10,6 +12,8 @@ it has:
 -Climbing
 
 -Dodging
+
+-Hitscan and projectile weapons
 
 -Parrying/Blocking/Guarding
 
@@ -20,6 +24,8 @@ it has:
 -Minimap
 
 -Free third person camera
+
+-Option to move by strafing
 
 -Optional strafing
 

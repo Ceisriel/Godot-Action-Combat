@@ -1,5 +1,0 @@
-[gd_scene load_steps=2 format=2]
-
-[ext_resource path="res://player/assets/player_assets/greatsword anim only.glb" type="PackedScene" id=1]
-
-[node name="Knight" instance=ExtResource( 1 )]

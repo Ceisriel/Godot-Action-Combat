@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://Weapons/Shield/Shield.glb" type="PackedScene" id=1]
+
+[sub_resource type="BoxShape" id=2]
+
+[node name="Shield" type="RigidBody" groups=["Shield"]]
+
+[node name="Shield" parent="." instance=ExtResource( 1 )]
+transform = Transform( -1, 0, -8.74228e-08, 0, 1, 0, 8.74228e-08, 0, -1, 0, -6.05092, 0 )
+
+[node name="CollisionShape" type="CollisionShape" parent="."]
+transform = Transform( 44.1886, 0, 0, 0, 53.7401, 0, 0, 0, 15.4765, 0, 0, 0 )
+shape = SubResource( 2 )

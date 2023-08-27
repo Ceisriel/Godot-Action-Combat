@@ -1,0 +1,72 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://UI/UI assets/MobileControls/arrow.png" type="Texture" id=1]
+[ext_resource path="res://UI/UI assets/MobileControls/hammer.png" type="Texture" id=2]
+[ext_resource path="res://UI/UI assets/MobileControls/MobileControls.gd" type="Script" id=3]
+
+[node name="MobileControls" type="CanvasLayer"]
+script = ExtResource( 3 )
+
+[node name="Left" type="TouchScreenButton" parent="."]
+position = Vector2( 30, 534 )
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+passby_press = true
+action = "left"
+
+[node name="Right" type="TouchScreenButton" parent="."]
+position = Vector2( 326, 630 )
+rotation = -3.14159
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+passby_press = true
+action = "right"
+
+[node name="Back" type="TouchScreenButton" parent="."]
+position = Vector2( 128, 720 )
+rotation = -1.5708
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+passby_press = true
+action = "backward"
+
+[node name="Front" type="TouchScreenButton" parent="."]
+position = Vector2( 225, 428 )
+rotation = 1.5708
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+passby_press = true
+action = "forward"
+
+[node name="Run" type="TouchScreenButton" parent="."]
+position = Vector2( 338, 425 )
+rotation = 1.5708
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+action = "RunOFFON"
+
+[node name="Sprint" type="TouchScreenButton" parent="."]
+position = Vector2( 109, 424 )
+rotation = 1.5708
+scale = Vector2( 3.06945, 2.99534 )
+normal = ExtResource( 1 )
+action = "SprintOFFON"
+
+[node name="Jump" type="TouchScreenButton" parent="."]
+position = Vector2( 1347, 630 )
+rotation = 1.5708
+scale = Vector2( 2.16342, 2.47692 )
+normal = ExtResource( 1 )
+action = "jump"
+
+[node name="Attack" type="TouchScreenButton" parent="."]
+position = Vector2( 1088, 460 )
+scale = Vector2( 2.92037, 2.70656 )
+normal = ExtResource( 2 )
+action = "attack"
+
+[node name="Parry" type="TouchScreenButton" parent="."]
+position = Vector2( 1112, 630 )
+scale = Vector2( 3.1372, 3.12272 )
+normal = ExtResource( 2 )
+action = "guard"

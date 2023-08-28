@@ -14,6 +14,8 @@ var has_semi_plate = bool()
 # Store the original intelligence level of the parent node
 var dress_modified = false
 var semip_modified = false
+var leather_modified = false
+var jute_modified = false
 
 func _ready():
 	switchArmors()
@@ -107,13 +109,22 @@ func _on_leater_pressed():
 	has_dress = false		
 	has_jute = false
 	has_semi_plate = false	
-
-
 func _on_Virtual_FPS_timeout():
 	switchArmors()
 	Dress()
 	SemiPlate()
-
+	Leather()
+	Jute()
+	
+func JuteEffect(active: bool):
+	if active and not jute_modified:
+		jute_modified = true
+		player.agility += 0.1  # Adjust the boost values as needed
+		player.maxenergy += 0.15 # For example, adding evasion boost
+	elif not active and jute_modified:
+		player.agility -= 0.1
+		player.maxenergy -= 0.15
+		jute_modified = false
 
 func DressEffect(active: bool):
 	if active and not dress_modified:
@@ -136,7 +147,27 @@ func SemiPlateEffect(active: bool):
 		player.vitality -= 0.105
 		player.agility -= 0.205
 		semip_modified = false
-
+		
+func LeatherEffect(active: bool):
+	if active and not leather_modified:
+		leather_modified = true
+		player.vitality += 0.08  # Adjust the boost values as needed
+		player.defense += 0.1    # For example, adding defense boost
+	elif not active and leather_modified:
+		player.vitality -= 0.08
+		player.defense -= 0.1
+		leather_modified = false
+func Jute():
+	if has_jute:
+		JuteEffect(true)
+		if dress_modified:
+			DressEffect(false)
+		if semip_modified:
+			SemiPlateEffect(false)
+		if leather_modified:
+			LeatherEffect(false)
+	else:
+		JuteEffect(false)		
 func Dress():
 	if has_dress:
 		DressEffect(true)
@@ -152,3 +183,13 @@ func SemiPlate():
 			DressEffect(false)
 	else:
 		SemiPlateEffect(false)
+
+func Leather():
+	if has_leather:
+		LeatherEffect(true)
+		if dress_modified:
+			DressEffect(false)
+		if semip_modified:
+			SemiPlateEffect(false)
+	else:
+		LeatherEffect(false)

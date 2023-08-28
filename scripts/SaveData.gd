@@ -29,8 +29,11 @@ func savePlayerData():
 		"has_jute": armors.has_jute,
 		"has_leather": armors.has_leather,
 		"has_semi_plate": armors.has_semi_plate,
-		"is_naked": armors.is_naked,		
-		"dress_modified": armors.dress_modified,		
+		"is_naked": armors.is_naked,
+		"jute_modified": armors.jute_modified,					
+		"dress_modified": armors.dress_modified,
+		"leather_modified": armors.leather_modified,	
+		"semip_modified": armors.semip_modified,	
 		"agilityModifierApplied1": player.agilityModifierApplied1,
 		"agilityModifierApplied0": player.agilityModifierApplied0,
 		"agility": player.agility,
@@ -89,8 +92,14 @@ func loadPlayerData():
 				armors.has_semi_plate = player_data["has_semi_plate"]											
 			if "is_naked" in player_data:
 				armors.is_naked = player_data["is_naked"]	
+			if "jute_modified" in player_data:
+				armors.jute_modified = player_data["jute_modified"]						
 			if "dress_modified" in player_data:
 				armors.dress_modified = player_data["dress_modified"]				
+			if "leather_modified" in player_data:
+				armors.leather_modified = player_data["leather_modified"]
+			if "semip_modified" in player_data:
+				armors.semip_modified = player_data["semip_modified"]				
 			if "agilityModifierApplied1" in player_data:
 				player.agilityModifierApplied1 = player_data["agilityModifierApplied1"]
 			if "agilityModifierApplied0" in player_data:

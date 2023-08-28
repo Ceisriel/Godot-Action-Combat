@@ -19,7 +19,11 @@ var jute_modified = false
 
 func _ready():
 	switchArmors()
-	Dress()
+	DressArmor()
+	SemiPlateArmor()
+	LeatherArmor()
+	JuteArmor()
+	
 
 func switchArmors():
 	if is_naked:
@@ -111,10 +115,10 @@ func _on_leater_pressed():
 	has_semi_plate = false	
 func _on_Virtual_FPS_timeout():
 	switchArmors()
-	Dress()
-	SemiPlate()
-	Leather()
-	Jute()
+	DressArmor()
+	SemiPlateArmor()
+	LeatherArmor()
+	JuteArmor()
 	
 func JuteEffect(active: bool):
 	if active and not jute_modified:
@@ -157,7 +161,7 @@ func LeatherEffect(active: bool):
 		player.vitality -= 0.08
 		player.defense -= 0.1
 		leather_modified = false
-func Jute():
+func JuteArmor():
 	if has_jute:
 		JuteEffect(true)
 		if dress_modified:
@@ -168,7 +172,7 @@ func Jute():
 			LeatherEffect(false)
 	else:
 		JuteEffect(false)		
-func Dress():
+func DressArmor():
 	if has_dress:
 		DressEffect(true)
 		if semip_modified:
@@ -176,7 +180,7 @@ func Dress():
 	else:
 		DressEffect(false)
 
-func SemiPlate():
+func SemiPlateArmor():
 	if has_semi_plate:
 		SemiPlateEffect(true)
 		if dress_modified:
@@ -184,7 +188,7 @@ func SemiPlate():
 	else:
 		SemiPlateEffect(false)
 
-func Leather():
+func LeatherArmor():
 	if has_leather:
 		LeatherEffect(true)
 		if dress_modified:

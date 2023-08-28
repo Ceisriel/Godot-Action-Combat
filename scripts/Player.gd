@@ -4,6 +4,7 @@ var floatingtext_damage = preload("res://UI/Spritefloatingtext.tscn")
 var floatingtext_heal = preload("res://UI/Spritefloatingtextheal.tscn")
 #var potion = preload("res://test2/potion.fbx")
 var potion_instance = null
+onready var armors =  $Armors
 onready var criticallabel = $GUI/Character/Attributes/Acc/CriticalChance
 onready var agillabel = $GUI/Character/Attributes/AGI/AGI
 onready var vitalitylabel = $GUI/Character/Attributes/VIT/VIT
@@ -100,6 +101,8 @@ var has_Sword_Off = bool()
 var has_Shield = bool()
 var agilityModifierApplied0 = bool()
 var agilityModifierApplied1 = bool()
+var intelligenceModified = false
+var originalIntelligence = intelligence
 #combat stance
 var is_in_combat = false
 # Mobile
@@ -652,6 +655,7 @@ func _physics_process(delta: float):#this calls every function
 	climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
+
 
 	# Gravity and stop sliding on floors
 	if not is_on_floor() and not is_swimming:

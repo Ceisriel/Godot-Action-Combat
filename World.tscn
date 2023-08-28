@@ -31,15 +31,6 @@ transform = Transform( 0.1, 0, 0, 0, 0.1, 0, 0, 0, 0.1, 0, 0, 0 )
 [node name="landscape test" parent="." instance=ExtResource( 2 )]
 transform = Transform( 200, 0, 0, 0, 20, 0, 0, 0, 200, 0, -6.39721, 0 )
 
-[node name="landscape test2" parent="." instance=ExtResource( 2 )]
-transform = Transform( 200, 0, 0, 0, 20, 0, 0, 0, 200, 0, -6.87478, 0 )
-
-[node name="landscape test3" parent="." instance=ExtResource( 2 )]
-transform = Transform( 200, 0, 0, 0, 20, 0, 0, 0, 200, 0, -6.93269, 0 )
-
-[node name="landscape test4" parent="." instance=ExtResource( 2 )]
-transform = Transform( 200, 0, 0, 0, 20, 0, 0, 0, 200, 0, -7.41026, 0 )
-
 [node name="Play" type="Button" parent="."]
 margin_left = 470.0
 margin_top = 294.0

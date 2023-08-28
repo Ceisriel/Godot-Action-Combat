@@ -2,7 +2,7 @@ extends Node
 
 const SAVE_DIR = "user://saves/"
 var save_path = SAVE_DIR + "save.dat"
-
+onready var armors = $"../Armors"
 onready var player = $".."  
 onready var camera = $"../Camroot/Camera_holder/Camera"
 
@@ -25,6 +25,12 @@ func savePlayerData():
 		"has_Sword": player.has_Sword,
 		"has_Shield": player.has_Shield,		
 		"has_Sword_Off": player.has_Sword_Off,
+		"has_dress": armors.has_dress,
+		"has_jute": armors.has_jute,
+		"has_leather": armors.has_leather,
+		"has_semi_plate": armors.has_semi_plate,
+		"is_naked": armors.is_naked,		
+		"dress_modified": armors.dress_modified,		
 		"agilityModifierApplied1": player.agilityModifierApplied1,
 		"agilityModifierApplied0": player.agilityModifierApplied0,
 		"agility": player.agility,
@@ -72,7 +78,19 @@ func loadPlayerData():
 			if "has_Shield" in player_data:
 				player.has_Shield = player_data["has_Shield"]				
 			if "has_Sword_Off" in player_data:
-				player.has_Sword_Off = player_data["has_Sword_Off"]				
+				player.has_Sword_Off = player_data["has_Sword_Off"]	
+			if "has_dress" in player_data:
+				armors.has_dress = player_data["has_dress"]
+			if "has_jute" in player_data:
+				armors.has_jute = player_data["has_jute"]	
+			if "has_leather" in player_data:
+				armors.has_leather = player_data["has_leather"]	
+			if "has_semi_plate" in player_data:
+				armors.has_semi_plate = player_data["has_semi_plate"]											
+			if "is_naked" in player_data:
+				armors.is_naked = player_data["is_naked"]	
+			if "dress_modified" in player_data:
+				armors.dress_modified = player_data["dress_modified"]				
 			if "agilityModifierApplied1" in player_data:
 				player.agilityModifierApplied1 = player_data["agilityModifierApplied1"]
 			if "agilityModifierApplied0" in player_data:

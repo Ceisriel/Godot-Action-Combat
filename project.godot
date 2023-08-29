@@ -16,7 +16,7 @@ config/Version="Prototype 0.34"
 
 [debug]
 
-settings/fps/force_fps=27
+settings/fps/force_fps=35
 
 [display]
 

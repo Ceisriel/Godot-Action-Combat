@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://Weapons/Shield/Shield.tscn" type="PackedScene" id=1]
 [ext_resource path="res://env/landscape test.tscn" type="PackedScene" id=2]
@@ -8,19 +8,15 @@
 [ext_resource path="res://Weapons/Sword/Sword.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scripts/World.gd" type="Script" id=7]
 [ext_resource path="res://Creatures/Enemies/SPK/SPKK.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Creatures/Enemies/SPK/DPSTESTDUMMY.tscn" type="PackedScene" id=9]
 
-[sub_resource type="BoxShape" id=1]
-extents = Vector3( 4.17424, 7.33728, 6.10486 )
+[sub_resource type="CubeMesh" id=1]
+
+[sub_resource type="ConcavePolygonShape" id=2]
+data = PoolVector3Array( -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1, 1, 1, 1, -1, -1, 1, -1, 1, -1, -1, -1, 1, -1, -1, -1, -1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, 1, 1, 1, -1, 1, -1, -1, 1, -1, 1, -1, 1, -1, -1, 1, 1, -1, -1, -1, -1, 1, 1, -1, -1, 1, -1, -1, -1, 1, 1, 1, -1, 1, 1, 1, 1, -1, -1, 1, 1, -1, 1, -1, 1, 1, -1, -1, -1, 1, 1, -1, 1, -1, -1, -1, 1, -1, 1, 1, -1, -1, -1, -1, -1 )
 
 [node name="World" type="Spatial"]
 script = ExtResource( 7 )
-
-[node name="Area" type="Area" parent="." groups=["Water", "item"]]
-transform = Transform( 3.19727, 0, 0, 0, 1, 0, 0, 0, 1.87105, 5.10926, -12.7999, 25.7951 )
-
-[node name="CollisionShape" type="CollisionShape" parent="Area"]
-transform = Transform( 1, 0, 0, 0, 1.69275, 0, 0, 0, 1, -3.4971, 0, 0 )
-shape = SubResource( 1 )
 
 [node name="sky" parent="." instance=ExtResource( 5 )]
 visible = false
@@ -136,7 +132,19 @@ transform = Transform( 0.008, 0, 0, 0, 0.008, 0, 0, 0, 0.008, 1.20618, 3.01607, 
 transform = Transform( 0.008, 0, 0, 0, 0.008, 0, 0, 0, 0.008, 1.20618, 3.01607, -2.66763 )
 
 [node name="Spearman" parent="." instance=ExtResource( 8 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.77717, 16.0116 )
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -21.9285, 6.95425, 16.0116 )
+
+[node name="dummy" parent="." instance=ExtResource( 9 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 5.32865, -1.89007, 0 )
+
+[node name="MeshInstance" type="MeshInstance" parent="."]
+transform = Transform( 16.0824, 0, 0, 0, 10.805, 0, 0, 0, 1, 8.99005, -0.909635, -11.4925 )
+mesh = SubResource( 1 )
+
+[node name="StaticBody" type="StaticBody" parent="MeshInstance"]
+
+[node name="CollisionShape" type="CollisionShape" parent="MeshInstance/StaticBody"]
+shape = SubResource( 2 )
 
 [connection signal="pressed" from="Play" to="." method="_on_Play_pressed"]
 

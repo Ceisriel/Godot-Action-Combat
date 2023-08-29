@@ -8,98 +8,124 @@ var hair3: PackedScene = preload("res://player/FHuman/Hair/hair3.glb")
 var hair4: PackedScene = preload("res://player/FHuman/Hair/hair4.glb")
 var hair5: PackedScene = preload("res://player/FHuman/Hair/Hair5.glb")
 
-var currentHairInstance: Node = null
-var persistenceFilePath: String = "user://selected_hair.txt"
+var current_hair_instance: Node = null
+
+var has_hair0 = false
+var has_hair1 = false
+var has_hair2 = false
+var has_hair3 = false
+var has_hair4 = false
+var has_hair5 = false
 
 func _ready():
-	if hair_attachment:
-		var selectedHair = load_selected_hair()
-		currentHairInstance = instance_hair(selectedHair)
-		hair_attachment.add_child(currentHairInstance)
+	switchHair()
 
-func instance_hair(hairIndex):
-	if hairIndex == 0:
-		return hair0.instance()
-	elif hairIndex == 1:
-		return hair1.instance()
-	elif hairIndex == 2:
-		return hair2.instance()
-	elif hairIndex == 3:
-		return hair3.instance()
-	elif hairIndex == 4:
-		return hair4.instance()
-	elif hairIndex == 5:
-		return hair5.instance()	
-
-func load_selected_hair():
-	var file = File.new()
-	if file.file_exists(persistenceFilePath):
-		file.open(persistenceFilePath, File.READ)
-		var selectedHair = file.get_var()
-		file.close()
-		return selectedHair
+func switchHair():
+	if current_hair_instance:
+		current_hair_instance.queue_free() # Remove the current hair instance
+	
+	if has_hair0:
+		instanceHair0()
+	elif has_hair1:
+		instanceHair1()
+	elif has_hair2:
+		instanceHair2()	
+	elif has_hair3:
+		instanceHair3()
+	elif has_hair4:
+		instanceHair4()	
+	elif has_hair5:
+		instanceHair5()
 	else:
-		return 0
+		instanceHair0()	
+				
+	# Add cases for other hair options
 
-func save_selected_hair(hairIndex):
-	var file = File.new()
-	file.open(persistenceFilePath, File.WRITE)
-	file.store_var(hairIndex)
-	file.close()
+func _physics_process(delta):
+	switchHair()
+
+func instanceHair0():
+	if hair_attachment and hair0:
+		var hair_instance = hair0.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance
+
+func instanceHair1():
+	if hair_attachment and hair1:
+		var hair_instance = hair1.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance
+func instanceHair2():
+	if hair_attachment and hair2:
+		var hair_instance = hair2.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance
+func instanceHair3():
+	if hair_attachment and hair3:
+		var hair_instance = hair3.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance		
+func instanceHair4():
+	if hair_attachment and hair4:
+		var hair_instance = hair4.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance
+func instanceHair5():
+	if hair_attachment and hair5:
+		var hair_instance = hair5.instance()
+		hair_attachment.add_child(hair_instance)
+		current_hair_instance = hair_instance		
+# Add instance functions for other hair options
 
 func _on_hair0_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
-
-		currentHairInstance = instance_hair(0)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(0)
-
+	has_hair0 = true
+	has_hair1 = false
+	has_hair2 = false	
+	has_hair3 = false
+	has_hair4 = false
+	has_hair5 = false
 func _on_hair1_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
-
-		currentHairInstance = instance_hair(1)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(1)
-
+	has_hair0 = false
+	has_hair1 = true
+	has_hair2 = false	
+	has_hair3 = false
+	has_hair4 = false
+	has_hair5 = false
 func _on_hair2_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
+	has_hair0 = false
+	has_hair1 = false
+	has_hair2 = true	
+	has_hair3 = false
+	has_hair4 = false
+	has_hair5 = false	
 
-		currentHairInstance = instance_hair(2)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(2)
 
 func _on_hair3_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
-
-		currentHairInstance = instance_hair(3)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(3)
+	has_hair0 = false
+	has_hair1 = false
+	has_hair2 = false	
+	has_hair3 = true
+	has_hair4 = false
+	has_hair5 = false	
 
 
 
 func _on_hair4_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
-
-		currentHairInstance = instance_hair(4)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(4)
+	has_hair0 = false
+	has_hair1 = false
+	has_hair2 = false	
+	has_hair3 = false
+	has_hair4 = true
+	has_hair5 = false	
 
 
 func _on_hair5_pressed():
-	if hair_attachment:
-		if currentHairInstance:
-			currentHairInstance.queue_free()
+	has_hair0 = false
+	has_hair1 = false
+	has_hair2 = false	
+	has_hair3 = false
+	has_hair4 = false
+	has_hair5 = true	
 
-		currentHairInstance = instance_hair(5)
-		hair_attachment.add_child(currentHairInstance)
-		save_selected_hair(5)
+
+

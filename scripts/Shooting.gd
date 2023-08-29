@@ -37,17 +37,11 @@ func shoot():
 					var body = aim.get_collider()
 					if body.is_in_group("Enemy"):
 						body.takeDamage(damage)
-				# Apply recoil effect to the camera by rotating it upwards
-				camera.rotation_degrees.x += recoil_angle
-				current_recoil_angle = recoil_angle
-			if current_recoil_angle > max_recoil_angle:
-				current_recoil_angle = max_recoil_angle
 		else:
 			parent.is_aiming = false
 			
 func shootShotgun(): 
 	if parent.has_Rcrossbow and (!parent.is_sprinting or !parent.is_running):
-		if Input.is_action_just_pressed("attack") or Input.is_action_pressed("attack"):
 			parent.is_aiming = true
 			for i in range(bullets_per_shotgun):
 					if aim.is_colliding():
@@ -69,11 +63,9 @@ func shootShotgun():
 			camera.rotation_degrees.x += recoil_angle
 			current_recoil_angle = recoil_angle	
 
-func _on_Timer_timeout():
-	if shotgun_mode: 
-		shootShotgun()
-	else: 
-		shoot()	
+func recoil():
+	camera.rotation_degrees.x += recoil_angle
+	current_recoil_angle = recoil_angle	
 func _physics_process(delta):
 	switchFireMode()
 	if current_recoil_angle > 0:
@@ -96,4 +88,5 @@ func switchFireMode():
 		recoil_angle = 1.95
 		recoil_speed = 10.1
 		firerate = 0.2	
+
 

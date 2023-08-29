@@ -11,7 +11,6 @@ var currentWeaponInstance: Node = null
 
 
 func _on_ItemDetector_body_entered(body):
-
 	if body.is_in_group("Weapon1"):
 		if Input.is_action_pressed("E"):
 			var newWeapon1 = weapon1.instance() as Node
@@ -73,8 +72,6 @@ func dropWeapon():
 		currentWeaponInstance = null  # Reset currentWeaponInstance
 
 func _physics_process(delta):
-
-		
 	if Input.is_action_just_pressed("drop"):
 		dropWeapon()
 		spawnWeapon()

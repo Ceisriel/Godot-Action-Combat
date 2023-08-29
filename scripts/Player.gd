@@ -22,7 +22,7 @@ onready var hitbox = $Hitbox
 onready var takedamagesprite = $Takedamage/DamageView
 onready var warlocktorso = $FHuman/Armature/Skeleton/TorsoSemiPlate
 onready var nakedtorso = $FHuman/Armature/Skeleton/TorsoNaked
-
+onready var shooting = $Shooting
 var velocity := Vector3()
 # Allows to pick your character's mesh from the inspector
 export (NodePath) var PlayerCharacterMesh
@@ -479,11 +479,6 @@ func teleport():
 			teleport_position = collision.position
 			translation = teleport_position
 func climbing(delta):
-	var ray_length = 1  # Adjust this value based on the desired length of the ray
-	var ray_direction = direction.normalized()  # Use the same direction as the character's movement
-	var ray_start = translation + Vector3(0, 0.15, 0)  # Adjust the starting position of the ray based on your character's position
-	var ray_end = ray_start + ray_direction * ray_length
-	var ray_cast = get_world().direct_space_state.intersect_ray(ray_start, ray_end, [self])
 	if Input.is_action_pressed("sprint") or Input.is_action_pressed("run") or Input.is_action_pressed("attack") or dodge :
 		enabled_climbing = false
 		if  enabled_climbing:
@@ -491,23 +486,25 @@ func climbing(delta):
 			is_climbing = true
 		else:
 			is_climbing = false
-	if is_on_wall() or is_on_ceiling() or ray_cast:
+	if is_on_wall():
 		if  Input.is_action_pressed("jump") and enabled_climbing:
-			if strength >= 1:
-				vertical_velocity = Vector3.UP * climb_speed
+			if strength >= 0.99:
+				vertical_velocity = Vector3.UP * climb_speed 
 				horizontal_velocity = direction * climb_speed
 				is_climbing = true
 				is_swimming = false
 			else:
 				is_climbing = false
+				
 	else:
 			is_climbing = false
 func speak():
-	if !is_in_combat or !is_walking:
-		if  Input.is_action_just_pressed("attack"):
-			speaking = !speaking
-		if 	Input.is_action_just_pressed("guard"):
-			speaking = false
+	if !mousemode:
+		if !is_in_combat or !is_walking:
+			if  Input.is_action_just_pressed("attack"):
+				speaking = !speaking
+			if 	Input.is_action_just_pressed("guard"):
+				speaking = false
 func consumeEnergy(delta):
 	if is_sprinting:
 		energy -= 0.005
@@ -532,6 +529,13 @@ func regeneration(delta):
 					energy = maxenergy
 					regenerateEnergy = false
 func mouseMode():
+	if has_Rcrossbow:
+		if is_in_combat:
+			if Input.is_action_pressed("attack"):
+				is_aiming = true
+			else:
+				is_aiming = false	
+	
 	if Input.is_action_just_pressed("aim"):
 		is_aiming = !is_aiming
 	# Toggle mouse mode
@@ -591,9 +595,6 @@ func mouseMode():
 func round_to_two_decimals(number):
 	return round(number * 100.0) / 100.0
 func updateattributes():
-	
-
-		
 	climb_speed = base_climb_speed * strength
 	dash_power = basedash * agility
 	sprint_speed = basesprint * agility
@@ -620,7 +621,6 @@ func updateinternface():
 	$GUI/E.text = energyText
 	$GUI/FPS.text = "FPS: %d" % Engine.get_frames_per_second()
 func _physics_process(delta: float):#this calls every function
-
 	if Input.is_action_just_pressed("Q"):
 		if !has_Spear or !has_Sword:
 			has_Rcrossbow = true
@@ -670,7 +670,10 @@ func _physics_process(delta: float):#this calls every function
 		vertical_velocity = Vector3.UP * jump_force
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
+	
 func animations():
+	if mousemode:
+		is_in_combat = false
 	if alive:
 		if !exercise:
 			if !is_swimming:
@@ -685,12 +688,19 @@ func animations():
 						animationOrderOutOfCombat()
 						speak()
 					elif is_in_combat:
-						animatiOnorderInCombat()
+						if !has_Rcrossbow:
+							animatiOnorderInCombat()
+						elif has_Rcrossbow:
+							 animationOrderStrafeCrossbow()	
+
 					elif is_crouching:
 						animationOrderCrouch()
 				elif is_aiming:
 					if is_in_combat:
-						animationOrderCombatStrafe()
+						if !has_Rcrossbow:
+							animationOrderCombatStrafe()
+						elif has_Rcrossbow:
+							animationOrderStrafeCrossbow()			
 					elif !is_in_combat:
 						animationOrderStrafe()
 			elif is_swimming:
@@ -752,34 +762,21 @@ func animationOrderStrafe(): #strafe
 
 
 		elif Input.is_action_pressed("forward") and Input.is_action_pressed("left"):
-			animation.play("strafe left front",0.25)
+			animation.play("strafe left front",0.3)
 		elif Input.is_action_pressed("backward") and Input.is_action_pressed("left"):
-			animation.play_backwards("strafe right front",0.25)
+			animation.play_backwards("strafe right front",0.3)
 		elif Input.is_action_pressed("backward") and Input.is_action_pressed("right"):
-			animation.play_backwards("strafe left front",0.25)
+			animation.play_backwards("strafe left front",0.3)
 		elif Input.is_action_pressed("forward") and Input.is_action_pressed("right"):
-			animation.play("strafe right front",0.25)
+			animation.play("strafe right front",0.3)
 		elif Input.is_action_pressed("backward"):
-			animation.play_backwards("walk cycle",0.25)
+			animation.play_backwards("walk cycle",0.3)
 		elif Input.is_action_pressed("left"):
-			animation.play("strafe left",0.25)
+			animation.play("strafe left",0.3)
 		elif Input.is_action_pressed("right"):
-			animation.play("strafe right",0.25)
+			animation.play("strafe right",0.3)
 		elif Input.is_action_pressed("forward"):
-			animation.play("walk cycle",0.25)
-	#crouching section
-		elif Input.is_action_pressed("crouch"):
-			if Input.is_action_pressed("forward"):
-				animation.play("crouch walk cycle",0.25)
-			elif Input.is_action_pressed("backward"):
-				animation.play_backwards("crouch walk cycle",0.25)
-			elif Input.is_action_pressed("left"):
-				animation.play_backwards("crouch walk cycle",0.25)
-			elif Input.is_action_pressed("right"):
-				animation.play_backwards("crouch walk cycle",0.25)
-			else:
-				animation.play("crouch",0.25)
-	#input section
+			animation.play("walk cycle",0.3)
 		elif tackle:
 			animation.play("tackle")
 		elif Input.is_action_pressed("attack"):
@@ -794,7 +791,6 @@ func animatiOnorderInCombat(): #barehanded combat stance
 		elif is_on_floor():
 			if is_guarding and is_walking and !is_aiming:
 				animation.play("barehanded guard walk cycle",0.2)
-
 			elif is_attacking and is_walking:
 				animation.play("barehanded base attack walking cycle",0.2,1.42)
 			elif is_guarding and !is_walking:
@@ -814,7 +810,36 @@ func animatiOnorderInCombat(): #barehanded combat stance
 			elif Input.is_action_pressed("2"):
 				animation.play("heal light",0.75)
 			else:
-				animation.play("barehanded idle",0.2)
+				animation.play("barehanded idle cycle",0.2)
+		else:
+			animation.play("barehanded idle cycle",0.2)		
+func animationOrderStrafeCrossbow():
+	if dash_count1 ==2 or dash_count2 ==2:
+		animation.play("slide",0.05)	
+	elif is_walking and !is_attacking:
+		animation.play("walk cycle",0.4)
+	elif Input.is_action_pressed("forward") and Input.is_action_pressed("right") and is_attacking:
+		animation.play("strafe right front shoot",0.2)
+	elif Input.is_action_pressed("forward") and Input.is_action_pressed("left") and is_attacking:
+		animation.play_backwards("strafe right front shoot",0.2)
+	elif Input.is_action_pressed("backward") and Input.is_action_pressed("right") and is_attacking:
+		animation.play_backwards("strafe right front shoot",0.2)
+	elif Input.is_action_pressed("backward") and Input.is_action_pressed("left") and is_attacking:
+		animation.play("strafe right front shoot",0.2)				
+	elif Input.is_action_pressed("forward") and is_attacking:
+		animation.play("shoot walking forward cycle",0.2)
+	elif Input.is_action_pressed("backward") and is_attacking:
+		animation.play_backwards("shoot walking forward cycle",0.4)			
+	elif Input.is_action_pressed("left")and is_attacking:
+		animation.play_backwards("strafe right shoot",0.2)
+	elif Input.is_action_pressed("right")and is_attacking:
+		animation.play("strafe right shoot",0.15)	
+	elif is_attacking:
+		animation.play("shoot still cycle",0.15, 0.85)
+	elif !is_walking and !is_attacking:
+		animation.play("idle crossbow",0.1)
+	else:
+		animation.play("idle crossbow",0.1)								
 func animationOrderCombatStrafe(): #barehanded combat stance strafe
 	#dodge section is prioritized
 		if dash_countback ==2:
@@ -880,6 +905,10 @@ func animationOrderClimbing():
 	if is_on_wall():
 		if is_climbing:
 			animation.play("climb cycle",0.2)
+		else:
+			animation.play("idle",0.1)	
+	else:
+		animation.play("idle",0.1)				
 func updateAliveOrDead():
 	if health <= 0:
 		alive = false
@@ -933,11 +962,6 @@ func _on_WaterDetector_area_entered(area):
 func _on_WaterDetector_area_exited(area):
 	if area.is_in_group("Water"):
 		is_swimming = false
-func _on_LineEdit_mouse_entered():
-	inventorymode = true
-func _on_LineEdit_mouse_exited():
-	inventorymode = false
-
 
 func drinkPotion():
 	if potion_ammount > 0:

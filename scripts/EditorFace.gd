@@ -5,71 +5,45 @@ onready var parent = $"../../.."
 var face0: PackedScene = preload("res://player/FHuman/Face/face0.glb")
 var face1: PackedScene = preload("res://player/FHuman/Face/FaceFHuman1.glb")
 
-var currentFaceInstance: Node = null
-var currentFaceAnimation: AnimationPlayer = null
-var persistenceFilePath: String = "user://selected_face.txt"
+var current_face_instance: Node = null
+
+var has_face0 = false
+var has_face1 = false
 
 func _ready():
-	if face_attachment:
-		var selectedFace = load_selected_face()
-		currentFaceInstance = instance_face(selectedFace)
-		face_attachment.add_child(currentFaceInstance)
-		currentFaceAnimation = get_animation_player(currentFaceInstance)
+	switchFace()
 
-func instance_face(faceIndex):
-	if faceIndex == 0:
-		return face0.instance()
-	elif faceIndex == 1:
-		return face1.instance()
-
-func load_selected_face():
-	var file = File.new()
-	if file.file_exists(persistenceFilePath):
-		file.open(persistenceFilePath, File.READ)
-		var selectedFace = file.get_var()
-		file.close()
-		return selectedFace
+func switchFace():
+	if current_face_instance:
+		current_face_instance.queue_free() # Remove the current face instance
+	
+	if has_face0:
+		instanceFace0()
+	elif has_face1:
+		instanceFace1()
 	else:
-		return 0
-
-func save_selected_face(faceIndex):
-	var file = File.new()
-	file.open(persistenceFilePath, File.WRITE)
-	file.store_var(faceIndex)
-	file.close()
-
-func get_animation_player(node: Node) -> AnimationPlayer:
-	if node is AnimationPlayer:
-		return node as AnimationPlayer
-	else:
-		for child in node.get_children():
-			var player = get_animation_player(child)
-			if player:
-				return player
-		return null
-
-func _on_face0_pressed():
-	if face_attachment:
-		if currentFaceInstance:
-			currentFaceInstance.queue_free()
-
-		currentFaceInstance = instance_face(0)
-		face_attachment.add_child(currentFaceInstance)
-		currentFaceAnimation = get_animation_player(currentFaceInstance)
-		save_selected_face(0)
-
-func _on_face1_pressed():
-	if face_attachment:
-		if currentFaceInstance:
-			currentFaceInstance.queue_free()
-
-		currentFaceInstance = instance_face(1)
-		face_attachment.add_child(currentFaceInstance)
-		currentFaceAnimation = get_animation_player(currentFaceInstance)
-
-		save_selected_face(1)
-
+		instanceFace0() # Default to face0 if no option is selected
 
 func _physics_process(delta):
-	if Input.is_action_pressed("attack"):
-		currentFaceAnimation.play("talk")
+	switchFace()
+
+func instanceFace0():
+	if face_attachment and face0:
+		var face_instance = face0.instance()
+		face_attachment.add_child(face_instance)
+		current_face_instance = face_instance
+
+func instanceFace1():
+	if face_attachment and face1:
+		var face_instance = face1.instance()
+		face_attachment.add_child(face_instance)
+		current_face_instance = face_instance
+
+func _on_face0_pressed():
+	has_face0 = true
+	has_face1 = false
+
+func _on_face1_pressed():
+	has_face0 = false
+	has_face1 = true
+

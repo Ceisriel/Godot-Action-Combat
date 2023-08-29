@@ -5,8 +5,9 @@ var save_path = SAVE_DIR + "save.dat"
 onready var armors = $"../Armors"
 onready var player = $".."  
 onready var camera = $"../Camroot/Camera_holder/Camera"
-
-
+onready var hair = $"../GUI/Edit_Character/EditorHair"
+onready var face = $"../GUI/Edit_Character/EditorFace"
+onready var Character = $"../GUI/Character"
 func _ready():
 	loadPlayerData()
 
@@ -38,6 +39,16 @@ func savePlayerData():
 		"agilityModifierApplied0": player.agilityModifierApplied0,
 		"agility": player.agility,
 		"accuracy": player.accuracy,
+		"attribute": player.attribute,
+		"has_hair0": hair.has_hair0,
+		"has_hair1": hair.has_hair1,	
+		"has_hair2": hair.has_hair2,
+		"has_hair3": hair.has_hair3,
+		"has_hair4": hair.has_hair4,
+		"has_hair5": hair.has_hair5,
+		"has_face0": face.has_face0,
+		"has_face1": face.has_face1,
+		"playerName": Character.playerName,
 		"camera_rotation": camera.rotation_degrees  # Save the camera's rotation
 		}
 
@@ -108,6 +119,26 @@ func loadPlayerData():
 				player.agility = player_data["agility"]  # Set the player's agility
 			if "accuracy" in player_data:
 				player.accuracy = player_data["accuracy"]
+			if "attribute" in player_data:
+				player.attribute = player_data["attribute"]
+			if "has_hair0" in player_data:
+				hair.has_hair0 = player_data["has_hair0"]	
+			if "has_hair1" in player_data:
+				hair.has_hair1 = player_data["has_hair1"]	
+			if "has_hair2" in player_data:
+				hair.has_hair2 = player_data["has_hair2"]	
+			if "has_hair3" in player_data:
+				hair.has_hair3 = player_data["has_hair3"]
+			if "has_hair4" in player_data:
+				hair.has_hair4 = player_data["has_hair4"]	
+			if "has_hair5" in player_data:
+				hair.has_hair5 = player_data["has_hair5"]	
+			if "has_face0" in player_data:
+				face.has_face0 = player_data["has_face0"]
+			if "has_face1" in player_data:
+				face.has_face1 = player_data["has_face1"]
+			if "playerName" in player_data:
+				Character.playerName = player_data["playerName"]	
 			if "camera_rotation" in player_data:
 				camera.rotation_degrees = player_data["camera_rotation"]  # Set the camera's rotation
 

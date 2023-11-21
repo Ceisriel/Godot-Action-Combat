@@ -70,6 +70,8 @@ var pressing = bool()
 var situp = bool()
 var dance1 = bool()
 var dance2 = bool()
+var has_Horse = bool()
+var is_riding = bool()
 var is_falling = bool()
 var is_swimming =bool()
 var is_rolling = bool()
@@ -146,6 +148,8 @@ var impact = 80
 #player attributes but stored, must have to update attributes with weapons and armors
 var original_agility = agility  # Store the original agility value
 var original_walk_speed = walk_speed  # Store the original walk speed value
+var original_run_speed = run_speed
+var original_sprint_speed = sprint_speed
 #Energy regeneration
 var regenerationRate = 0.5  # 1 point every 2 seconds
 var regenerateEnergy = true
@@ -670,6 +674,7 @@ func _physics_process(delta: float):#this calls every function
 		vertical_velocity = Vector3.UP * jump_force
 	if Input.is_action_pressed("jump") and is_swimming:
 		vertical_velocity = Vector3.UP * 15 * delta
+		
 	
 func animations():
 	if mousemode:

@@ -20,8 +20,8 @@ settings/fps/force_fps=35
 
 [display]
 
-window/size/width=1366
-window/size/height=786
+window/size/width=1920
+window/size/height=1080
 window/vsync/use_vsync=false
 window/energy_saving/keep_screen_on=false
 window/stretch/mode="2d"
@@ -274,3 +274,5 @@ common/enable_pause_aware_picking=true
 [rendering]
 
 quality/driver/driver_name="GLES2"
+environment/default_clear_color=Color( 0.752941, 1, 0.905882, 1 )
+environment/default_environment="res://world_env.tres"

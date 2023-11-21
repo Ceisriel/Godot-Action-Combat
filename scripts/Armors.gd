@@ -113,6 +113,7 @@ func _on_leater_pressed():
 	has_dress = false		
 	has_jute = false
 	has_semi_plate = false	
+	
 func _on_Virtual_FPS_timeout():
 	switchArmors()
 	DressArmor()

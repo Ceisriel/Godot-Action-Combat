@@ -1,9 +1,10 @@
-[gd_scene load_steps=11 format=2]
+[gd_scene load_steps=12 format=2]
 
 [ext_resource path="res://env/Decorations/Nature/Trees/Tree with chemist stuff/Tree.tscn" type="PackedScene" id=1]
 [ext_resource path="res://env/landscape test.tscn" type="PackedScene" id=2]
 [ext_resource path="res://Creatures/Mounts/horse/Horse.tscn" type="PackedScene" id=3]
 [ext_resource path="res://Creatures/Mounts/horse/Horse2.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Creatures/Mounts/horse/Horse2/horse2.tscn" type="PackedScene" id=5]
 [ext_resource path="res://scripts/World.gd" type="Script" id=7]
 [ext_resource path="res://UI/Inventory.tres" type="DynamicFont" id=10]
 
@@ -112,5 +113,8 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.26931, -0.423284, 0 )
 
 [node name="KinematicBody2" parent="." instance=ExtResource( 4 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4.18818, 1.6575, 4.59408 )
+
+[node name="horse2" parent="." instance=ExtResource( 5 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -1.03376, 4 )
 
 [connection signal="pressed" from="Play" to="." method="_on_Play_pressed"]

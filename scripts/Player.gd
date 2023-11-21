@@ -656,10 +656,19 @@ func _physics_process(delta: float):#this calls every function
 	updateattributes()
 	updateinternface()
 	mouseMode()
-	climbing(delta)
+	if not has_Horse:
+		climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
 
+	if has_Horse:
+		# If has_horse is true, change collision layers
+		set_collision_layer(6)  # Set to the desired collision layer
+		set_collision_mask(6)   # Set to the desired collision mask
+	else:
+		# If has_horse is false, reset collision layers
+		set_collision_layer(1)  # Set to the original collision layer
+		set_collision_mask(1)   # Set to the original collision mask
 
 	# Gravity and stop sliding on floors
 	if not is_on_floor() and not is_swimming:

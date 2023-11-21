@@ -3,6 +3,8 @@ Trying to recreate The combat system from Tera online but with more indepth mech
 
 it has: 
 
+-Horse riding 
+
 -Basic enemy ai with multiple type of attacks, random roaming and player chasing 
 
 -Pick up and drop down weapons in main hand and offhand 

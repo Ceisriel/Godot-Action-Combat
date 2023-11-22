@@ -8,17 +8,21 @@ var model1: PackedScene = preload("res://Creatures/Mounts/horse/Horse1/horse1.ts
 var model2: PackedScene = preload("res://Creatures/Mounts/horse/Horse2/Horse2.tscn")
 var model3: PackedScene = preload("res://Creatures/Mounts/horse/Horse3/horse3.tscn")
 var model4: PackedScene = preload("res://Creatures/Mounts/horse/Horse4/Horse4.tscn")
-
+var model5: PackedScene = preload("res://Creatures/Mounts/horse/Horse5/Horse5.tscn")
+var model6: PackedScene = preload("res://Creatures/Mounts/horse/Horse6/Horse6.tscn")
+var model7: PackedScene = preload("res://Creatures/Mounts/horse/Horse7/Horse7.tscn")
 var currentInstance: Node = null  
 var effect0_applied: bool = false
-
 var has_model0 = false
 var has_model1 = false
 var has_model2 = false
 var has_model3 = false 
 var has_model4 = false
-
-
+var has_model5 = false
+var has_model6 = false
+var has_model7 = false
+func ready():
+	switch()
 func switch():
 	if has_model0:
 		# Check if there is no current horse instance
@@ -80,6 +84,42 @@ func switch():
 			print("Player has horse4")
 			player.has_ride = true
 			Effect0(true)			
+	elif has_model5:
+		# Check if there is no current horse instance
+		if currentInstance == null:
+			# Instantiate the horse scene
+			currentInstance = model5.instance()
+			# Set the scale of the horse
+			currentInstance.scale *= Vector3(100, 100, 100)
+			# Add the horse as a child of the attachment node
+			attachment.add_child(currentInstance)
+			print("Player has horse5")
+			player.has_ride = true
+			Effect0(true)
+	elif has_model6:
+		# Check if there is no current horse instance
+		if currentInstance == null:
+			# Instantiate the horse scene
+			currentInstance = model6.instance()
+			# Set the scale of the horse
+			currentInstance.scale *= Vector3(100, 100, 100)
+			# Add the horse as a child of the attachment node
+			attachment.add_child(currentInstance)
+			print("Player has horse6")
+			player.has_ride = true
+			Effect0(true)
+	elif has_model7:
+		# Check if there is no current horse instance
+		if currentInstance == null:
+			# Instantiate the horse scene
+			currentInstance = model7.instance()
+			# Set the scale of the horse
+			currentInstance.scale *= Vector3(100, 100, 100)
+			# Add the horse as a child of the attachment node
+			attachment.add_child(currentInstance)
+			print("Player has horse7")
+			player.has_ride = true
+			Effect0(true)		
 	else: 
 		player.has_ride = false
 		Effect0(false)
@@ -114,7 +154,7 @@ func _on_ItemDetector_body_entered(body):
 				check_and_delete(body)		
 		elif body.is_in_group("Horse2"):
 			if Input.is_action_pressed("E"):
-				has_model2 = true
+				has_model0 = false
 				check_and_delete(body)
 		elif body.is_in_group("Horse3"):
 			if Input.is_action_pressed("E"):
@@ -123,6 +163,18 @@ func _on_ItemDetector_body_entered(body):
 		elif body.is_in_group("Horse4"):
 			if Input.is_action_pressed("E"):
 				has_model4 = true
+				check_and_delete(body)
+		elif body.is_in_group("Horse5"):
+			if Input.is_action_pressed("E"):
+				has_model5 = true
+				check_and_delete(body)
+		elif body.is_in_group("Horse6"):
+			if Input.is_action_pressed("E"):
+				has_model6 = true
+				check_and_delete(body)
+		elif body.is_in_group("Horse7"):
+			if Input.is_action_pressed("E"):
+				has_model7 = true
 				check_and_delete(body)
 func check_and_delete(body):
 	# Check if the parent is the player
@@ -137,10 +189,12 @@ func _physics_process(delta):
 		has_model1 = false
 		has_model2 = false
 		has_model3 = false
-		has_model4 = false		
+		has_model4 = false
+		has_model5 = false
+		has_model6 = false		
+		has_model7 = false
 		player.has_ride = false
 		Effect0(false)
-
 func Effect0(active: bool):
 	if active and not effect0_applied:
 		effect0_applied = true

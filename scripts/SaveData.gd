@@ -52,6 +52,12 @@ func savePlayerData():
 		"has_ride": player.has_ride,
 		"has_model0": rides.has_model0,
 		"has_model1": rides.has_model1,
+		"has_model2": rides.has_model2,
+		"has_model3": rides.has_model3,
+		"has_model4": rides.has_model4,
+		"has_model5": rides.has_model5,	
+		"has_model6": rides.has_model6,	
+		"has_model7": rides.has_model7,		
 		"playerName": Character.playerName,
 		"camera_rotation": camera.rotation_degrees,  # Save the camera's rotation
 		"effect0_horse": rides.effect0_applied
@@ -142,18 +148,30 @@ func loadPlayerData():
 				face.has_face0 = player_data["has_face0"]
 			if "has_face1" in player_data:
 				face.has_face1 = player_data["has_face1"]
-			if "has_ride" in player_data:
-				player.has_ride = player_data["has_ride"]
-			if "has_model0" in player_data:
-				rides.has_model0 = player_data["has_ride"]
-			if "has_model1" in player_data:
-				rides.has_model1 = player_data["has_ride"]
 			if "playerName" in player_data:
 				Character.playerName = player_data["playerName"]	
 			if "camera_rotation" in player_data:
 				camera.rotation_degrees = player_data["camera_rotation"]  # Set the camera's rotation
 			if "effect0_horse" in player_data:
 				rides.effect0_applied = player_data["effect0_horse"]
+			if "has_ride" in player_data:
+				player.has_ride = player_data["has_ride"]
+			if "has_model0" in player_data:
+				rides.has_model0 = player_data["has_model0"]
+			if "has_model1" in player_data:
+				rides.has_model1 = player_data["has_model1"]
+			if "has_model2" in player_data:
+				rides.has_model2 = player_data["has_model2"]
+			if "has_model3" in player_data:
+				rides.has_model3 = player_data["has_model3"]
+			if "has_model4" in player_data:
+				rides.has_model4 = player_data["has_model4"]
+			if "has_model5" in player_data:
+				rides.has_model5 = player_data["has_model5"]
+			if "has_model6" in player_data:
+				rides.has_model6 = player_data["has_model6"]
+			if "has_model7" in player_data:
+				rides.has_model7 = player_data["has_model7"]
 func resetSavedData():
 	var dir = Directory.new()
 	if dir.file_exists(save_path):
@@ -172,3 +190,8 @@ func console_write(value):
 
 func _on_SaveDataTimer_timeout():
 	savePlayerData()
+
+
+func _on_Button_pressed():
+	loadPlayerData()
+

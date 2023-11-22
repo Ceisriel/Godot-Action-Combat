@@ -70,7 +70,7 @@ var pressing = bool()
 var situp = bool()
 var dance1 = bool()
 var dance2 = bool()
-var has_Horse = bool()
+var has_ride = bool()
 var is_riding = bool()
 var is_falling = bool()
 var is_swimming =bool()
@@ -656,16 +656,16 @@ func _physics_process(delta: float):#this calls every function
 	updateattributes()
 	updateinternface()
 	mouseMode()
-	if not has_Horse:
+	if not has_ride:
 		climbing(delta)
 	consumeEnergy(delta)
 	regeneration(delta)
 
-	if has_Horse:
+	if has_ride:
 		# If has_horse is true, change collision layers
 		set_collision_layer(6)  # Set to the desired collision layer
 		set_collision_mask(6)   # Set to the desired collision mask
-	else:
+	elif not has_ride:
 		# If has_horse is false, reset collision layers
 		set_collision_layer(1)  # Set to the original collision layer
 		set_collision_mask(1)   # Set to the original collision mask

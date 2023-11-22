@@ -38,7 +38,6 @@ func switchHair():
 		instanceHair5()
 	else:
 		instanceHair0()	
-				
 	# Add cases for other hair options
 
 func _physics_process(delta):

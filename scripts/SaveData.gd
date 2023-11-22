@@ -8,6 +8,7 @@ onready var camera = $"../Camroot/Camera_holder/Camera"
 onready var hair = $"../GUI/Edit_Character/EditorHair"
 onready var face = $"../GUI/Edit_Character/EditorFace"
 onready var Character = $"../GUI/Character"
+onready var rides = $"../GUI/Edit_Character/MountManager"
 func _ready():
 	loadPlayerData()
 
@@ -48,6 +49,9 @@ func savePlayerData():
 		"has_hair5": hair.has_hair5,
 		"has_face0": face.has_face0,
 		"has_face1": face.has_face1,
+		"has_ride": player.has_ride,
+		"has_model0": rides.has_model0,
+		"has_model1": rides.has_model1,
 		"playerName": Character.playerName,
 		"camera_rotation": camera.rotation_degrees  # Save the camera's rotation
 		}
@@ -137,6 +141,12 @@ func loadPlayerData():
 				face.has_face0 = player_data["has_face0"]
 			if "has_face1" in player_data:
 				face.has_face1 = player_data["has_face1"]
+			if "has_ride" in player_data:
+				player.has_ride = player_data["has_ride"]
+			if "has_model0" in player_data:
+				rides.has_model0 = player_data["has_ride"]
+			if "has_model1" in player_data:
+				rides.has_model1 = player_data["has_ride"]
 			if "playerName" in player_data:
 				Character.playerName = player_data["playerName"]	
 			if "camera_rotation" in player_data:

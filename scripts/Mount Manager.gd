@@ -83,9 +83,7 @@ func switch():
 	else: 
 		player.has_ride = false
 		Effect0(false)
-
 func drop():
-
 		if currentInstance != null:
 			# Remove the instanced model from the attachment
 			attachment.remove_child(currentInstance)
@@ -98,32 +96,39 @@ func drop():
 			currentInstance.global_transform.origin = camera_transform.origin + camera_transform.basis.z * (-5.0)  # Adjust the distance as needed		
 			# Instance the horse back as a child of the root node
 			get_tree().root.add_child(currentInstance)
-
-			print("Horse1 dropped")
+			print("Horse dropped")
 			# Reset variables
 			has_model0 = false
 			currentInstance = null
 			player.has_ride = false
 			Effect0(false)
-
-
 func _on_ItemDetector_body_entered(body):
-	if body.is_in_group("Horse0"):
-		if Input.is_action_pressed("E"):
-			has_model0 = true
-	elif body.is_in_group("Horse1"):
-		if Input.is_action_pressed("E"):
-			has_model1 = true			
-	elif body.is_in_group("Horse2"):
-		if Input.is_action_pressed("E"):
-			has_model2 = true
-	elif body.is_in_group("Horse3"):
-		if Input.is_action_pressed("E"):
-			has_model3 = true			
-	elif body.is_in_group("Horse4"):
-		if Input.is_action_pressed("E"):
-			has_model4 = true
-			
+	if !player.has_ride:
+		if body.is_in_group("Horse0"):
+			if Input.is_action_pressed("E"):
+				has_model0 = true
+				check_and_delete(body)
+		elif body.is_in_group("Horse1"):
+			if Input.is_action_pressed("E"):
+				has_model1 = true
+				check_and_delete(body)		
+		elif body.is_in_group("Horse2"):
+			if Input.is_action_pressed("E"):
+				has_model2 = true
+				check_and_delete(body)
+		elif body.is_in_group("Horse3"):
+			if Input.is_action_pressed("E"):
+				has_model3 = true
+				check_and_delete(body)	
+		elif body.is_in_group("Horse4"):
+			if Input.is_action_pressed("E"):
+				has_model4 = true
+				check_and_delete(body)
+func check_and_delete(body):
+	# Check if the parent is the player
+	if body.get_parent() != attachment:
+		# Delete the body or perform other actions
+		body.queue_free()
 func _physics_process(delta):
 	switch()
 	if Input.is_action_just_pressed("drop"):

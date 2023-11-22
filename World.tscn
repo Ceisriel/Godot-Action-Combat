@@ -1,11 +1,13 @@
-[gd_scene load_steps=12 format=2]
+[gd_scene load_steps=14 format=2]
 
 [ext_resource path="res://env/Decorations/Nature/Trees/Tree with chemist stuff/Tree.tscn" type="PackedScene" id=1]
 [ext_resource path="res://env/landscape test.tscn" type="PackedScene" id=2]
-[ext_resource path="res://Creatures/Mounts/horse/Horse.tscn" type="PackedScene" id=3]
-[ext_resource path="res://Creatures/Mounts/horse/Horse2.tscn" type="PackedScene" id=4]
-[ext_resource path="res://Creatures/Mounts/horse/Horse2/horse2.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Creatures/Mounts/horse/Horse0/Horse0.tscn" type="PackedScene" id=3]
+[ext_resource path="res://Creatures/Mounts/horse/Horse2/Horse2.tscn" type="PackedScene" id=4]
+[ext_resource path="res://Creatures/Mounts/horse/Horse3/Horse3.tscn" type="PackedScene" id=5]
+[ext_resource path="res://Creatures/Mounts/horse/Horse1/Horse1.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scripts/World.gd" type="Script" id=7]
+[ext_resource path="res://Creatures/Mounts/horse/Horse4/Horse4.tscn" type="PackedScene" id=8]
 [ext_resource path="res://UI/Inventory.tres" type="DynamicFont" id=10]
 
 [sub_resource type="CubeMesh" id=1]
@@ -36,6 +38,8 @@ transform = Transform( 16.0824, 0, 0, 0, 10.805, 0, 0, 0, 1, 8.99005, -0.909635,
 mesh = SubResource( 1 )
 
 [node name="StaticBody" type="StaticBody" parent="MeshInstance"]
+collision_layer = 65535
+collision_mask = 65535
 
 [node name="CollisionShape" type="CollisionShape" parent="MeshInstance/StaticBody"]
 shape = SubResource( 2 )
@@ -108,13 +112,25 @@ shape = SubResource( 4 )
 [node name="Tree" parent="." instance=ExtResource( 1 )]
 transform = Transform( 0.976175, 0.216985, 0, -0.216985, 0.976175, 0, 0, 0, 1, -6.92367, 0.0819342, 0 )
 
-[node name="KinematicBody" parent="." instance=ExtResource( 3 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.26931, -0.423284, 0 )
+[node name="StaticBody" parent="Tree/tree" index="0"]
+collision_layer = 65535
+collision_mask = 65535
 
-[node name="KinematicBody2" parent="." instance=ExtResource( 4 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -4.18818, 1.6575, 4.59408 )
+[node name="Horse0" parent="." instance=ExtResource( 3 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.36965, 2.56659 )
 
-[node name="horse2" parent="." instance=ExtResource( 5 )]
-transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2, -1.03376, 4 )
+[node name="Horse1" parent="." instance=ExtResource( 6 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.320597, -2.5963, -0.508963 )
+
+[node name="Horse2" parent="." instance=ExtResource( 4 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.21293, 5.39485 )
+
+[node name="Horse3" parent="." instance=ExtResource( 5 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.303519, -2.72332, -3.69626 )
+
+[node name="Horse4" parent="." instance=ExtResource( 8 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.164412, -2.51282, -6.56564 )
 
 [connection signal="pressed" from="Play" to="." method="_on_Play_pressed"]
+
+[editable path="Tree"]

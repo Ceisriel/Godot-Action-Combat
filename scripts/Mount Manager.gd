@@ -6,7 +6,7 @@ onready var camera = $"../../../Camroot/Camera_holder/Camera"
 var model0: PackedScene = preload("res://Creatures/Mounts/horse/Horse1/Horse1.tscn")
 var model1: PackedScene = preload("res://Creatures/Mounts/horse/Horse2/horse2.tscn")
 var currentInstance: Node = null  
-var effect1_applied: bool = false
+var effect0_applied: bool = false
 
 var has_model0 = false
 var has_model1 = false
@@ -23,8 +23,11 @@ func switch():
 			attachment.add_child(currentInstance)
 			print("Player has horse1")
 			player.has_ride = true
+			Effect0(true)
+			
 	else: 
 		player.has_ride = false
+		Effect0(false)
 
 func drop():
 	if has_model0:
@@ -46,6 +49,7 @@ func drop():
 			has_model0 = false
 			currentInstance = null
 			player.has_ride = false
+			Effect0(false)
 
 func _on_ItemDetector_body_entered(body):
 	if body.is_in_group("Horse"):
@@ -58,6 +62,20 @@ func _physics_process(delta):
 		drop()
 		has_model0 = false
 		player.has_ride = false
+		Effect0(false)
 
-
+func Effect0(active: bool):
+	if active and not effect0_applied:
+		effect0_applied = true
+		# Apply horse effect, adjust the boost values as needed
+		player.walk_speed *= 2  
+		player.run_speed *= 2
+		player.agility += 0.75
+	   
+	elif not active and effect0_applied:
+		# Remove horse effect
+		player.walk_speed = player.original_walk_speed  # Reset walk speed to its original value
+		player.run_speed = player.original_run_speed     # Reset run speed to its original value
+		player.agility -= 0.75
+		effect0_applied = false
 

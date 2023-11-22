@@ -53,7 +53,8 @@ func savePlayerData():
 		"has_model0": rides.has_model0,
 		"has_model1": rides.has_model1,
 		"playerName": Character.playerName,
-		"camera_rotation": camera.rotation_degrees  # Save the camera's rotation
+		"camera_rotation": camera.rotation_degrees,  # Save the camera's rotation
+		"effect0_horse": rides.effect0_applied
 		}
 
 	var dir = Directory.new()
@@ -151,7 +152,8 @@ func loadPlayerData():
 				Character.playerName = player_data["playerName"]	
 			if "camera_rotation" in player_data:
 				camera.rotation_degrees = player_data["camera_rotation"]  # Set the camera's rotation
-
+			if "effect0_horse" in player_data:
+				rides.effect0_applied = player_data["effect0_horse"]
 func resetSavedData():
 	var dir = Directory.new()
 	if dir.file_exists(save_path):

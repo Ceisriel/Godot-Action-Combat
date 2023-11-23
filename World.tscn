@@ -1,4 +1,4 @@
-[gd_scene load_steps=14 format=2]
+[gd_scene load_steps=18 format=2]
 
 [ext_resource path="res://env/Decorations/Nature/Trees/Tree with chemist stuff/Tree.tscn" type="PackedScene" id=1]
 [ext_resource path="res://env/landscape test.tscn" type="PackedScene" id=2]
@@ -8,7 +8,11 @@
 [ext_resource path="res://Creatures/Mounts/horse/Horse1/Horse1.tscn" type="PackedScene" id=6]
 [ext_resource path="res://scripts/World.gd" type="Script" id=7]
 [ext_resource path="res://Creatures/Mounts/horse/Horse4/Horse4.tscn" type="PackedScene" id=8]
+[ext_resource path="res://Creatures/Mounts/horse/Horse5/Horse5.tscn" type="PackedScene" id=9]
 [ext_resource path="res://UI/Inventory.tres" type="DynamicFont" id=10]
+[ext_resource path="res://Creatures/Mounts/horse/Horse6/Horse6.tscn" type="PackedScene" id=11]
+[ext_resource path="res://Creatures/Mounts/horse/Horse7/Horse7.tscn" type="PackedScene" id=12]
+[ext_resource path="res://Creatures/Enemies/SPK/Horse7.tscn" type="PackedScene" id=13]
 
 [sub_resource type="CubeMesh" id=1]
 
@@ -19,11 +23,11 @@ data = PoolVector3Array( -1, 1, 1, 1, 1, 1, -1, -1, 1, 1, 1, 1, 1, -1, 1, -1, -1
 
 [sub_resource type="BoxShape" id=4]
 
-[node name="World" type="Spatial"]
+[node name="World" type="Spatial" groups=["World"]]
 script = ExtResource( 7 )
 
-[node name="landscape test" parent="." instance=ExtResource( 2 )]
-transform = Transform( 200, 0, 0, 0, 40, 0, 0, 0, 200, 0, -14.6801, 0 )
+[node name="landscape test" parent="." groups=["World"] instance=ExtResource( 2 )]
+transform = Transform( 200, 0, 0, 0, 1.6501, 0, 0, 0, 200, 0, -2.56037, 0 )
 
 [node name="Play" type="Button" parent="."]
 margin_left = 812.0
@@ -130,6 +134,18 @@ transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.303519, -2.72332, -3.69626 
 
 [node name="Horse4" parent="." instance=ExtResource( 8 )]
 transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -0.164412, -2.51282, -6.56564 )
+
+[node name="Horse5" parent="." instance=ExtResource( 9 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -2.27544, -9.10128 )
+
+[node name="Horse6" parent="." instance=ExtResource( 11 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.92355, 7.74168 )
+
+[node name="Horse7" parent="." instance=ExtResource( 12 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, 0, -1.84625, 10.2998 )
+
+[node name="Spearman" parent="." instance=ExtResource( 13 )]
+transform = Transform( 1, 0, 0, 0, 1, 0, 0, 0, 1, -2.1045, 0, 10.0452 )
 
 [connection signal="pressed" from="Play" to="." method="_on_Play_pressed"]
 
